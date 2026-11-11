@@ -1,0 +1,7 @@
+{
+  "stylesheet": "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;800&display=swap",
+  "files": {
+    "https://fonts.gstatic.com/s/figtree/v9/_Xms-HUzqDCFdgfMm4S9DQ.woff2": "figtree-400.woff2",
+    "https://fonts.gstatic.com/s/plusjakartasans/v12/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yw.woff2": "plus-jakarta-sans-600.woff2"
+  }
+}

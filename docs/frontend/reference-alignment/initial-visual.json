@@ -1,0 +1,71 @@
+{
+  "pages": [
+    {
+      "role": "ku",
+      "view": "beranda",
+      "x": 0,
+      "mainX": 0,
+      "insights": "true",
+      "error": "",
+      "sidebar": 256,
+      "navbar": 80
+    },
+    {
+      "role": "kd",
+      "view": "beranda",
+      "x": 0,
+      "mainX": 0,
+      "insights": "true",
+      "error": "",
+      "sidebar": 256,
+      "navbar": 80
+    },
+    {
+      "role": "hc",
+      "view": "beranda",
+      "x": 0,
+      "mainX": 0,
+      "insights": "true",
+      "error": "",
+      "sidebar": 256,
+      "navbar": 80
+    },
+    {
+      "role": "kd",
+      "view": "dashboard",
+      "x": 0,
+      "mainX": 0,
+      "insights": "true",
+      "error": "",
+      "sidebar": 256,
+      "navbar": 80
+    },
+    {
+      "role": "ku",
+      "view": "riwayat",
+      "x": 0,
+      "mainX": 0,
+      "insights": "true",
+      "error": "",
+      "sidebar": 256,
+      "navbar": 80
+    },
+    {
+      "role": "hc",
+      "view": "kpi",
+      "x": 0,
+      "mainX": 0,
+      "sidebar": 256,
+      "navbar": 80
+    },
+    {
+      "role": "hc",
+      "view": "karyawan",
+      "x": 0,
+      "mainX": 0,
+      "sidebar": 256,
+      "navbar": 80
+    }
+  ],
+  "errors": []
+}

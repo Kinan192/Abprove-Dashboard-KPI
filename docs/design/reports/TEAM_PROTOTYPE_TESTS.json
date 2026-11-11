@@ -1,0 +1,3111 @@
+{
+  "runtime": [
+    {
+      "name": "HC pilih divisi Pelayanan",
+      "start": 1542,
+      "current": 8981,
+      "expected": 8981,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC pilih divisi Keperawatan",
+      "start": 1542,
+      "current": 9145,
+      "expected": 9145,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC pilih divisi Penunjang",
+      "start": 1542,
+      "current": 9309,
+      "expected": 9309,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC buka Unit SDM dari baris pertama",
+      "start": 1542,
+      "current": 9801,
+      "expected": 9801,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC tambah divisi",
+      "start": 1542,
+      "current": 9473,
+      "expected": 9473,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC divisi baru tambah unit",
+      "start": 9473,
+      "current": 11676,
+      "expected": 11676,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC unit baru tambah anggota",
+      "start": 11676,
+      "current": 11840,
+      "expected": 11840,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC tambah unit di Umum SDM",
+      "start": 1542,
+      "current": 10129,
+      "expected": 10129,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC unit Pengadaan tambah anggota",
+      "start": 10129,
+      "current": 11512,
+      "expected": 11512,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC Unit IT tambah anggota",
+      "start": 9637,
+      "current": 10293,
+      "expected": 10293,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC pindahkan anggota IT ke SDM",
+      "start": 9637,
+      "current": 10457,
+      "expected": 10457,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC ganti Kepala Unit IT",
+      "start": 9637,
+      "current": 10621,
+      "expected": 10621,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC ganti Kepala Divisi Umum SDM",
+      "start": 1542,
+      "current": 13901,
+      "expected": 13901,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "KD buka Tim Divisi",
+      "start": 648,
+      "current": 10785,
+      "expected": 10785,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "KD lihat anggota UGD",
+      "start": 10785,
+      "current": 10937,
+      "expected": 10937,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "KD lanjut ke persetujuan",
+      "start": 10937,
+      "current": 731,
+      "expected": 731,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "KU buka Anggota Unit",
+      "start": 133,
+      "current": 11089,
+      "expected": 11089,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "KU lanjut pengisian nilai",
+      "start": 11089,
+      "current": 208,
+      "expected": 208,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Ponsel HC buka anggota IT",
+      "start": 3389,
+      "current": 11238,
+      "expected": 11238,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Ponsel KD buka Tim Divisi",
+      "start": 3054,
+      "current": 11268,
+      "expected": 11268,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Ponsel KU buka Anggota Unit",
+      "start": 2834,
+      "current": 11300,
+      "expected": 11300,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Tambah divisi dapat dibatalkan",
+      "start": 1542,
+      "current": 1542,
+      "expected": 1542,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Scope Umum & SDM / SDM",
+      "start": 9801,
+      "current": 14416,
+      "expected": 14416,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Scope Umum & SDM / Logistik",
+      "start": 9965,
+      "current": 14643,
+      "expected": 14643,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Scope Pelayanan Medis / Pengadaan",
+      "start": 8981,
+      "current": 15035,
+      "expected": 15035,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Scope Keperawatan / Pengadaan",
+      "start": 9145,
+      "current": 15467,
+      "expected": 15467,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "Scope Penunjang Medis / Pengadaan",
+      "start": 9309,
+      "current": 15899,
+      "expected": 15899,
+      "overlays": [],
+      "pass": true
+    },
+    {
+      "name": "HC buka Unit IT dari divisi",
+      "start": 1542,
+      "current": 9637,
+      "expected": 9637,
+      "overlays": [],
+      "pass": true
+    }
+  ],
+  "preview": [
+    {
+      "root": 3,
+      "name": "KPI Kinerja • Peta desain",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 0,
+      "missing": [],
+      "current": 3,
+      "pass": true
+    },
+    {
+      "root": 37,
+      "name": "Fondasi & komponen",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 37,
+      "pass": true
+    },
+    {
+      "root": 103,
+      "name": "Login • U-1",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 103,
+      "pass": true
+    },
+    {
+      "root": 133,
+      "name": "Beranda • Kepala Unit",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 20,
+      "missing": [],
+      "current": 133,
+      "pass": true
+    },
+    {
+      "root": 208,
+      "name": "Isi Nilai • Kepala Unit",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 23,
+      "missing": [],
+      "current": 208,
+      "pass": true
+    },
+    {
+      "root": 336,
+      "name": "Pengajuan • Kepala Unit",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 336,
+      "pass": true
+    },
+    {
+      "root": 414,
+      "name": "Riwayat • Kepala Unit",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 44,
+      "missing": [],
+      "current": 414,
+      "pass": true
+    },
+    {
+      "root": 566,
+      "name": "KPI Unit • Kepala Unit",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 566,
+      "pass": true
+    },
+    {
+      "root": 648,
+      "name": "Beranda • Kepala Divisi",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 648,
+      "pass": true
+    },
+    {
+      "root": 731,
+      "name": "Persetujuan • Kepala Divisi",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 731,
+      "pass": true
+    },
+    {
+      "root": 860,
+      "name": "Dashboard Divisi • Kepala Divisi",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 12,
+      "missing": [],
+      "current": 860,
+      "pass": true
+    },
+    {
+      "root": 975,
+      "name": "Beranda • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 20,
+      "missing": [],
+      "current": 975,
+      "pass": true
+    },
+    {
+      "root": 1068,
+      "name": "Rekap & Finalisasi • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 1068,
+      "pass": true
+    },
+    {
+      "root": 1159,
+      "name": "Master KPI • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 18,
+      "missing": [],
+      "current": 1159,
+      "pass": true
+    },
+    {
+      "root": 1239,
+      "name": "Editor Template KPI • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 21,
+      "missing": [],
+      "current": 1239,
+      "pass": true
+    },
+    {
+      "root": 1347,
+      "name": "Pengaturan Siklus & Kategori • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 14,
+      "missing": [],
+      "current": 1347,
+      "pass": true
+    },
+    {
+      "root": 1406,
+      "name": "Pengguna • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 1406,
+      "pass": true
+    },
+    {
+      "root": 1477,
+      "name": "Karyawan • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 1477,
+      "pass": true
+    },
+    {
+      "root": 1542,
+      "name": "Divisi & Tim • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 1542,
+      "pass": true
+    },
+    {
+      "root": 1610,
+      "name": "Dashboard Analitik • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 14,
+      "missing": [],
+      "current": 1610,
+      "pass": true
+    },
+    {
+      "root": 1728,
+      "name": "Analitik Rinci • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 14,
+      "missing": [],
+      "current": 1728,
+      "pass": true
+    },
+    {
+      "root": 1843,
+      "name": "Lembar Final & Riwayat",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 1843,
+      "pass": true
+    },
+    {
+      "root": 1938,
+      "name": "Detail Pengajuan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 1938,
+      "pass": true
+    },
+    {
+      "root": 2033,
+      "name": "Detail Siap Final",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 2033,
+      "pass": true
+    },
+    {
+      "root": 2131,
+      "name": "KPI Kinerja",
+      "size": [
+        352.0,
+        650.0
+      ],
+      "expectedVisible": 7,
+      "missing": [],
+      "current": 2131,
+      "pass": true
+    },
+    {
+      "root": 2152,
+      "name": "KPI Kinerja",
+      "size": [
+        352.0,
+        650.0
+      ],
+      "expectedVisible": 5,
+      "missing": [],
+      "current": 2152,
+      "pass": true
+    },
+    {
+      "root": 2169,
+      "name": "KPI Kinerja",
+      "size": [
+        352.0,
+        650.0
+      ],
+      "expectedVisible": 8,
+      "missing": [],
+      "current": 2169,
+      "pass": true
+    },
+    {
+      "root": 2192,
+      "name": "Akun • Kepala Unit",
+      "size": [
+        380.0,
+        250.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2192,
+      "pass": true
+    },
+    {
+      "root": 2201,
+      "name": "Akun • Kepala Unit",
+      "size": [
+        560.0,
+        400.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2201,
+      "pass": true
+    },
+    {
+      "root": 2217,
+      "name": "Periode penilaian",
+      "size": [
+        440.0,
+        430.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 2217,
+      "pass": true
+    },
+    {
+      "root": 2227,
+      "name": "Ajukan penilaian?",
+      "size": [
+        560.0,
+        400.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2227,
+      "pass": true
+    },
+    {
+      "root": 2237,
+      "name": "Setujui penilaian?",
+      "size": [
+        560.0,
+        380.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2237,
+      "pass": true
+    },
+    {
+      "root": 2247,
+      "name": "Kembalikan penilaian?",
+      "size": [
+        560.0,
+        470.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2247,
+      "pass": true
+    },
+    {
+      "root": 2258,
+      "name": "Kembalikan penilaian?",
+      "size": [
+        560.0,
+        470.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2258,
+      "pass": true
+    },
+    {
+      "root": 2270,
+      "name": "Finalkan 3 penilaian?",
+      "size": [
+        560.0,
+        440.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2270,
+      "pass": true
+    },
+    {
+      "root": 2280,
+      "name": "Tarik kembali pengajuan?",
+      "size": [
+        560.0,
+        360.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2280,
+      "pass": true
+    },
+    {
+      "root": 2288,
+      "name": "Simpan perubahan pengaturan?",
+      "size": [
+        560.0,
+        360.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2288,
+      "pass": true
+    },
+    {
+      "root": 2296,
+      "name": "Keluar dari akun?",
+      "size": [
+        560.0,
+        280.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2296,
+      "pass": true
+    },
+    {
+      "root": 2303,
+      "name": "Draft tersimpan",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2303,
+      "pass": true
+    },
+    {
+      "root": 2308,
+      "name": "Penilaian diajukan",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2308,
+      "pass": true
+    },
+    {
+      "root": 2313,
+      "name": "Penilaian disetujui",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2313,
+      "pass": true
+    },
+    {
+      "root": 2318,
+      "name": "Penilaian dikembalikan",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2318,
+      "pass": true
+    },
+    {
+      "root": 2323,
+      "name": "3 penilaian menjadi Final",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2323,
+      "pass": true
+    },
+    {
+      "root": 2328,
+      "name": "Pengaturan tersimpan",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2328,
+      "pass": true
+    },
+    {
+      "root": 2333,
+      "name": "3 baris berhasil disalin",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2333,
+      "pass": true
+    },
+    {
+      "root": 2338,
+      "name": "Konsep pengingat unit",
+      "size": [
+        560.0,
+        340.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2338,
+      "pass": true
+    },
+    {
+      "root": 2347,
+      "name": "Atur pengguna & cakupan",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2347,
+      "pass": true
+    },
+    {
+      "root": 2371,
+      "name": "Edit karyawan",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2371,
+      "pass": true
+    },
+    {
+      "root": 2396,
+      "name": "Edit struktur organisasi",
+      "size": [
+        760.0,
+        650.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2396,
+      "pass": true
+    },
+    {
+      "root": 2418,
+      "name": "Edit baris KPI",
+      "size": [
+        1000.0,
+        730.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 2418,
+      "pass": true
+    },
+    {
+      "root": 2449,
+      "name": "Hapus baris KPI?",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2449,
+      "pass": true
+    },
+    {
+      "root": 2456,
+      "name": "Notifikasi • P1",
+      "size": [
+        560.0,
+        260.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2456,
+      "pass": true
+    },
+    {
+      "root": 2469,
+      "name": "Cara pengisian nilai • P1",
+      "size": [
+        560.0,
+        610.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2469,
+      "pass": true
+    },
+    {
+      "root": 2479,
+      "name": "Finalkan penilaian?",
+      "size": [
+        560.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2479,
+      "pass": true
+    },
+    {
+      "root": 2489,
+      "name": "Penilaian menjadi Final",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2489,
+      "pass": true
+    },
+    {
+      "root": 2494,
+      "name": "Penilaian dikembalikan",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 2494,
+      "pass": true
+    },
+    {
+      "root": 2577,
+      "name": "State • empty",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 2577,
+      "pass": true
+    },
+    {
+      "root": 2599,
+      "name": "State • loading",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 12,
+      "missing": [],
+      "current": 2599,
+      "pass": true
+    },
+    {
+      "root": 2623,
+      "name": "State • error",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 2623,
+      "pass": true
+    },
+    {
+      "root": 2645,
+      "name": "State • conflict",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 2645,
+      "pass": true
+    },
+    {
+      "root": 2667,
+      "name": "State • forbidden",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 2667,
+      "pass": true
+    },
+    {
+      "root": 2689,
+      "name": "State • session",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 2689,
+      "pass": true
+    },
+    {
+      "root": 2711,
+      "name": "Validasi & focus input",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 14,
+      "missing": [],
+      "current": 2711,
+      "pass": true
+    },
+    {
+      "root": 2758,
+      "name": "Impor Master KPI • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 18,
+      "missing": [],
+      "current": 2758,
+      "pass": true
+    },
+    {
+      "root": 2824,
+      "name": "Perubahan belum disimpan",
+      "size": [
+        560.0,
+        350.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 2824,
+      "pass": true
+    },
+    {
+      "root": 2834,
+      "name": "Penilaian bulan ini • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 4,
+      "missing": [],
+      "current": 2834,
+      "pass": true
+    },
+    {
+      "root": 2874,
+      "name": "Isi nilai • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 2874,
+      "pass": true
+    },
+    {
+      "root": 2949,
+      "name": "Pengajuan • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 5,
+      "missing": [],
+      "current": 2949,
+      "pass": true
+    },
+    {
+      "root": 2989,
+      "name": "Riwayat • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 4,
+      "missing": [],
+      "current": 2989,
+      "pass": true
+    },
+    {
+      "root": 3021,
+      "name": "KPI unit • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3021,
+      "pass": true
+    },
+    {
+      "root": 3054,
+      "name": "Persetujuan divisi • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 6,
+      "missing": [],
+      "current": 3054,
+      "pass": true
+    },
+    {
+      "root": 3086,
+      "name": "Tinjau penilaian • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3086,
+      "pass": true
+    },
+    {
+      "root": 3140,
+      "name": "Dashboard divisi • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 3140,
+      "pass": true
+    },
+    {
+      "root": 3171,
+      "name": "Rekap siklus • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 3171,
+      "pass": true
+    },
+    {
+      "root": 3209,
+      "name": "Rekap & finalisasi • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 5,
+      "missing": [],
+      "current": 3209,
+      "pass": true
+    },
+    {
+      "root": 3253,
+      "name": "Master KPI • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 5,
+      "missing": [],
+      "current": 3253,
+      "pass": true
+    },
+    {
+      "root": 3290,
+      "name": "Pengaturan • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3290,
+      "pass": true
+    },
+    {
+      "root": 3325,
+      "name": "Pengguna & struktur • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 7,
+      "missing": [],
+      "current": 3325,
+      "pass": true
+    },
+    {
+      "root": 3359,
+      "name": "Data karyawan • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 5,
+      "missing": [],
+      "current": 3359,
+      "pass": true
+    },
+    {
+      "root": 3389,
+      "name": "Struktur organisasi • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3389,
+      "pass": true
+    },
+    {
+      "root": 3419,
+      "name": "Analitik rumah sakit • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3419,
+      "pass": true
+    },
+    {
+      "root": 3454,
+      "name": "Lembar penilaian • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3454,
+      "pass": true
+    },
+    {
+      "root": 3499,
+      "name": "Template KPI • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3499,
+      "pass": true
+    },
+    {
+      "root": 3542,
+      "name": "Atur pengguna • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3542,
+      "pass": true
+    },
+    {
+      "root": 3575,
+      "name": "Edit karyawan • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3575,
+      "pass": true
+    },
+    {
+      "root": 3608,
+      "name": "Edit struktur • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3608,
+      "pass": true
+    },
+    {
+      "root": 3638,
+      "name": "Data unit divisi • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 3638,
+      "pass": true
+    },
+    {
+      "root": 3666,
+      "name": "KPI Kinerja • mobile",
+      "size": [
+        358.0,
+        720.0
+      ],
+      "expectedVisible": 9,
+      "missing": [],
+      "current": 3666,
+      "pass": true
+    },
+    {
+      "root": 3687,
+      "name": "KPI Kinerja • mobile",
+      "size": [
+        358.0,
+        720.0
+      ],
+      "expectedVisible": 7,
+      "missing": [],
+      "current": 3687,
+      "pass": true
+    },
+    {
+      "root": 3704,
+      "name": "KPI Kinerja • mobile",
+      "size": [
+        358.0,
+        720.0
+      ],
+      "expectedVisible": 9,
+      "missing": [],
+      "current": 3704,
+      "pass": true
+    },
+    {
+      "root": 3736,
+      "name": "Periode penilaian • mobile",
+      "size": [
+        358.0,
+        380.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3736,
+      "pass": true
+    },
+    {
+      "root": 3744,
+      "name": "Ajukan penilaian? • mobile",
+      "size": [
+        358.0,
+        430.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3744,
+      "pass": true
+    },
+    {
+      "root": 3754,
+      "name": "Setujui penilaian? • mobile",
+      "size": [
+        358.0,
+        350.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3754,
+      "pass": true
+    },
+    {
+      "root": 3761,
+      "name": "Kembalikan penilaian? • mobile",
+      "size": [
+        358.0,
+        480.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3761,
+      "pass": true
+    },
+    {
+      "root": 3772,
+      "name": "Finalkan 3 penilaian? • mobile",
+      "size": [
+        358.0,
+        460.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 3772,
+      "pass": true
+    },
+    {
+      "root": 3782,
+      "name": "Draft tersimpan • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3782,
+      "pass": true
+    },
+    {
+      "root": 3787,
+      "name": "Penilaian diajukan • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3787,
+      "pass": true
+    },
+    {
+      "root": 3792,
+      "name": "Penilaian disetujui • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3792,
+      "pass": true
+    },
+    {
+      "root": 3797,
+      "name": "Penilaian dikembalikan • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3797,
+      "pass": true
+    },
+    {
+      "root": 3802,
+      "name": "3 penilaian Final • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3802,
+      "pass": true
+    },
+    {
+      "root": 3807,
+      "name": "3 baris disalin • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3807,
+      "pass": true
+    },
+    {
+      "root": 3812,
+      "name": "Simpan pengaturan? • mobile",
+      "size": [
+        358.0,
+        330.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3812,
+      "pass": true
+    },
+    {
+      "root": 3817,
+      "name": "Cara pengisian • P1 • mobile",
+      "size": [
+        358.0,
+        460.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3817,
+      "pass": true
+    },
+    {
+      "root": 3824,
+      "name": "Login • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 3824,
+      "pass": true
+    },
+    {
+      "root": 3840,
+      "name": "Persetujuan • Tablet 1024 × 900",
+      "size": [
+        1024.0,
+        900.0
+      ],
+      "expectedVisible": 6,
+      "missing": [],
+      "current": 3840,
+      "pass": true
+    },
+    {
+      "root": 3917,
+      "name": "Rekap Siklus • Tablet 1024 × 900",
+      "size": [
+        1024.0,
+        900.0
+      ],
+      "expectedVisible": 8,
+      "missing": [],
+      "current": 3917,
+      "pass": true
+    },
+    {
+      "root": 3981,
+      "name": "Template KPI • Valid 100%",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 3981,
+      "pass": true
+    },
+    {
+      "root": 4065,
+      "name": "Lembar Final • Super HC",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 4065,
+      "pass": true
+    },
+    {
+      "root": 4143,
+      "name": "Buka kunci Final • OPEN",
+      "size": [
+        560.0,
+        540.0
+      ],
+      "expectedVisible": 0,
+      "missing": [],
+      "current": 4143,
+      "pass": true
+    },
+    {
+      "root": 4155,
+      "name": "Setujui Sekaligus • Kepala Divisi",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 4155,
+      "pass": true
+    },
+    {
+      "root": 4219,
+      "name": "Setujui 2 penilaian?",
+      "size": [
+        560.0,
+        410.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 4219,
+      "pass": true
+    },
+    {
+      "root": 4226,
+      "name": "2 penilaian disetujui",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 4226,
+      "pass": true
+    },
+    {
+      "root": 4231,
+      "name": "Salin nilai bulan lalu?",
+      "size": [
+        560.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 4231,
+      "pass": true
+    },
+    {
+      "root": 4994,
+      "name": "Login • U-1",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 4994,
+      "pass": true
+    },
+    {
+      "root": 5022,
+      "name": "Login • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5022,
+      "pass": true
+    },
+    {
+      "root": 5038,
+      "name": "Akun • Kepala Divisi",
+      "size": [
+        380.0,
+        250.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5038,
+      "pass": true
+    },
+    {
+      "root": 5045,
+      "name": "Akun • Kepala Divisi",
+      "size": [
+        560.0,
+        400.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5045,
+      "pass": true
+    },
+    {
+      "root": 5051,
+      "name": "Periode penilaian",
+      "size": [
+        440.0,
+        430.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 5051,
+      "pass": true
+    },
+    {
+      "root": 5061,
+      "name": "Periode penilaian • mobile",
+      "size": [
+        358.0,
+        380.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5061,
+      "pass": true
+    },
+    {
+      "root": 5069,
+      "name": "Notifikasi • P1",
+      "size": [
+        560.0,
+        260.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5069,
+      "pass": true
+    },
+    {
+      "root": 5082,
+      "name": "Cara pengisian nilai • P1",
+      "size": [
+        560.0,
+        610.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5082,
+      "pass": true
+    },
+    {
+      "root": 5092,
+      "name": "Cara pengisian • P1 • mobile",
+      "size": [
+        358.0,
+        460.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5092,
+      "pass": true
+    },
+    {
+      "root": 5098,
+      "name": "Keluar dari akun?",
+      "size": [
+        560.0,
+        280.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5098,
+      "pass": true
+    },
+    {
+      "root": 5105,
+      "name": "Lembar penilaian • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5105,
+      "pass": true
+    },
+    {
+      "root": 5150,
+      "name": "Detail Pengajuan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 11,
+      "missing": [],
+      "current": 5150,
+      "pass": true
+    },
+    {
+      "root": 5265,
+      "name": "Login • U-1",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5265,
+      "pass": true
+    },
+    {
+      "root": 5293,
+      "name": "Login • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5293,
+      "pass": true
+    },
+    {
+      "root": 5309,
+      "name": "Akun • Super HC",
+      "size": [
+        380.0,
+        250.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5309,
+      "pass": true
+    },
+    {
+      "root": 5316,
+      "name": "Akun • Super HC",
+      "size": [
+        560.0,
+        400.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5316,
+      "pass": true
+    },
+    {
+      "root": 5322,
+      "name": "Periode penilaian",
+      "size": [
+        440.0,
+        430.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 5322,
+      "pass": true
+    },
+    {
+      "root": 5332,
+      "name": "Periode penilaian • mobile",
+      "size": [
+        358.0,
+        380.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5332,
+      "pass": true
+    },
+    {
+      "root": 5340,
+      "name": "Notifikasi • P1",
+      "size": [
+        560.0,
+        260.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5340,
+      "pass": true
+    },
+    {
+      "root": 5353,
+      "name": "Cara pengisian nilai • P1",
+      "size": [
+        560.0,
+        610.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5353,
+      "pass": true
+    },
+    {
+      "root": 5363,
+      "name": "Cara pengisian • P1 • mobile",
+      "size": [
+        358.0,
+        460.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 5363,
+      "pass": true
+    },
+    {
+      "root": 5369,
+      "name": "Keluar dari akun?",
+      "size": [
+        560.0,
+        280.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5369,
+      "pass": true
+    },
+    {
+      "root": 5376,
+      "name": "Lembar penilaian • 390",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 5376,
+      "pass": true
+    },
+    {
+      "root": 5437,
+      "name": "Review desain & handoff",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 0,
+      "missing": [],
+      "current": 5437,
+      "pass": true
+    },
+    {
+      "root": 5529,
+      "name": "Pengajuan • Menunggu",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 20,
+      "missing": [],
+      "current": 5529,
+      "pass": true
+    },
+    {
+      "root": 5637,
+      "name": "Pengajuan • Disetujui",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 18,
+      "missing": [],
+      "current": 5637,
+      "pass": true
+    },
+    {
+      "root": 5725,
+      "name": "Pengajuan • Final",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 18,
+      "missing": [],
+      "current": 5725,
+      "pass": true
+    },
+    {
+      "root": 5813,
+      "name": "Pengajuan • Belum diajukan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 20,
+      "missing": [],
+      "current": 5813,
+      "pass": true
+    },
+    {
+      "root": 5921,
+      "name": "Rekap • Diajukan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 21,
+      "missing": [],
+      "current": 5921,
+      "pass": true
+    },
+    {
+      "root": 6066,
+      "name": "Rekap • Final",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 21,
+      "missing": [],
+      "current": 6066,
+      "pass": true
+    },
+    {
+      "root": 6211,
+      "name": "Rekap • Dikembalikan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 20,
+      "missing": [],
+      "current": 6211,
+      "pass": true
+    },
+    {
+      "root": 6345,
+      "name": "Rekap • Semua",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 22,
+      "missing": [],
+      "current": 6345,
+      "pass": true
+    },
+    {
+      "root": 6501,
+      "name": "Persetujuan • Dikembalikan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 6501,
+      "pass": true
+    },
+    {
+      "root": 6647,
+      "name": "Persetujuan • Disetujui",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 6647,
+      "pass": true
+    },
+    {
+      "root": 6793,
+      "name": "Persetujuan • Semua",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 19,
+      "missing": [],
+      "current": 6793,
+      "pass": true
+    },
+    {
+      "root": 6939,
+      "name": "Isi Nilai • Perlu diisi",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 21,
+      "missing": [],
+      "current": 6939,
+      "pass": true
+    },
+    {
+      "root": 7088,
+      "name": "Pilih penilaian",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 7088,
+      "pass": true
+    },
+    {
+      "root": 7096,
+      "name": "Rekap • Pilihan 000",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7096,
+      "pass": true
+    },
+    {
+      "root": 7211,
+      "name": "Rekap • Pilihan 001",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7211,
+      "pass": true
+    },
+    {
+      "root": 7326,
+      "name": "Rekap • Pilihan 010",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7326,
+      "pass": true
+    },
+    {
+      "root": 7441,
+      "name": "Rekap • Pilihan 011",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7441,
+      "pass": true
+    },
+    {
+      "root": 7556,
+      "name": "Rekap • Pilihan 100",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7556,
+      "pass": true
+    },
+    {
+      "root": 7671,
+      "name": "Rekap • Pilihan 101",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7671,
+      "pass": true
+    },
+    {
+      "root": 7786,
+      "name": "Rekap • Pilihan 110",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 7786,
+      "pass": true
+    },
+    {
+      "root": 7901,
+      "name": "Finalkan 1 penilaian?",
+      "size": [
+        560.0,
+        440.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 7901,
+      "pass": true
+    },
+    {
+      "root": 7911,
+      "name": "1 penilaian menjadi Final",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 7911,
+      "pass": true
+    },
+    {
+      "root": 7916,
+      "name": "Finalkan 2 penilaian?",
+      "size": [
+        560.0,
+        440.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 7916,
+      "pass": true
+    },
+    {
+      "root": 7926,
+      "name": "2 penilaian menjadi Final",
+      "size": [
+        560.0,
+        300.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 7926,
+      "pass": true
+    },
+    {
+      "root": 7931,
+      "name": "Navigasi cepat • Kepala Unit",
+      "size": [
+        560.0,
+        400.0
+      ],
+      "expectedVisible": 6,
+      "missing": [],
+      "current": 7931,
+      "pass": true
+    },
+    {
+      "root": 7946,
+      "name": "Navigasi cepat • Kepala Divisi",
+      "size": [
+        560.0,
+        304.0
+      ],
+      "expectedVisible": 4,
+      "missing": [],
+      "current": 7946,
+      "pass": true
+    },
+    {
+      "root": 7957,
+      "name": "Navigasi cepat • Super HC",
+      "size": [
+        560.0,
+        448.0
+      ],
+      "expectedVisible": 7,
+      "missing": [],
+      "current": 7957,
+      "pass": true
+    },
+    {
+      "root": 8981,
+      "name": "Divisi & Tim • Pelayanan Medis",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 24,
+      "missing": [],
+      "current": 8981,
+      "pass": true
+    },
+    {
+      "root": 9145,
+      "name": "Divisi & Tim • Keperawatan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 23,
+      "missing": [],
+      "current": 9145,
+      "pass": true
+    },
+    {
+      "root": 9309,
+      "name": "Divisi & Tim • Penunjang",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 23,
+      "missing": [],
+      "current": 9309,
+      "pass": true
+    },
+    {
+      "root": 9473,
+      "name": "Divisi & Tim • Divisi baru",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 25,
+      "missing": [],
+      "current": 9473,
+      "pass": true
+    },
+    {
+      "root": 9637,
+      "name": "Tim Unit IT",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 17,
+      "missing": [],
+      "current": 9637,
+      "pass": true
+    },
+    {
+      "root": 9801,
+      "name": "Tim Unit SDM",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 9801,
+      "pass": true
+    },
+    {
+      "root": 9965,
+      "name": "Tim Unit Logistik",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 9965,
+      "pass": true
+    },
+    {
+      "root": 10129,
+      "name": "Unit baru • Pengadaan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 17,
+      "missing": [],
+      "current": 10129,
+      "pass": true
+    },
+    {
+      "root": 10293,
+      "name": "Unit IT • Anggota ditambahkan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 17,
+      "missing": [],
+      "current": 10293,
+      "pass": true
+    },
+    {
+      "root": 10457,
+      "name": "Unit IT • Anggota dipindahkan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 10457,
+      "pass": true
+    },
+    {
+      "root": 10621,
+      "name": "Unit IT • Kepala Unit diperbarui",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 17,
+      "missing": [],
+      "current": 10621,
+      "pass": true
+    },
+    {
+      "root": 10785,
+      "name": "Tim Divisi • Pelayanan Medis",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 13,
+      "missing": [],
+      "current": 10785,
+      "pass": true
+    },
+    {
+      "root": 10937,
+      "name": "Anggota Unit • UGD / Kepala Divisi",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 12,
+      "missing": [],
+      "current": 10937,
+      "pass": true
+    },
+    {
+      "root": 11089,
+      "name": "Anggota Unit • UGD / Kepala Unit",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 14,
+      "missing": [],
+      "current": 11089,
+      "pass": true
+    },
+    {
+      "root": 11238,
+      "name": "Tim IT • Ponsel",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 11238,
+      "pass": true
+    },
+    {
+      "root": 11268,
+      "name": "Tim Divisi • Ponsel",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 11268,
+      "pass": true
+    },
+    {
+      "root": 11300,
+      "name": "Anggota Unit • Ponsel",
+      "size": [
+        390.0,
+        844.0
+      ],
+      "expectedVisible": 1,
+      "missing": [],
+      "current": 11300,
+      "pass": true
+    },
+    {
+      "root": 11340,
+      "name": "Tambah divisi",
+      "size": [
+        600.0,
+        540.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 11340,
+      "pass": true
+    },
+    {
+      "root": 11341,
+      "name": "Tambah unit",
+      "size": [
+        600.0,
+        580.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 11341,
+      "pass": true
+    },
+    {
+      "root": 11342,
+      "name": "Tambah anggota • Belum dipilih",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 11342,
+      "pass": true
+    },
+    {
+      "root": 11343,
+      "name": "Tambah anggota • 1 dipilih",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 11343,
+      "pass": true
+    },
+    {
+      "root": 11344,
+      "name": "Pindahkan anggota",
+      "size": [
+        600.0,
+        600.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 11344,
+      "pass": true
+    },
+    {
+      "root": 11345,
+      "name": "Konfirmasi pemindahan anggota",
+      "size": [
+        560.0,
+        390.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 11345,
+      "pass": true
+    },
+    {
+      "root": 11346,
+      "name": "Tetapkan Kepala Divisi",
+      "size": [
+        600.0,
+        500.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 11346,
+      "pass": true
+    },
+    {
+      "root": 11347,
+      "name": "Tetapkan Kepala Unit",
+      "size": [
+        600.0,
+        500.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 11347,
+      "pass": true
+    },
+    {
+      "root": 11348,
+      "name": "Tim Unit UGD",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 11348,
+      "pass": true
+    },
+    {
+      "root": 11512,
+      "name": "Unit Pengadaan • 1 anggota",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 11512,
+      "pass": true
+    },
+    {
+      "root": 11676,
+      "name": "Unit Pengadaan • Divisi Pengembangan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 17,
+      "missing": [],
+      "current": 11676,
+      "pass": true
+    },
+    {
+      "root": 11840,
+      "name": "Unit Pengadaan • Anggota ditambahkan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 11840,
+      "pass": true
+    },
+    {
+      "root": 12004,
+      "name": "Divisi Umum & SDM • Unit baru",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 27,
+      "missing": [],
+      "current": 12004,
+      "pass": true
+    },
+    {
+      "root": 12168,
+      "name": "Tambah unit • Divisi Pengembangan",
+      "size": [
+        600.0,
+        580.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 12168,
+      "pass": true
+    },
+    {
+      "root": 12169,
+      "name": "Tambah anggota Pengadaan • 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 12169,
+      "pass": true
+    },
+    {
+      "root": 12170,
+      "name": "Tambah anggota Pengadaan • 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 12170,
+      "pass": true
+    },
+    {
+      "root": 12171,
+      "name": "Tambah anggota divisi baru • 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 12171,
+      "pass": true
+    },
+    {
+      "root": 12172,
+      "name": "Tambah anggota divisi baru • 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 12172,
+      "pass": true
+    },
+    {
+      "root": 13508,
+      "name": "Atur akses • Super HC",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13508,
+      "pass": true
+    },
+    {
+      "root": 13557,
+      "name": "Atur akses • KD Pelayanan Medis",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13557,
+      "pass": true
+    },
+    {
+      "root": 13582,
+      "name": "Atur akses • KD Keperawatan",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13582,
+      "pass": true
+    },
+    {
+      "root": 13607,
+      "name": "Atur akses • KD Penunjang Medis",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13607,
+      "pass": true
+    },
+    {
+      "root": 13632,
+      "name": "Atur akses • KU SDM",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13632,
+      "pass": true
+    },
+    {
+      "root": 13657,
+      "name": "Atur akses • KU Logistik",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13657,
+      "pass": true
+    },
+    {
+      "root": 13682,
+      "name": "Atur akses • KU IT",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13682,
+      "pass": true
+    },
+    {
+      "root": 13707,
+      "name": "Atur akses • KU UGD",
+      "size": [
+        760.0,
+        730.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 13707,
+      "pass": true
+    },
+    {
+      "root": 13901,
+      "name": "Divisi Umum & SDM • Kepala Divisi diperbarui",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 26,
+      "missing": [],
+      "current": 13901,
+      "pass": true
+    },
+    {
+      "root": 14139,
+      "name": "Penanggung jawab • Pelayanan Medis",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14139,
+      "pass": true
+    },
+    {
+      "root": 14148,
+      "name": "Penanggung jawab • Keperawatan",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14148,
+      "pass": true
+    },
+    {
+      "root": 14157,
+      "name": "Penanggung jawab • Penunjang Medis",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14157,
+      "pass": true
+    },
+    {
+      "root": 14166,
+      "name": "Penanggung jawab • Pengembangan",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14166,
+      "pass": true
+    },
+    {
+      "root": 14175,
+      "name": "Kepala Unit • SDM",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14175,
+      "pass": true
+    },
+    {
+      "root": 14184,
+      "name": "Kepala Unit • Logistik",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14184,
+      "pass": true
+    },
+    {
+      "root": 14193,
+      "name": "Kepala Unit • UGD",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14193,
+      "pass": true
+    },
+    {
+      "root": 14202,
+      "name": "Kepala Unit • Pengadaan",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14202,
+      "pass": true
+    },
+    {
+      "root": 14211,
+      "name": "Kepala Unit • Pengadaan",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14211,
+      "pass": true
+    },
+    {
+      "root": 14220,
+      "name": "Kepala Unit • Pengadaan",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14220,
+      "pass": true
+    },
+    {
+      "root": 14229,
+      "name": "Kepala Unit • Pengadaan",
+      "size": [
+        600.0,
+        420.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14229,
+      "pass": true
+    },
+    {
+      "root": 14416,
+      "name": "Unit SDM • Anggota ditambahkan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 14416,
+      "pass": true
+    },
+    {
+      "root": 14581,
+      "name": "Tambah anggota • SDM / 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14581,
+      "pass": true
+    },
+    {
+      "root": 14582,
+      "name": "Tambah anggota • SDM / 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 14582,
+      "pass": true
+    },
+    {
+      "root": 14643,
+      "name": "Unit Logistik • Anggota ditambahkan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 14643,
+      "pass": true
+    },
+    {
+      "root": 14808,
+      "name": "Tambah anggota • Logistik / 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 14808,
+      "pass": true
+    },
+    {
+      "root": 14809,
+      "name": "Tambah anggota • Logistik / 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 14809,
+      "pass": true
+    },
+    {
+      "root": 14870,
+      "name": "Unit Pengadaan • Pelayanan Medis",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 14870,
+      "pass": true
+    },
+    {
+      "root": 15035,
+      "name": "Unit Pengadaan • Pelayanan Medis / 1 anggota",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 15035,
+      "pass": true
+    },
+    {
+      "root": 15200,
+      "name": "Tambah unit • Pelayanan Medis",
+      "size": [
+        600.0,
+        580.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 15200,
+      "pass": true
+    },
+    {
+      "root": 15201,
+      "name": "Tambah anggota • Pelayanan Medis / 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 15201,
+      "pass": true
+    },
+    {
+      "root": 15202,
+      "name": "Tambah anggota • Pelayanan Medis / 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 15202,
+      "pass": true
+    },
+    {
+      "root": 15302,
+      "name": "Unit Pengadaan • Keperawatan",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 15302,
+      "pass": true
+    },
+    {
+      "root": 15467,
+      "name": "Unit Pengadaan • Keperawatan / 1 anggota",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 15467,
+      "pass": true
+    },
+    {
+      "root": 15632,
+      "name": "Tambah unit • Keperawatan",
+      "size": [
+        600.0,
+        580.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 15632,
+      "pass": true
+    },
+    {
+      "root": 15633,
+      "name": "Tambah anggota • Keperawatan / 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 15633,
+      "pass": true
+    },
+    {
+      "root": 15634,
+      "name": "Tambah anggota • Keperawatan / 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 15634,
+      "pass": true
+    },
+    {
+      "root": 15734,
+      "name": "Unit Pengadaan • Penunjang Medis",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 16,
+      "missing": [],
+      "current": 15734,
+      "pass": true
+    },
+    {
+      "root": 15899,
+      "name": "Unit Pengadaan • Penunjang Medis / 1 anggota",
+      "size": [
+        1440.0,
+        900.0
+      ],
+      "expectedVisible": 15,
+      "missing": [],
+      "current": 15899,
+      "pass": true
+    },
+    {
+      "root": 16064,
+      "name": "Tambah unit • Penunjang Medis",
+      "size": [
+        600.0,
+        580.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 16064,
+      "pass": true
+    },
+    {
+      "root": 16065,
+      "name": "Tambah anggota • Penunjang Medis / 0",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 2,
+      "missing": [],
+      "current": 16065,
+      "pass": true
+    },
+    {
+      "root": 16066,
+      "name": "Tambah anggota • Penunjang Medis / 1",
+      "size": [
+        680.0,
+        620.0
+      ],
+      "expectedVisible": 3,
+      "missing": [],
+      "current": 16066,
+      "pass": true
+    }
+  ],
+  "method": "Native FigCraft MCP. On Click actions exercised using temporary afterDelay triggers, then removed; visible hotspots checked against geometry and clipping. No claim of physical mouse clicking."
+}

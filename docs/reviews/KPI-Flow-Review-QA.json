@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "pages": 12,
+  "renderedPages": 12,
+  "visualInspection": "12-page contact sheet plus full-page inspection of diagram, role journeys, dense tables and source/review worksheet",
+  "outOfPageText": [],
+  "pdf": "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX\\output\\pdf\\KPI-Kinerja-Review-Alur-dan-Fitur.pdf",
+  "bytes": 106839,
+  "renderer": "PyMuPDF 2.1 (existing local runtime; Poppler unavailable)",
+  "scope": "Documentation only; no application/database change"
+}

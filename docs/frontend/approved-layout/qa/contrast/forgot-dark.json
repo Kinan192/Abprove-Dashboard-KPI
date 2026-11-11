@@ -1,0 +1,97 @@
+{
+  "sampledPairs": 6,
+  "skippedDecorativeOrGradient": 5,
+  "issues": [],
+  "pairs": [
+    {
+      "text": "Lupa kata sandi",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 3
+    },
+    {
+      "text": "Pemulihan akun",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 4.5
+    },
+    {
+      "text": "Masukkan email atau NIP yang terdaftar untuk menerima petunjuk pengaturan ulang kata sandi",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 6.928,
+      "required": 4.5
+    },
+    {
+      "text": "Kirim petunjuk",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        16,
+        107,
+        80
+      ],
+      "ratio": 6.48,
+      "required": 4.5
+    },
+    {
+      "text": "Kembali ke halaman masuk",
+      "color": [
+        111,
+        216,
+        171
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 8.965,
+      "required": 4.5
+    },
+    {
+      "text": "Audit desain · akun contoh ABprove",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        11,
+        30,
+        24
+      ],
+      "ratio": 7.699,
+      "required": 4.5
+    }
+  ]
+}

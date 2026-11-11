@@ -1,0 +1,251 @@
+{
+  "source": "C:\\Users\\Kinan\\Downloads\\ABprove",
+  "htmlSHA256": "88066f7f14267174d6a5e64a00a485a153669e72b38cfcec0ac82724b9a5a2da",
+  "references": [
+    {
+      "path": "0_Login/01_Halaman_masuk.jpg",
+      "sha256": "a09925f57763b99c79609e0f38aa90175720ed7c7167b0a29deded44f3dce848"
+    },
+    {
+      "path": "0_Login/02_Lupa_kata_sandi.jpg",
+      "sha256": "c2fa8a68f9d3c2aaa4243bb952f14fedf151e37356cccf61b3a364f599bb5e29"
+    },
+    {
+      "path": "1_Kepala_Unit/01_Beranda.jpg",
+      "sha256": "94b04821d15e970231ce319a8f95b54b7d7f38e70497ee8955981c03db3bb704"
+    },
+    {
+      "path": "1_Kepala_Unit/02_Isi_nilai.jpg",
+      "sha256": "088e3b5e972334d806f84198f71a389985077317583eb0cec40a1cdfd36eca08"
+    },
+    {
+      "path": "1_Kepala_Unit/03_Pengajuan.jpg",
+      "sha256": "9cd25761b62726acba35a05cb641dd2d6bf6c308199e82f0cd8f127c8553346b"
+    },
+    {
+      "path": "1_Kepala_Unit/04_Riwayat.jpg",
+      "sha256": "84ce42c2cbbda93d12e9313d5f9e3f2ffacb6be01569b4bf57999975bd5400ef"
+    },
+    {
+      "path": "1_Kepala_Unit/05_KPI_unit.jpg",
+      "sha256": "22b85258465e14b70b59112fba2c682952988b2c390d513497797f5105cdf2b3"
+    },
+    {
+      "path": "1_Kepala_Unit/06_Panduan.jpg",
+      "sha256": "87aa2a8e9748275a69f1a59dc16d9ef28e83ffaf46dcbcf2d0dc1744b907353c"
+    },
+    {
+      "path": "1_Kepala_Unit/07_Profil.jpg",
+      "sha256": "782fc8587375adf68bd9195fa01e0510b53e06cada34b5b5ef32806e9b88efb2"
+    },
+    {
+      "path": "2_Kepala_Divisi/01_Beranda.jpg",
+      "sha256": "f40bd4c72c4d19bd6f5c819da0a4e6ff46e6744f5d2eee60bcf26190be972768"
+    },
+    {
+      "path": "2_Kepala_Divisi/02_Persetujuan.jpg",
+      "sha256": "73569ad8e55f0f3773824967cc181edbcdd63b48744462309a3fe0d0b34695e9"
+    },
+    {
+      "path": "2_Kepala_Divisi/03_Tinjau_penilaian.jpg",
+      "sha256": "efc126ed61b201dda80e39d904b1f5f3c6f3a3f3355314b2222b2fb25eca984e"
+    },
+    {
+      "path": "2_Kepala_Divisi/04_Dashboard_divisi.jpg",
+      "sha256": "5c5dbe93a3dcd32eae4b581a156e2c048acd23d9fd46dbe8b055cd3d8d7373ba"
+    },
+    {
+      "path": "2_Kepala_Divisi/05_KPI_divisi.jpg",
+      "sha256": "015d928c3d2dcc31dd7fb051a83c16db22513bba62183b21547ef9dfbd859409"
+    },
+    {
+      "path": "2_Kepala_Divisi/06_Panduan.jpg",
+      "sha256": "a7922cb93f1a40ce44170f1d39f57bb5533d366bc9df45eccf64e3cc3cfeedbd"
+    },
+    {
+      "path": "2_Kepala_Divisi/07_Profil.jpg",
+      "sha256": "3000120c555d99769f3e914ada41f19c314c00f43032ea41325ecca74672e166"
+    },
+    {
+      "path": "3_Super_HC/01_Beranda.jpg",
+      "sha256": "0e4ac0875dfd8a0d74591e88aecfc042bb5fd2267f173e8586b01e2af6850244"
+    },
+    {
+      "path": "3_Super_HC/02_Rekap_dan_finalisasi.jpg",
+      "sha256": "7302cef09f50e05566145ea686d17fbba17a6267dbdfdb8cd23c447f92e2d4ed"
+    },
+    {
+      "path": "3_Super_HC/03_Export_Excel.jpg",
+      "sha256": "6a63d0df4381716592cbdb761c6757fd80280929df6e1ba7d5d9f3767fa2ecbf"
+    },
+    {
+      "path": "3_Super_HC/04_Dashboard.jpg",
+      "sha256": "9e91eb83e38dd52f3f40900a1df6033e656e4e3d709ef12d816ae6852a7b46f4"
+    },
+    {
+      "path": "3_Super_HC/05_Karyawan.jpg",
+      "sha256": "7bb8231572a00f20de90a4baa27fc9cff46e329b6c0f8cea8a8bf233b90e2cb7"
+    },
+    {
+      "path": "3_Super_HC/06_Tambah_karyawan.jpg",
+      "sha256": "d35f03aeeb529d8bf63a5f35b5d045c03bac29f9aae5d3bf24f461b3d939f175"
+    },
+    {
+      "path": "3_Super_HC/07_Kepala_unit.jpg",
+      "sha256": "5c66e07d945bb6b507229f9a2e04b3e5eb211531d6eb3888692f85ad7b1ba311"
+    },
+    {
+      "path": "3_Super_HC/08_Tambah_kepala_unit.jpg",
+      "sha256": "8a106c0488ec172a70bb2408ddd9fb36459cbf6923a9f1d6378b52a4b5759cf4"
+    },
+    {
+      "path": "3_Super_HC/09_Master_KPI.jpg",
+      "sha256": "6c9ddad4cdb7e798f5f62e68d6feada250b3c8e031e935d499e9509ac33c40fb"
+    },
+    {
+      "path": "3_Super_HC/10_Penempatan_KPI.jpg",
+      "sha256": "6a80ba8bccdd8a75ed13560d64e6055a22b848078ab0deb9f84f80d85a4c4d34"
+    },
+    {
+      "path": "3_Super_HC/11_Atur_KPI.jpg",
+      "sha256": "5231344cda91070f27ec01cd83583eeecbb50bed23fe648921dd0ea2dd476668"
+    },
+    {
+      "path": "3_Super_HC/12_Pengaturan.jpg",
+      "sha256": "da43f1567bf667fa79dd1ac0cd7e466a01d86357c00c6e203274193b8d3355e7"
+    },
+    {
+      "path": "3_Super_HC/13_Panduan.jpg",
+      "sha256": "c073250d931964b3fcfb86d2a7c3a923cd8f814aa01444aab3e09e31b8e99fc9"
+    },
+    {
+      "path": "3_Super_HC/14_Profil.jpg",
+      "sha256": "b457ae9392c78e54e146f8901aa8906fac73354bc029591bb6a4843dffc2d010"
+    }
+  ],
+  "protectedExistingFiles": {
+    "app/Enums/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Exceptions/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Exceptions/BusinessRule.php": "ff93d1c59a69356b17f1eee24c29d9820222fc7db039ddafa42127296292e265",
+    "app/Http/Controllers/AssessmentController.php": "1d06658b34fae4dc595f5a2694b96617653b78c6c07e474f3579eb457694471a",
+    "app/Http/Controllers/Controller.php": "25d1c1ef8e6cc8a376553faacfba2b07d9dfaee9bdbb84f14f77517580e9deb1",
+    "app/Http/Controllers/FrontendController.php": "466d959a55727770c925595d2971c73e69290a91c8b7e7db7af4532cb99e8ec3",
+    "app/Http/Controllers/FrontendDataController.php": "645e42de803e65c3ae46b5bac9b30d4b7f87594f1dc56fff0db76f459a303cc8",
+    "app/Http/Controllers/ReportingController.php": "2aea21d7953c5b0ed45e3dfadd70a7a8ce1acd01e294d4901e2b168f3153b522",
+    "app/Http/Controllers/Auth/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Controllers/Auth/AuthenticatedSessionController.php": "f4a509a69ceeb75c1b2d63aac2db3a4ac6b8ce4f260d6707e4ef4c488a2fd46a",
+    "app/Http/Controllers/KepalaDivisi/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Controllers/KepalaUnit/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Controllers/SuperHc/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Controllers/SuperHc/CycleController.php": "c2d9336a23f46144108cb043a7e99114521537b53cdf578808c7b7906037f2bd",
+    "app/Http/Controllers/SuperHc/KpiTemplateController.php": "ac5238ec267b7130eb4863a44a1eab8d4a29899338acf17f3e3b704a257abaa3",
+    "app/Http/Controllers/SuperHc/OrganizationController.php": "373972104bd491ce04d79475bbe42f2be06920e54480670f87d26b8657122aad",
+    "app/Http/Controllers/SuperHc/TemplateImportController.php": "02903169441c0e69a25954134f0666765ddf6c6565ac64f1add5e88853db8cb7",
+    "app/Http/Middleware/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Middleware/ActiveContext.php": "1d4b3085f0322dcb762b69073666129e3a226e2e20c6b90a0c24a0fdf89f2326",
+    "app/Http/Middleware/RenderFrontend.php": "423a87380963821b5b99fff3702c5503e5da6339ba22a055b8299a3764506f85",
+    "app/Http/Requests/CycleRequest.php": "6156c190343ec368e71836514749dd4ee91a94edaad0397d384e0ae8a0173df9",
+    "app/Http/Requests/KpiTemplateRequest.php": "dfbb45415a099e899431a5f37290fa2461dbe4c7155cd82ebc9d249934549c59",
+    "app/Http/Requests/MutationRequest.php": "cc91f3c6baa6370653164fd5c4bf0500beeca71edf62d3cf14fecd9740f516d1",
+    "app/Http/Requests/RequestIdRequest.php": "d4d582f1d25ba48f95c2d6ba33e3ee96861765c8222dbf8cf207e4d530534f98",
+    "app/Http/Requests/Assessment/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Requests/Assessment/AssessmentRequest.php": "4e5253ee106fced64e88b581db29bb1f8fd0923605e5d81e9e280328fad1d3d4",
+    "app/Http/Requests/Auth/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Requests/Auth/LoginRequest.php": "03f5755dadc445b3d29e921d13d8693c61a6226b702b0a0d450f7693269bb095",
+    "app/Http/Requests/Organization/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Http/Requests/Organization/OrganizationRequest.php": "db8d6d097e0b8f9a7f0e6bfdb3fdee8be5cc2f4e7ee257b4b019b79c00b6fcc8",
+    "app/Models/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Models/Assessment.php": "3059ffbcf5468a75ba3b74e016933b55248571243f991709eca631a59a14ab32",
+    "app/Models/AssessmentCycle.php": "532ca594e9386d0bc9a61decfbc7cba30da2abc4f8b690e28b59e11bda47ac3e",
+    "app/Models/AssessmentItem.php": "40b6dac2dc7a5b4451840d78d9323a09bef827fa71691d47b3d56aa2b1574642",
+    "app/Models/AuditEvent.php": "ae4ad33da2ca8c524bec8db50f51ec71cbd8c147cafe10c22600136a61e1f0e6",
+    "app/Models/Division.php": "5e4edccc5282084a835d7a368644bb5525d6d4767d1c2b91e422ee0bd8026958",
+    "app/Models/DomainModel.php": "1653374aff199737960df1dea32040aa23745a368372de4dcab13d6499c5e120",
+    "app/Models/Employee.php": "5b72bc4f9c69c1655b74e43a7abb782b3dae371e81dbdf1377464d6b7359937a",
+    "app/Models/EmployeePlacement.php": "04e87f9d4fe757eafd3d3d6aafe5b1220387e5d2db987b531b1637815cceee07",
+    "app/Models/KpiItem.php": "391a9f66ad455ac970dcd29daf4d766d5d55a6ce754124ff680ad880ad7ab71b",
+    "app/Models/KpiTemplate.php": "65c1f6c4fda2990cf5d4e04a8a280d9374ddedbf0cbd0ff17952bf8937372b49",
+    "app/Models/Position.php": "4efd88cafe7aa7c63970c91b921bec2565e845f90dd4656921ebc06178d04851",
+    "app/Models/ScopeAssignment.php": "314599d80cfa771a7970be856fd1ef1efafeb76a0b83c7514b43d22d448bbbb8",
+    "app/Models/Unit.php": "771e0ab1554904ee7bd3c054366a9229782b1f5268257fb68395a108771c902f",
+    "app/Models/User.php": "cd7c94e11847b341db155a28ee7ac665aa0b56538682904860a2eb70a76c82a8",
+    "app/Policies/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Policies/AssessmentPolicy.php": "7bdfcbaf100727d23238c76bdc6314be41d02600dec7f2897c4c0048166dad7b",
+    "app/Providers/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Providers/AppServiceProvider.php": "6415e2e9f92f7cd691191d6d1b1323464346220d25bd00ea14b45b296a65c1bd",
+    "app/Queries/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Queries/ScopedRecords.php": "24cc6ff70cd9437c831499c493e8498cee4f1fcfc87deff5255bb752efc4d7dd",
+    "app/Rules/Score.php": "f67f49cc67a4a535f7a0ae98100f5bbb3b01c5a7984b2965cdc7015c1648186f",
+    "app/Services/Assessment/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Services/Assessment/AssessmentService.php": "f8bad214ea743a4f98626f63d0c62a4919af4c295b23cd6ede11d5405eb78ed7",
+    "app/Services/Audit/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Services/Audit/AuditWriter.php": "88a32584be0ba0a142033358b9c5f45f40dcec25480c4343bfb20cdc98faed2e",
+    "app/Services/IdentityAccess/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Services/IdentityAccess/AccessContext.php": "bbc43f4054ca68524089de3aa7d99ca9084e6e7b7785947ec24721cb4742a783",
+    "app/Services/IdentityAccess/MutationRunner.php": "f5d411975055760c27f762f7fc1beef393459c99028ff2743ec2dc9f31805f5f",
+    "app/Services/IdentityAccess/ScopeResolver.php": "4e2738d4570a302497b0df76a3b2a4d14f1891d8d1c88378b347f89238d11218",
+    "app/Services/KpiMaster/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Services/KpiMaster/KpiMasterService.php": "7ad69a6f43533c91337646639d403d99e7c34f557bc86cc65ea00cfb5d79bd9e",
+    "app/Services/KpiMaster/TemplateImport.php": "e354f500a48d538b3e1bbaf537a4cf2bf70a0d7b4b129b060aabf862dc34ddf7",
+    "app/Services/Organization/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Services/Organization/OrganizationService.php": "bbe7ba050ec367765d96372a5385301299b635107a8dcf160f0aa7e911730157",
+    "app/Services/Reporting/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "app/Support/FrontendPages.php": "b4c3601f803bd1b67e899fe4da961cc2a900c6ecb87d3d94db6369f7a16c5324",
+    "routes/console.php": "eadd08964d676b73c0006bc372873df1c0c888be24bfbbc6977c76b77237287a",
+    "routes/web.php": "7224e6ed01ef39d3515bf3f83126d67602d316d7db523780719165dd6d34ebfa",
+    "database/factories/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "database/migrations/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "database/migrations/2026_11_08_000001_create_kpi_domain.php": "a0ae1bc2c141fe2416e41d95d7f6d99c935480f3f572bd5aa5ed81415e0f9f1f",
+    "database/migrations/2026_11_08_000002_create_operation_requests.php": "07f32b04aaf76111921a7deb72b0b2b485318da5c5358be8acac0b3eafc1ba41",
+    "database/migrations/2026_11_08_000003_add_unit_head_assessments.php": "9f356bed1a96d75b65045566e1c24c87204237ae57b472e437a905e6016ad0d3",
+    "database/migrations/2026_11_08_000004_protect_final_rows.php": "fc9b40ec48c848c0120606fca3e6012485e132edb6a152ec4072084dbe687f9f",
+    "database/migrations/README.md": "36745d60abc2d9c835828486d5d7c966c41b85d3fbbcd3cae411ecd6f4d87097",
+    "database/migrations/sql/2026_11_08_initial.sql": "7b250580bb7b56b6424ca0421d1ebd0322797fb0100c899240983f2bcacbcb50",
+    "database/schema/schema.mysql.sql": "d039874ab55974c8f2eadec4688a5e1c5894ab480e3b7731a61e68fac8ebab7c",
+    "database/seeders/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "database/seeders/DatabaseSeeder.php": "8259eae569378285c8d2a852e1161d7ce28559020f389f720bad8fd903dae294",
+    "database/seeders/LocalDemoSeeder.php": "ebbaf9a3ce0cdef957b2eb9dc56c43bf9390a9d8b9b809d2e5124503b9006aef",
+    "resources/views/README.md": "aa610182e951864733d4ff9a178f3702b97f9f0eba089d2ccd1968f2bdf6f3e7",
+    "resources/views/auth/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/views/auth/login.blade.php": "88b75bbe2f1bf3bf4dc27ce4c51cca287148e7ccc3e917d3aa75e4dfce50b26b",
+    "resources/views/components/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/views/components/badge.blade.php": "cfb8b8599015c6a0193341fede9e740143726268fc78407f7bf30e1ee71835dd",
+    "resources/views/components/icon.blade.php": "c7e9ae5cb803e875e64b6bd49b7dac7d721e7a748882b164790c1e282e7f4c5c",
+    "resources/views/components/organization-tabs.blade.php": "f755267828616855ec939139cc987089d5cba214e927fb5f6a58995fa1487f3d",
+    "resources/views/components/page-state.blade.php": "1cc5726e5174b093762fefb1e7fb63b7b09f34cf556037bbeb700b73364639f9",
+    "resources/views/components/pagination.blade.php": "862ba1811a7d3ebd84fd071625bf6c033861290175bb14e3a4a1d62ebc8461a4",
+    "resources/views/components/record-form.blade.php": "fc49329fedf93dd5a10f84c999dbf8d1f4e52400f9901ca496aada62e695d39b",
+    "resources/views/components/trend.blade.php": "96c539a7ec006be9edb24cb9885a8ec2e70c9b43962c60ed958e904c4e70a36a",
+    "resources/views/errors/403.blade.php": "9d4c0d666a3df7086772e122fb23777e7676855695988a86f79bb62fa6c0770c",
+    "resources/views/errors/404.blade.php": "ccbdd051c619af7b0c6d31bf7cbe965f5622de5dc83d3d83849d57f41966d753",
+    "resources/views/errors/419.blade.php": "1f868f3699b98737f38d50403a764f81023ad2923f423ad445c8bcaa9a71c8e8",
+    "resources/views/errors/business.blade.php": "1c7d65259b8e3549eefbc05335c6fd94624326840a7138a4aa0140439e23a1b7",
+    "resources/views/kepala-divisi/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/views/kepala-unit/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/views/layouts/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/views/layouts/app.blade.php": "3df03bba583dc0748be1316799b1b0816170c0fae8a95e663c6e8f2c5425cec4",
+    "resources/views/layouts/base.blade.php": "1166f162bd96fedb1f10a532d0d5497cba0634780b490ad3dc2c24b22195bf6d",
+    "resources/views/pages/analytics.blade.php": "c060b7e184c4e07deeacab1d7636be2070c280a5f690b83abb2ade2f5726e981",
+    "resources/views/pages/assessment.blade.php": "7a6749ed80f532e96bcccacf023b973fb451aef059b92705d481b47d69fe6897",
+    "resources/views/pages/dashboard.blade.php": "7305c61cd574f923bb438de4b684947e01ee6560a0cc58d1ec1e11445239503c",
+    "resources/views/pages/help.blade.php": "923ac79ac84d2e94b273916638a1e73d408fd9bbc45486afdc86fc6a832ce095",
+    "resources/views/pages/notifications.blade.php": "d649968070375886219e17f3a4ff44fe3fa38db390910241c5e55252bf608925",
+    "resources/views/pages/organization.blade.php": "f09beca4ff6943e40e32bd17974c32aaa5a204b074533470782bb52dac643a17",
+    "resources/views/pages/records.blade.php": "76f704c09be5488eff6b40d6d3610cf5e756b315bf36bca6be399f535cd7c94b",
+    "resources/views/pages/settings.blade.php": "1f14c0e65d96182b4950326eeb594d24e16cdaf1f8cbb52c3d87e1e1ac567706",
+    "resources/views/pages/submissions.blade.php": "441ce2e170703fa13262e55c9e29bca5b1dd941548a264f0fe7452df0b07a62c",
+    "resources/views/pages/team.blade.php": "5610c6cd86ad7e2533e1fc62a0bfd91490e52e9fe619b96c0566901337d775df",
+    "resources/views/pages/templates.blade.php": "ba746d7e0a5b5d150d612b4c038dad9ad627d58b56e3e6738c498515c71cad96",
+    "resources/views/super-hc/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/js/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/js/app.js": "fc6664ace7ef4f48e28b52bf5593f89167fa6ad852984a73e9f0daaf3dfe113e",
+    "resources/js/lib/api.js": "84a81ef5b1fdeeb620c3d40c77b7e54522d3568e15cd8e702fbff92376191d9c",
+    "resources/js/lib/ui.js": "01ea44ea6c77ba4c2e46d8afdf2ca7ec9886c4d87defddafee9dc6686d98c9a0",
+    "resources/js/pages/assessment.js": "3b29542c0104873743ff6913f4ec63ac663200cbe51722e98a452951e46df348",
+    "resources/js/pages/master.js": "9c95fc9a3b011ab85d192caccca7d110248e90e9cacf352882b525dfe3759749",
+    "resources/js/pages/organization.js": "d1fab21c83ca9e105f6e533554b5ab000a8103414707f534bfa063655617925a",
+    "resources/js/pages/reporting.js": "0a1c1b2e712b2c2e6b80ce0c1d93a4af31c182a40213a7c20cb67b4ff39c7a66",
+    "resources/css/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "resources/css/app.css": "1b1c4413a8bdd940daa049354d083541248616ca9e605a6b292f39c7d31e8bcf"
+  }
+}

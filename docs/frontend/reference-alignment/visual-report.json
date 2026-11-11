@@ -1,0 +1,995 @@
+{
+  "pages": [
+    {
+      "role": "ku",
+      "page": "beranda",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 407
+    },
+    {
+      "role": "ku",
+      "page": "nilai",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "ku",
+      "page": "pengajuan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 499
+    },
+    {
+      "role": "ku",
+      "page": "riwayat",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 935
+    },
+    {
+      "role": "ku",
+      "page": "kpi",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "ku",
+      "page": "tim",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 273
+    },
+    {
+      "role": "ku",
+      "page": "panduan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 84
+    },
+    {
+      "role": "ku",
+      "page": "profil",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 72
+    },
+    {
+      "role": "ku",
+      "page": "notifikasi",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "ku",
+      "page": "beranda",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 959
+    },
+    {
+      "role": "ku",
+      "page": "nilai",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 24
+    },
+    {
+      "role": "ku",
+      "page": "pengajuan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1335
+    },
+    {
+      "role": "ku",
+      "page": "riwayat",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 968
+    },
+    {
+      "role": "ku",
+      "page": "kpi",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "ku",
+      "page": "tim",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 425
+    },
+    {
+      "role": "ku",
+      "page": "panduan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 434
+    },
+    {
+      "role": "ku",
+      "page": "profil",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 204
+    },
+    {
+      "role": "ku",
+      "page": "notifikasi",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "ku",
+      "page": "beranda",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1968
+    },
+    {
+      "role": "ku",
+      "page": "nilai",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 132
+    },
+    {
+      "role": "ku",
+      "page": "pengajuan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 2012
+    },
+    {
+      "role": "ku",
+      "page": "riwayat",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1981
+    },
+    {
+      "role": "ku",
+      "page": "kpi",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 131
+    },
+    {
+      "role": "ku",
+      "page": "tim",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1268
+    },
+    {
+      "role": "ku",
+      "page": "panduan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 513
+    },
+    {
+      "role": "ku",
+      "page": "profil",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 522
+    },
+    {
+      "role": "ku",
+      "page": "notifikasi",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "beranda",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 381
+    },
+    {
+      "role": "kd",
+      "page": "persetujuan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "dashboard",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 2090
+    },
+    {
+      "role": "kd",
+      "page": "kpi",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "nilai-kepala",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "tim",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 273
+    },
+    {
+      "role": "kd",
+      "page": "panduan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 84
+    },
+    {
+      "role": "kd",
+      "page": "profil",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 72
+    },
+    {
+      "role": "kd",
+      "page": "notifikasi",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "beranda",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 590
+    },
+    {
+      "role": "kd",
+      "page": "persetujuan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 224
+    },
+    {
+      "role": "kd",
+      "page": "dashboard",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 2803
+    },
+    {
+      "role": "kd",
+      "page": "kpi",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "nilai-kepala",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 58
+    },
+    {
+      "role": "kd",
+      "page": "tim",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 425
+    },
+    {
+      "role": "kd",
+      "page": "panduan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 434
+    },
+    {
+      "role": "kd",
+      "page": "profil",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 204
+    },
+    {
+      "role": "kd",
+      "page": "notifikasi",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "kd",
+      "page": "beranda",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1159
+    },
+    {
+      "role": "kd",
+      "page": "persetujuan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 523
+    },
+    {
+      "role": "kd",
+      "page": "dashboard",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 5852
+    },
+    {
+      "role": "kd",
+      "page": "kpi",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 185
+    },
+    {
+      "role": "kd",
+      "page": "nilai-kepala",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 100
+    },
+    {
+      "role": "kd",
+      "page": "tim",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1268
+    },
+    {
+      "role": "kd",
+      "page": "panduan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 513
+    },
+    {
+      "role": "kd",
+      "page": "profil",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 522
+    },
+    {
+      "role": "kd",
+      "page": "notifikasi",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "beranda",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 715
+    },
+    {
+      "role": "hc",
+      "page": "rekap",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 563
+    },
+    {
+      "role": "hc",
+      "page": "dashboard",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 2719
+    },
+    {
+      "role": "hc",
+      "page": "karyawan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 651
+    },
+    {
+      "role": "hc",
+      "page": "struktur",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "akun",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 181
+    },
+    {
+      "role": "hc",
+      "page": "jabatan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "kpi",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "penempatan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "pengaturan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 879
+    },
+    {
+      "role": "hc",
+      "page": "aktivitas",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "impor",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "panduan",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 162
+    },
+    {
+      "role": "hc",
+      "page": "profil",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 72
+    },
+    {
+      "role": "hc",
+      "page": "notifikasi",
+      "width": 1440,
+      "height": 900,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "beranda",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 937
+    },
+    {
+      "role": "hc",
+      "page": "rekap",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1387
+    },
+    {
+      "role": "hc",
+      "page": "dashboard",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 3587
+    },
+    {
+      "role": "hc",
+      "page": "karyawan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 831
+    },
+    {
+      "role": "hc",
+      "page": "struktur",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "akun",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 547
+    },
+    {
+      "role": "hc",
+      "page": "jabatan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "kpi",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "penempatan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 330
+    },
+    {
+      "role": "hc",
+      "page": "pengaturan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1011
+    },
+    {
+      "role": "hc",
+      "page": "aktivitas",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 195
+    },
+    {
+      "role": "hc",
+      "page": "impor",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "panduan",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 608
+    },
+    {
+      "role": "hc",
+      "page": "profil",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 204
+    },
+    {
+      "role": "hc",
+      "page": "notifikasi",
+      "width": 1024,
+      "height": 768,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "beranda",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1820
+    },
+    {
+      "role": "hc",
+      "page": "rekap",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 2012
+    },
+    {
+      "role": "hc",
+      "page": "dashboard",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 6952
+    },
+    {
+      "role": "hc",
+      "page": "karyawan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 2009
+    },
+    {
+      "role": "hc",
+      "page": "struktur",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 540
+    },
+    {
+      "role": "hc",
+      "page": "akun",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1491
+    },
+    {
+      "role": "hc",
+      "page": "jabatan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 168
+    },
+    {
+      "role": "hc",
+      "page": "kpi",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 512
+    },
+    {
+      "role": "hc",
+      "page": "penempatan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    },
+    {
+      "role": "hc",
+      "page": "pengaturan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1553
+    },
+    {
+      "role": "hc",
+      "page": "aktivitas",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 1026
+    },
+    {
+      "role": "hc",
+      "page": "impor",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 512
+    },
+    {
+      "role": "hc",
+      "page": "panduan",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 687
+    },
+    {
+      "role": "hc",
+      "page": "profil",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 522
+    },
+    {
+      "role": "hc",
+      "page": "notifikasi",
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "x": 0,
+      "mainX": 0,
+      "mainY": 0
+    }
+  ],
+  "errors": []
+}

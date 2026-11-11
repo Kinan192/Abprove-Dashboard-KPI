@@ -1,0 +1,19 @@
+@extends('layouts.app')
+@section('content')
+<div class="page-content page-stack workspace-v4" data-flow-kpi>
+@include('v4.section-tabs')
+@if($vm->role==='hc')<div class="seg w-fit" aria-label="Jenis KPI"><button class="active" type="button" data-kpi-level="unit">KPI Unit untuk staf</button><button type="button" data-kpi-level="division">KPI Divisi untuk Kepala Unit</button></div>@endif
+<div class="toolbar"><div class="flex flex-wrap gap-2"><select class="field w-auto!" data-kpi-area aria-label="Unit atau divisi target"></select><select class="field w-auto!" data-kpi-version aria-label="Riwayat perubahan KPI" @if($vm->role!=='hc') hidden @endif></select></div><div class="flex flex-wrap gap-2"><button class="btn" type="button" data-flow-action="export-kpi">Ekspor KPI</button>@if($vm->role==='hc')<button class="btn" type="button" data-dialog-open="import-dialog">Impor KPI</button><button class="btn btn-primary" type="button" data-flow-action="apply-kpi">Simpan KPI</button>@else<span class="status" data-status="Final">Hanya baca</span>@endif</div></div>
+<p class="text-xs text-muted" data-kpi-purpose></p>
+<form data-kpi-editor class="page-stack" method="post" action="{{ $vm->link('kpi') }}">
+<div class="kpi-definition-meta {{ $vm->role!=='hc'?'hidden':'' }}"><x-abprove.flow-input name="name" label="Nama KPI" :required="true" maxlength="160"/><x-abprove.flow-input name="from" label="Mulai digunakan pada penilaian" type="month" :required="true"/><div><p class="label">Riwayat indikator</p><p class="text-xs text-muted" data-kpi-version-label></p>@if($vm->role==='hc')<button class="link mt-2 text-xs" type="button" data-flow-action="delete-kpi-version">Hapus perubahan yang belum dipakai</button>@endif</div></div>
+@if($vm->role==='hc')<p class="text-xs text-muted">Indikator dan bobot dapat diubah untuk bulan yang belum dinilai. Hasil yang sudah dikirim tetap memakai indikator sebelumnya. Jadwal diatur pada tab Periode & kategori.</p>@endif
+<div class="toolbar"><h2 class="section-title">Indikator KPI</h2><p class="text-sm">Total bobot <strong data-kpi-weight></strong>% / 100%</p></div>
+<div class="table-wrap"><table class="data-table kpi-table"><thead><tr><th>Indikator / pilar</th><th>Target</th><th class="numeric">Bobot (%)</th><th class="numeric">Tindakan</th></tr></thead><tbody data-kpi-body></tbody></table></div>
+@if($vm->role==='hc')<div class="flex gap-3"><button class="link" type="button" data-flow-action="add-kpi-item">+ Tambah indikator</button><button class="link" type="button" data-flow-action="preview-kpi">Pratinjau dampak</button></div>@endif
+<p data-kpi-error class="notice notice-error" role="alert" hidden></p></form>
+@if($vm->role!=='hc')<p class="text-xs text-muted">Indikator dan bobot ditetapkan Super HC untuk periode terpilih. Anda mengisi nilai pada menu penilaian.</p>@endif
+</div>
+<template id="flow-kpi-item"><tr><td><button type="button" class="table-name text-left font-semibold" data-indicator-edit data-item-name></button><p class="mt-1 text-xs text-muted" data-item-pillar></p><div hidden>@foreach(['pillar','name','numerator','denominator','formula','target'] as $key)<input type="hidden" data-kpi-field="{{ $key }}">@endforeach</div></td><td data-item-target></td><td class="numeric">@if($vm->role==='hc')<input class="field weight-input" type="number" min="0.0001" max="100" step="0.0001" data-kpi-field="weight" aria-label="Bobot indikator (%)">@else<span data-item-weight></span>@endif</td><td class="numeric"><div class="row-actions"><button type="button" class="link" data-indicator-edit>{{ $vm->role==='hc'?'Ubah':'Rincian' }}</button>@if($vm->role==='hc')<button type="button" class="icon-button" data-flow-action="remove-kpi-item" aria-label="Hapus indikator"><x-abprove.icon name="trash"/></button>@endif</div></td></tr></template>
+@include('v4.kpi-dialogs')
+@endsection

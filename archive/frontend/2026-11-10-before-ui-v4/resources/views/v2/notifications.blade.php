@@ -1,0 +1,2 @@
+@extends('layouts.app')
+@section('content')<div class="page-content page-stack"><div class="toolbar"><h2 class="lead">Tugas periode ini</h2><button class="btn" data-flow-action="read-notifications" type="button">Tandai dibaca</button></div><div data-notification-page class="card divide-y divide-line"></div><p class="notice">Notifikasi berasal dari tugas penilaian. Email, WhatsApp dan pengingat terjadwal belum diaktifkan.</p></div>@endsection

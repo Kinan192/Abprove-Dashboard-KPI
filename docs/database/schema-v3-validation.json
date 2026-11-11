@@ -1,0 +1,42 @@
+{
+  "checks": [
+    {
+      "name": "fresh schema has 23 domain/auth tables",
+      "passed": true
+    },
+    {
+      "name": "all 11 domain protection triggers remain",
+      "passed": true
+    },
+    {
+      "name": "users does not retain a password column",
+      "passed": true
+    },
+    {
+      "name": "credential unique per user/provider",
+      "passed": true
+    },
+    {
+      "name": "session owner foreign key enforced",
+      "passed": true
+    },
+    {
+      "name": "unused account deletion removes credentials and sessions",
+      "passed": true
+    },
+    {
+      "name": "v2 upgrade preserves exact credential hash",
+      "passed": true
+    },
+    {
+      "name": "upgraded users password column removed",
+      "passed": true
+    },
+    {
+      "name": "upgraded session includes server idle timestamp",
+      "passed": true
+    }
+  ],
+  "isolated": true,
+  "existingDatabaseTouched": false
+}

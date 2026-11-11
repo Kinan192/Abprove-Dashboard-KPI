@@ -1,0 +1,3437 @@
+{
+  "months": [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember"
+  ],
+  "shortMonths": [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mei",
+    "Jun",
+    "Jul",
+    "Agu",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des"
+  ],
+  "year": 2026,
+  "activeMonth": 10,
+  "divisions": [
+    {
+      "id": "YM",
+      "nama": "Divisi Pelayanan Medis",
+      "kepala": "dr. Hendra Kusuma, Sp.PD"
+    },
+    {
+      "id": "JM",
+      "nama": "Divisi Penunjang Medis",
+      "kepala": "dr. Ratna Dewi, Sp.Rad"
+    }
+  ],
+  "units": [
+    {
+      "id": "UGD",
+      "div": "YM",
+      "nama": "Unit Gawat Darurat",
+      "kepala": "dr. Agus Prasetyo"
+    },
+    {
+      "id": "RI",
+      "div": "YM",
+      "nama": "Unit Rawat Inap",
+      "kepala": "dr. Dewi Lestari"
+    },
+    {
+      "id": "RAD",
+      "div": "JM",
+      "nama": "Unit Radiologi",
+      "kepala": "dr. Rizky Hidayat, Sp.Rad"
+    },
+    {
+      "id": "LAB",
+      "div": "JM",
+      "nama": "Unit Laboratorium PK",
+      "kepala": "dr. Sari Puspita, Sp.PK"
+    }
+  ],
+  "actors": {
+    "ku": {
+      "nama": "dr. Agus Prasetyo",
+      "peran": "Kepala Unit Gawat Darurat",
+      "unit": "UGD",
+      "short": "Kepala Unit"
+    },
+    "kd": {
+      "nama": "dr. Hendra Kusuma, Sp.PD",
+      "peran": "Kepala Divisi Pelayanan Medis",
+      "div": "YM",
+      "short": "Kepala Divisi"
+    },
+    "hc": {
+      "nama": "Rina Marlina",
+      "peran": "Super HC, SDM",
+      "short": "Super HC"
+    }
+  },
+  "templates": {
+    "GP": {
+      "nama": "Pelayanan Medis - GP",
+      "kpi": [
+        [
+          "Efficient",
+          "Kunjungan Pasien UGD",
+          "Jumlah kunjungan pasien UGD",
+          "Target kunjungan pasien UGD",
+          "Numerator / Denominator x 100%",
+          "95%",
+          15
+        ],
+        [
+          "Technical Care",
+          "Audit Rekam Medis",
+          "Rekam medis lengkap",
+          "Jumlah rekam medis diaudit",
+          "Numerator / Denominator x 100%",
+          "95%",
+          15
+        ],
+        [
+          "Technical Care",
+          "Sentinel, KTD, KTC yang terkait medik",
+          "Jumlah kasus dalam 1 bulan",
+          "",
+          "Kasus",
+          "Tidak ada",
+          15
+        ],
+        [
+          "Technical Care",
+          "Visite pasien baru rawat inap",
+          "Pasien baru divisite sesuai waktu",
+          "Jumlah pasien baru rawat inap",
+          "Numerator / Denominator x 100%",
+          "90%",
+          10
+        ],
+        [
+          "Access",
+          "Pencapaian Pelatihan",
+          "Jumlah pelatihan yang diikuti",
+          "Jumlah pelatihan yang direncanakan",
+          "Numerator / Denominator x 100%",
+          "100%",
+          10
+        ],
+        [
+          "Coordination and Continuity",
+          "Edukasi pasien terdokumentasi",
+          "Pasien dengan edukasi terdokumentasi",
+          "Jumlah pasien",
+          "Numerator / Denominator x 100%",
+          "100%",
+          15
+        ],
+        [
+          "Coordination and Continuity",
+          "Produktivitas Kerja",
+          "Jumlah absensi karyawan",
+          "Jumlah hari kerja x jumlah karyawan",
+          "Numerator / Denominator x 100%",
+          "1%",
+          10
+        ],
+        [
+          "Interpersonal Care",
+          "Implementasi Budaya Prima",
+          "Jumlah complaint dalam 1 bulan",
+          "",
+          "Jumlah complaint",
+          "0 complaint",
+          10
+        ]
+      ]
+    },
+    "YJM": {
+      "nama": "MJR Yanjangmed & Koord Yanmed",
+      "kpi": [
+        [
+          "Technical Care",
+          "Penambahan Dokter Spesialis dan Subspesialis",
+          "Penambahan dokter spesialis",
+          "Jumlah dokter yang direncanakan",
+          "Numerator / Denominator x 100%",
+          "95%",
+          15
+        ],
+        [
+          "Technical Care",
+          "Implementasi POA COE Services",
+          "POA COE Services terlaksana",
+          "POA COE yang direncanakan",
+          "Numerator / Denominator x 100%",
+          "95%",
+          15
+        ],
+        [
+          "Technical Care",
+          "Utilisasi Alat vs Capacity",
+          "Jumlah pemeriksaan tiap alat",
+          "Kapasitas CT Scan 15-20/alat/hari",
+          "Numerator / Denominator x 100%",
+          "90%",
+          10
+        ],
+        [
+          "Technical Care",
+          "Utilisasi Kamar Operasi",
+          "Jumlah operasi bulan berjalan",
+          "Target utilisasi kamar operasi",
+          "Numerator / Denominator x 100%",
+          "85%",
+          10
+        ],
+        [
+          "Technical Care",
+          "Sentinel, KTD, KTC yang terkait medik",
+          "Jumlah kasus dalam 1 bulan",
+          "",
+          "Kasus",
+          "Tidak ada",
+          5
+        ],
+        [
+          "Access",
+          "Pencapaian Pelatihan",
+          "Jumlah pelatihan yang diikuti",
+          "Jumlah pelatihan yang direncanakan",
+          "Numerator / Denominator x 100%",
+          "100%",
+          10
+        ],
+        [
+          "Coordination and Continuity",
+          "Kesesuaian Discharge Planning",
+          "Pasien dengan discharge planning sesuai",
+          "Jumlah pasien rawat inap",
+          "Numerator / Denominator x 100%",
+          "90%",
+          5
+        ],
+        [
+          "Coordination and Continuity",
+          "Produktivitas Kerja",
+          "Jumlah absensi karyawan",
+          "Jumlah hari kerja x jumlah karyawan",
+          "Numerator / Denominator x 100%",
+          "1%",
+          10
+        ],
+        [
+          "Interpersonal Care",
+          "Implementasi Budaya Prima",
+          "Jumlah complaint dalam 1 bulan",
+          "",
+          "Jumlah complaint",
+          "0 complaint",
+          10
+        ],
+        [
+          "Efficient",
+          "Selisih pelayanan JKN setiap bulan",
+          "Total klaim BPJS - Total billing RS",
+          "Total billing RS",
+          "Numerator / Denominator x 100%",
+          "<20%",
+          5
+        ],
+        [
+          "Efficient",
+          "Menurunkan AR Ageing >90 hari",
+          "AR ageing > 90 hari",
+          "Total AR",
+          "Numerator / Denominator x 100%",
+          "<3%",
+          5
+        ]
+      ]
+    }
+  },
+  "employees": [
+    {
+      "id": "E01",
+      "nama": "dr. Budi Santoso",
+      "jab": "Dokter Umum",
+      "unit": "UGD",
+      "tpl": "GP",
+      "st": "Dikembalikan",
+      "nip": "1987040"
+    },
+    {
+      "id": "E02",
+      "nama": "dr. Ratna Sari",
+      "jab": "Dokter Umum",
+      "unit": "UGD",
+      "tpl": "GP",
+      "st": "Final",
+      "nip": "1987153"
+    },
+    {
+      "id": "E03",
+      "nama": "dr. Kevin Sanjaya",
+      "jab": "Dokter Umum",
+      "unit": "UGD",
+      "tpl": "GP",
+      "st": "Belum",
+      "nip": "1987266"
+    },
+    {
+      "id": "E04",
+      "nama": "dr. Andi Saputra",
+      "jab": "Dokter Umum",
+      "unit": "UGD",
+      "tpl": "GP",
+      "st": "Draft",
+      "nip": "1987379"
+    },
+    {
+      "id": "E05",
+      "nama": "dr. Fajar Nugroho",
+      "jab": "Koord Yanmed",
+      "unit": "UGD",
+      "tpl": "YJM",
+      "st": "Diajukan",
+      "nip": "1987492"
+    },
+    {
+      "id": "E06",
+      "nama": "dr. Dimas Ardiansyah",
+      "jab": "Dokter Umum",
+      "unit": "RI",
+      "tpl": "GP",
+      "st": "Diajukan",
+      "nip": "1987605"
+    },
+    {
+      "id": "E07",
+      "nama": "dr. Eka Fitriani",
+      "jab": "Dokter Umum",
+      "unit": "RI",
+      "tpl": "GP",
+      "st": "Diajukan",
+      "nip": "1987718"
+    },
+    {
+      "id": "E08",
+      "nama": "dr. Citra Maharani",
+      "jab": "Dokter Umum",
+      "unit": "RI",
+      "tpl": "GP",
+      "st": "Final",
+      "nip": "1987831"
+    },
+    {
+      "id": "E09",
+      "nama": "dr. Intan Kusuma",
+      "jab": "Koord Yanmed",
+      "unit": "RI",
+      "tpl": "YJM",
+      "st": "Belum",
+      "nip": "1987944"
+    },
+    {
+      "id": "E10",
+      "nama": "dr. Gita Permata",
+      "jab": "MJR Yanjangmed",
+      "unit": "RAD",
+      "tpl": "YJM",
+      "st": "Final",
+      "nip": "1988057"
+    },
+    {
+      "id": "E11",
+      "nama": "dr. Hendra Wijaya",
+      "jab": "Dokter Umum",
+      "unit": "RAD",
+      "tpl": "GP",
+      "st": "Diajukan",
+      "nip": "1988170"
+    },
+    {
+      "id": "E12",
+      "nama": "dr. Joko Susilo",
+      "jab": "Koord Yanmed",
+      "unit": "RAD",
+      "tpl": "YJM",
+      "st": "Final",
+      "nip": "1988283"
+    },
+    {
+      "id": "E13",
+      "nama": "dr. Kartika Sari",
+      "jab": "Dokter Umum",
+      "unit": "LAB",
+      "tpl": "GP",
+      "st": "Diajukan",
+      "nip": "1988396"
+    },
+    {
+      "id": "E14",
+      "nama": "dr. Lukman Hakim",
+      "jab": "Dokter Umum",
+      "unit": "LAB",
+      "tpl": "GP",
+      "st": "Belum",
+      "nip": "1988509"
+    },
+    {
+      "id": "E15",
+      "nama": "dr. Maya Anggraini",
+      "jab": "Koord Yanmed",
+      "unit": "LAB",
+      "tpl": "YJM",
+      "st": "Final",
+      "nip": "1988622"
+    }
+  ],
+  "state": {
+    "ev": {
+      "E01|0": {
+        "vals": {
+          "0": 80,
+          "1": 75,
+          "2": 70,
+          "3": 90,
+          "4": 80,
+          "5": 80,
+          "6": 80,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|1": {
+        "vals": {
+          "0": 75,
+          "1": 75,
+          "2": 85,
+          "3": 75,
+          "4": 80,
+          "5": 85,
+          "6": 90,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|2": {
+        "vals": {
+          "0": 75,
+          "1": 75,
+          "2": 85,
+          "3": 85,
+          "4": 80,
+          "5": 80,
+          "6": 75,
+          "7": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|3": {
+        "vals": {
+          "0": 85,
+          "1": 70,
+          "2": 75,
+          "3": 85,
+          "4": 85,
+          "5": 70,
+          "6": 80,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|4": {
+        "vals": {
+          "0": 80,
+          "1": 75,
+          "2": 85,
+          "3": 90,
+          "4": 75,
+          "5": 90,
+          "6": 70,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|5": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 75,
+          "3": 75,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|6": {
+        "vals": {
+          "0": 85,
+          "1": 80,
+          "2": 75,
+          "3": 85,
+          "4": 70,
+          "5": 90,
+          "6": 90,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|7": {
+        "vals": {
+          "0": 90,
+          "1": 70,
+          "2": 85,
+          "3": 90,
+          "4": 80,
+          "5": 85,
+          "6": 80,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|8": {
+        "vals": {
+          "0": 80,
+          "1": 90,
+          "2": 90,
+          "3": 80,
+          "4": 85,
+          "5": 80,
+          "6": 75,
+          "7": 70
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|9": {
+        "vals": {
+          "0": 70,
+          "1": 90,
+          "2": 75,
+          "3": 80,
+          "4": 80,
+          "5": 80,
+          "6": 80,
+          "7": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E01|10": {
+        "vals": {
+          "0": 75,
+          "1": 80,
+          "2": 80,
+          "3": 90,
+          "4": 75,
+          "5": 90,
+          "6": 90,
+          "7": 85
+        },
+        "status": "Dikembalikan",
+        "pos": "",
+        "neg": "Terlambat melengkapi resume medis 3 kali.",
+        "note": "Nilai Audit Rekam Medis belum sesuai hasil audit bulan ini. Ada 3 rekam medis yang belum lengkap.",
+        "log": []
+      },
+      "E02|0": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 90,
+          "3": 90,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|1": {
+        "vals": {
+          "0": 90,
+          "1": 100,
+          "2": 80,
+          "3": 85,
+          "4": 100,
+          "5": 95,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|2": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 90,
+          "3": 90,
+          "4": 85,
+          "5": 80,
+          "6": 95,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|3": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 85,
+          "3": 95,
+          "4": 90,
+          "5": 80,
+          "6": 80,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|4": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 95,
+          "3": 85,
+          "4": 90,
+          "5": 100,
+          "6": 90,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|5": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 90,
+          "3": 85,
+          "4": 85,
+          "5": 90,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|6": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 90,
+          "3": 80,
+          "4": 90,
+          "5": 95,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|7": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 85,
+          "3": 80,
+          "4": 90,
+          "5": 85,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|8": {
+        "vals": {
+          "0": 100,
+          "1": 85,
+          "2": 85,
+          "3": 95,
+          "4": 95,
+          "5": 95,
+          "6": 85,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|9": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 100,
+          "3": 95,
+          "4": 90,
+          "5": 90,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E02|10": {
+        "vals": {
+          "0": 80,
+          "1": 95,
+          "2": 95,
+          "3": 80,
+          "4": 95,
+          "5": 90,
+          "6": 90,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "Sigap menangani lonjakan pasien trauma saat jaga malam 14 November.",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|0": {
+        "vals": {
+          "0": 100,
+          "1": 100,
+          "2": 90,
+          "3": 85,
+          "4": 90,
+          "5": 95,
+          "6": 100,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|1": {
+        "vals": {
+          "0": 95,
+          "1": 85,
+          "2": 95,
+          "3": 95,
+          "4": 100,
+          "5": 90,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|2": {
+        "vals": {
+          "0": 100,
+          "1": 100,
+          "2": 85,
+          "3": 95,
+          "4": 100,
+          "5": 100,
+          "6": 95,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|3": {
+        "vals": {
+          "0": 85,
+          "1": 100,
+          "2": 95,
+          "3": 85,
+          "4": 95,
+          "5": 90,
+          "6": 95,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|4": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 100,
+          "3": 100,
+          "4": 100,
+          "5": 85,
+          "6": 90,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|5": {
+        "vals": {
+          "0": 100,
+          "1": 85,
+          "2": 100,
+          "3": 100,
+          "4": 90,
+          "5": 90,
+          "6": 95,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|6": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 100,
+          "3": 100,
+          "4": 95,
+          "5": 100,
+          "6": 100,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|7": {
+        "vals": {
+          "0": 100,
+          "1": 95,
+          "2": 95,
+          "3": 100,
+          "4": 100,
+          "5": 85,
+          "6": 100,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|8": {
+        "vals": {
+          "0": 90,
+          "1": 100,
+          "2": 95,
+          "3": 100,
+          "4": 100,
+          "5": 85,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|9": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 95,
+          "3": 95,
+          "4": 95,
+          "5": 90,
+          "6": 90,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E03|10": {
+        "vals": {},
+        "status": "Belum",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|0": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 95,
+          "3": 90,
+          "4": 80,
+          "5": 90,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|1": {
+        "vals": {
+          "0": 80,
+          "1": 80,
+          "2": 80,
+          "3": 80,
+          "4": 95,
+          "5": 90,
+          "6": 80,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|2": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 95,
+          "3": 80,
+          "4": 95,
+          "5": 95,
+          "6": 95,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|3": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 100,
+          "3": 90,
+          "4": 95,
+          "5": 90,
+          "6": 85,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|4": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 90,
+          "3": 90,
+          "4": 90,
+          "5": 90,
+          "6": 85,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|5": {
+        "vals": {
+          "0": 95,
+          "1": 80,
+          "2": 85,
+          "3": 90,
+          "4": 95,
+          "5": 90,
+          "6": 95,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|6": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 80,
+          "3": 80,
+          "4": 90,
+          "5": 90,
+          "6": 95,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|7": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 95,
+          "3": 95,
+          "4": 80,
+          "5": 85,
+          "6": 95,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|8": {
+        "vals": {
+          "0": 85,
+          "1": 80,
+          "2": 95,
+          "3": 80,
+          "4": 95,
+          "5": 85,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|9": {
+        "vals": {
+          "0": 80,
+          "1": 95,
+          "2": 85,
+          "3": 80,
+          "4": 85,
+          "5": 90,
+          "6": 80,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E04|10": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 100
+        },
+        "status": "Draft",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|0": {
+        "vals": {
+          "0": 75,
+          "1": 75,
+          "2": 75,
+          "3": 75,
+          "4": 75,
+          "5": 90,
+          "6": 85,
+          "7": 85,
+          "8": 80,
+          "9": 85,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|1": {
+        "vals": {
+          "0": 95,
+          "1": 80,
+          "2": 90,
+          "3": 90,
+          "4": 90,
+          "5": 90,
+          "6": 80,
+          "7": 80,
+          "8": 90,
+          "9": 85,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|2": {
+        "vals": {
+          "0": 80,
+          "1": 90,
+          "2": 75,
+          "3": 80,
+          "4": 90,
+          "5": 90,
+          "6": 90,
+          "7": 85,
+          "8": 75,
+          "9": 90,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|3": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 90,
+          "3": 95,
+          "4": 80,
+          "5": 80,
+          "6": 80,
+          "7": 90,
+          "8": 80,
+          "9": 90,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|4": {
+        "vals": {
+          "0": 75,
+          "1": 90,
+          "2": 75,
+          "3": 85,
+          "4": 80,
+          "5": 75,
+          "6": 75,
+          "7": 85,
+          "8": 85,
+          "9": 80,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|5": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 90,
+          "3": 80,
+          "4": 85,
+          "5": 80,
+          "6": 75,
+          "7": 85,
+          "8": 90,
+          "9": 85,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|6": {
+        "vals": {
+          "0": 75,
+          "1": 85,
+          "2": 80,
+          "3": 85,
+          "4": 85,
+          "5": 85,
+          "6": 90,
+          "7": 90,
+          "8": 75,
+          "9": 80,
+          "10": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|7": {
+        "vals": {
+          "0": 75,
+          "1": 80,
+          "2": 80,
+          "3": 75,
+          "4": 80,
+          "5": 90,
+          "6": 80,
+          "7": 80,
+          "8": 85,
+          "9": 75,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|8": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 80,
+          "3": 75,
+          "4": 85,
+          "5": 90,
+          "6": 75,
+          "7": 85,
+          "8": 90,
+          "9": 90,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|9": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 85,
+          "3": 80,
+          "4": 85,
+          "5": 90,
+          "6": 90,
+          "7": 80,
+          "8": 80,
+          "9": 80,
+          "10": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E05|10": {
+        "vals": {
+          "0": 75,
+          "1": 90,
+          "2": 85,
+          "3": 90,
+          "4": 90,
+          "5": 85,
+          "6": 75,
+          "7": 75,
+          "8": 80,
+          "9": 85,
+          "10": 80
+        },
+        "status": "Diajukan",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|0": {
+        "vals": {
+          "0": 95,
+          "1": 95,
+          "2": 90,
+          "3": 100,
+          "4": 100,
+          "5": 95,
+          "6": 95,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|1": {
+        "vals": {
+          "0": 90,
+          "1": 95,
+          "2": 90,
+          "3": 90,
+          "4": 95,
+          "5": 95,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|2": {
+        "vals": {
+          "0": 100,
+          "1": 85,
+          "2": 95,
+          "3": 95,
+          "4": 90,
+          "5": 100,
+          "6": 90,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|3": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 90,
+          "3": 95,
+          "4": 90,
+          "5": 100,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|4": {
+        "vals": {
+          "0": 95,
+          "1": 100,
+          "2": 95,
+          "3": 95,
+          "4": 100,
+          "5": 100,
+          "6": 95,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|5": {
+        "vals": {
+          "0": 100,
+          "1": 100,
+          "2": 85,
+          "3": 95,
+          "4": 100,
+          "5": 90,
+          "6": 90,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|6": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 95,
+          "3": 100,
+          "4": 100,
+          "5": 90,
+          "6": 100,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|7": {
+        "vals": {
+          "0": 100,
+          "1": 85,
+          "2": 90,
+          "3": 85,
+          "4": 100,
+          "5": 95,
+          "6": 100,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|8": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 90,
+          "3": 100,
+          "4": 90,
+          "5": 90,
+          "6": 95,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|9": {
+        "vals": {
+          "0": 100,
+          "1": 85,
+          "2": 95,
+          "3": 95,
+          "4": 100,
+          "5": 95,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E06|10": {
+        "vals": {
+          "0": 90,
+          "1": 100,
+          "2": 100,
+          "3": 90,
+          "4": 95,
+          "5": 100,
+          "6": 100,
+          "7": 100
+        },
+        "status": "Diajukan",
+        "pos": "Mengusulkan alur triase baru yang mempercepat penanganan pasien.",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|0": {
+        "vals": {
+          "0": 90,
+          "1": 75,
+          "2": 85,
+          "3": 90,
+          "4": 80,
+          "5": 75,
+          "6": 95,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|1": {
+        "vals": {
+          "0": 90,
+          "1": 75,
+          "2": 85,
+          "3": 85,
+          "4": 90,
+          "5": 80,
+          "6": 90,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|2": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 80,
+          "3": 85,
+          "4": 75,
+          "5": 80,
+          "6": 95,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|3": {
+        "vals": {
+          "0": 90,
+          "1": 95,
+          "2": 85,
+          "3": 85,
+          "4": 90,
+          "5": 85,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|4": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 80,
+          "3": 95,
+          "4": 90,
+          "5": 90,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|5": {
+        "vals": {
+          "0": 90,
+          "1": 75,
+          "2": 80,
+          "3": 85,
+          "4": 90,
+          "5": 75,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|6": {
+        "vals": {
+          "0": 90,
+          "1": 80,
+          "2": 90,
+          "3": 80,
+          "4": 80,
+          "5": 85,
+          "6": 75,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|7": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 90,
+          "3": 85,
+          "4": 90,
+          "5": 85,
+          "6": 80,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|8": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 95,
+          "3": 75,
+          "4": 75,
+          "5": 80,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|9": {
+        "vals": {
+          "0": 95,
+          "1": 80,
+          "2": 90,
+          "3": 80,
+          "4": 75,
+          "5": 90,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E07|10": {
+        "vals": {
+          "0": 75,
+          "1": 90,
+          "2": 80,
+          "3": 80,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 75
+        },
+        "status": "Diajukan",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|0": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 90,
+          "3": 95,
+          "4": 95,
+          "5": 90,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|1": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 100,
+          "3": 85,
+          "4": 95,
+          "5": 90,
+          "6": 100,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|2": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 85,
+          "3": 95,
+          "4": 95,
+          "5": 85,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|3": {
+        "vals": {
+          "0": 100,
+          "1": 95,
+          "2": 90,
+          "3": 95,
+          "4": 95,
+          "5": 90,
+          "6": 80,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|4": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 85,
+          "3": 80,
+          "4": 95,
+          "5": 90,
+          "6": 90,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|5": {
+        "vals": {
+          "0": 90,
+          "1": 100,
+          "2": 95,
+          "3": 90,
+          "4": 80,
+          "5": 90,
+          "6": 95,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|6": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 95,
+          "3": 85,
+          "4": 85,
+          "5": 85,
+          "6": 95,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|7": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 95,
+          "3": 90,
+          "4": 85,
+          "5": 95,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|8": {
+        "vals": {
+          "0": 85,
+          "1": 100,
+          "2": 100,
+          "3": 80,
+          "4": 95,
+          "5": 85,
+          "6": 95,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|9": {
+        "vals": {
+          "0": 90,
+          "1": 95,
+          "2": 90,
+          "3": 95,
+          "4": 95,
+          "5": 85,
+          "6": 90,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E08|10": {
+        "vals": {
+          "0": 90,
+          "1": 95,
+          "2": 100,
+          "3": 95,
+          "4": 85,
+          "5": 80,
+          "6": 85,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|0": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 90,
+          "3": 85,
+          "4": 90,
+          "5": 90,
+          "6": 95,
+          "7": 80,
+          "8": 85,
+          "9": 80,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|1": {
+        "vals": {
+          "0": 95,
+          "1": 85,
+          "2": 85,
+          "3": 90,
+          "4": 90,
+          "5": 90,
+          "6": 85,
+          "7": 85,
+          "8": 80,
+          "9": 85,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|2": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 80,
+          "3": 95,
+          "4": 95,
+          "5": 95,
+          "6": 90,
+          "7": 90,
+          "8": 80,
+          "9": 80,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|3": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 80,
+          "3": 85,
+          "4": 90,
+          "5": 95,
+          "6": 95,
+          "7": 80,
+          "8": 95,
+          "9": 85,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|4": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 95,
+          "3": 95,
+          "4": 85,
+          "5": 80,
+          "6": 90,
+          "7": 85,
+          "8": 85,
+          "9": 95,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|5": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 85,
+          "3": 85,
+          "4": 90,
+          "5": 90,
+          "6": 80,
+          "7": 80,
+          "8": 95,
+          "9": 90,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|6": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 95,
+          "3": 95,
+          "4": 95,
+          "5": 90,
+          "6": 80,
+          "7": 85,
+          "8": 80,
+          "9": 95,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|7": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 95,
+          "3": 90,
+          "4": 85,
+          "5": 85,
+          "6": 80,
+          "7": 80,
+          "8": 90,
+          "9": 85,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|8": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 95,
+          "3": 90,
+          "4": 85,
+          "5": 90,
+          "6": 95,
+          "7": 90,
+          "8": 100,
+          "9": 95,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|9": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 95,
+          "3": 85,
+          "4": 85,
+          "5": 95,
+          "6": 90,
+          "7": 80,
+          "8": 85,
+          "9": 85,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E09|10": {
+        "vals": {},
+        "status": "Belum",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|0": {
+        "vals": {
+          "0": 90,
+          "1": 100,
+          "2": 85,
+          "3": 90,
+          "4": 95,
+          "5": 100,
+          "6": 95,
+          "7": 90,
+          "8": 100,
+          "9": 95,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|1": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 100,
+          "3": 85,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 85,
+          "8": 85,
+          "9": 100,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|2": {
+        "vals": {
+          "0": 100,
+          "1": 90,
+          "2": 95,
+          "3": 95,
+          "4": 95,
+          "5": 90,
+          "6": 90,
+          "7": 90,
+          "8": 95,
+          "9": 95,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|3": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 90,
+          "3": 95,
+          "4": 100,
+          "5": 100,
+          "6": 90,
+          "7": 85,
+          "8": 90,
+          "9": 100,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|4": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 100,
+          "3": 90,
+          "4": 90,
+          "5": 85,
+          "6": 100,
+          "7": 85,
+          "8": 85,
+          "9": 95,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|5": {
+        "vals": {
+          "0": 95,
+          "1": 100,
+          "2": 90,
+          "3": 95,
+          "4": 85,
+          "5": 85,
+          "6": 95,
+          "7": 100,
+          "8": 90,
+          "9": 90,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|6": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 90,
+          "3": 100,
+          "4": 100,
+          "5": 90,
+          "6": 95,
+          "7": 85,
+          "8": 85,
+          "9": 100,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|7": {
+        "vals": {
+          "0": 95,
+          "1": 95,
+          "2": 100,
+          "3": 95,
+          "4": 90,
+          "5": 95,
+          "6": 90,
+          "7": 85,
+          "8": 90,
+          "9": 85,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|8": {
+        "vals": {
+          "0": 90,
+          "1": 100,
+          "2": 90,
+          "3": 85,
+          "4": 85,
+          "5": 95,
+          "6": 100,
+          "7": 85,
+          "8": 100,
+          "9": 95,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|9": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 85,
+          "3": 85,
+          "4": 100,
+          "5": 100,
+          "6": 90,
+          "7": 95,
+          "8": 95,
+          "9": 100,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E10|10": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 95,
+          "3": 90,
+          "4": 95,
+          "5": 95,
+          "6": 100,
+          "7": 100,
+          "8": 100,
+          "9": 90,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|0": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 90,
+          "3": 95,
+          "4": 95,
+          "5": 85,
+          "6": 95,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|1": {
+        "vals": {
+          "0": 95,
+          "1": 100,
+          "2": 85,
+          "3": 90,
+          "4": 85,
+          "5": 95,
+          "6": 90,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|2": {
+        "vals": {
+          "0": 80,
+          "1": 90,
+          "2": 100,
+          "3": 80,
+          "4": 85,
+          "5": 90,
+          "6": 100,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|3": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 90,
+          "3": 95,
+          "4": 85,
+          "5": 85,
+          "6": 100,
+          "7": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|4": {
+        "vals": {
+          "0": 80,
+          "1": 100,
+          "2": 100,
+          "3": 90,
+          "4": 90,
+          "5": 95,
+          "6": 90,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|5": {
+        "vals": {
+          "0": 100,
+          "1": 95,
+          "2": 95,
+          "3": 85,
+          "4": 85,
+          "5": 100,
+          "6": 90,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|6": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 90,
+          "3": 95,
+          "4": 90,
+          "5": 90,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|7": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 80,
+          "3": 85,
+          "4": 90,
+          "5": 90,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|8": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 95,
+          "3": 85,
+          "4": 100,
+          "5": 90,
+          "6": 80,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|9": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 95,
+          "3": 90,
+          "4": 80,
+          "5": 85,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E11|10": {
+        "vals": {
+          "0": 85,
+          "1": 80,
+          "2": 100,
+          "3": 95,
+          "4": 100,
+          "5": 90,
+          "6": 90,
+          "7": 100
+        },
+        "status": "Diajukan",
+        "pos": "",
+        "neg": "Terlambat hadir saat jadwal jaga 1 kali.",
+        "note": "",
+        "log": []
+      },
+      "E12|0": {
+        "vals": {
+          "0": 85,
+          "1": 100,
+          "2": 90,
+          "3": 90,
+          "4": 90,
+          "5": 95,
+          "6": 90,
+          "7": 95,
+          "8": 100,
+          "9": 95,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|1": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 85,
+          "3": 100,
+          "4": 100,
+          "5": 100,
+          "6": 100,
+          "7": 100,
+          "8": 85,
+          "9": 90,
+          "10": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|2": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 90,
+          "3": 95,
+          "4": 90,
+          "5": 85,
+          "6": 85,
+          "7": 100,
+          "8": 90,
+          "9": 95,
+          "10": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|3": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 85,
+          "3": 90,
+          "4": 85,
+          "5": 90,
+          "6": 100,
+          "7": 90,
+          "8": 100,
+          "9": 100,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|4": {
+        "vals": {
+          "0": 85,
+          "1": 95,
+          "2": 95,
+          "3": 85,
+          "4": 85,
+          "5": 85,
+          "6": 100,
+          "7": 85,
+          "8": 100,
+          "9": 85,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|5": {
+        "vals": {
+          "0": 95,
+          "1": 85,
+          "2": 85,
+          "3": 95,
+          "4": 90,
+          "5": 85,
+          "6": 85,
+          "7": 95,
+          "8": 90,
+          "9": 95,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|6": {
+        "vals": {
+          "0": 100,
+          "1": 100,
+          "2": 100,
+          "3": 90,
+          "4": 95,
+          "5": 90,
+          "6": 90,
+          "7": 100,
+          "8": 85,
+          "9": 100,
+          "10": 100
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|7": {
+        "vals": {
+          "0": 100,
+          "1": 85,
+          "2": 85,
+          "3": 100,
+          "4": 85,
+          "5": 95,
+          "6": 95,
+          "7": 95,
+          "8": 95,
+          "9": 90,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|8": {
+        "vals": {
+          "0": 95,
+          "1": 90,
+          "2": 85,
+          "3": 90,
+          "4": 100,
+          "5": 90,
+          "6": 85,
+          "7": 85,
+          "8": 100,
+          "9": 85,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|9": {
+        "vals": {
+          "0": 95,
+          "1": 85,
+          "2": 90,
+          "3": 100,
+          "4": 90,
+          "5": 95,
+          "6": 90,
+          "7": 100,
+          "8": 90,
+          "9": 90,
+          "10": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E12|10": {
+        "vals": {
+          "0": 95,
+          "1": 100,
+          "2": 90,
+          "3": 90,
+          "4": 95,
+          "5": 85,
+          "6": 95,
+          "7": 100,
+          "8": 100,
+          "9": 95,
+          "10": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|0": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 80,
+          "3": 75,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|1": {
+        "vals": {
+          "0": 85,
+          "1": 75,
+          "2": 90,
+          "3": 85,
+          "4": 80,
+          "5": 80,
+          "6": 85,
+          "7": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|2": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 90,
+          "3": 85,
+          "4": 90,
+          "5": 80,
+          "6": 75,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|3": {
+        "vals": {
+          "0": 80,
+          "1": 90,
+          "2": 80,
+          "3": 75,
+          "4": 75,
+          "5": 75,
+          "6": 80,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|4": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 95,
+          "3": 80,
+          "4": 90,
+          "5": 90,
+          "6": 95,
+          "7": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|5": {
+        "vals": {
+          "0": 80,
+          "1": 80,
+          "2": 75,
+          "3": 75,
+          "4": 85,
+          "5": 95,
+          "6": 90,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|6": {
+        "vals": {
+          "0": 95,
+          "1": 75,
+          "2": 85,
+          "3": 95,
+          "4": 75,
+          "5": 75,
+          "6": 80,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|7": {
+        "vals": {
+          "0": 75,
+          "1": 75,
+          "2": 90,
+          "3": 85,
+          "4": 90,
+          "5": 90,
+          "6": 85,
+          "7": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|8": {
+        "vals": {
+          "0": 85,
+          "1": 75,
+          "2": 85,
+          "3": 75,
+          "4": 80,
+          "5": 80,
+          "6": 75,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|9": {
+        "vals": {
+          "0": 75,
+          "1": 90,
+          "2": 85,
+          "3": 85,
+          "4": 95,
+          "5": 80,
+          "6": 95,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E13|10": {
+        "vals": {
+          "0": 90,
+          "1": 90,
+          "2": 80,
+          "3": 80,
+          "4": 90,
+          "5": 85,
+          "6": 85,
+          "7": 85
+        },
+        "status": "Diajukan",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|0": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 90,
+          "3": 75,
+          "4": 85,
+          "5": 80,
+          "6": 90,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|1": {
+        "vals": {
+          "0": 95,
+          "1": 80,
+          "2": 95,
+          "3": 90,
+          "4": 80,
+          "5": 90,
+          "6": 95,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|2": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 90,
+          "3": 80,
+          "4": 90,
+          "5": 95,
+          "6": 95,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|3": {
+        "vals": {
+          "0": 90,
+          "1": 80,
+          "2": 90,
+          "3": 90,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|4": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 90,
+          "3": 90,
+          "4": 80,
+          "5": 80,
+          "6": 85,
+          "7": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|5": {
+        "vals": {
+          "0": 80,
+          "1": 85,
+          "2": 90,
+          "3": 80,
+          "4": 90,
+          "5": 95,
+          "6": 85,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|6": {
+        "vals": {
+          "0": 90,
+          "1": 80,
+          "2": 95,
+          "3": 90,
+          "4": 90,
+          "5": 80,
+          "6": 80,
+          "7": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|7": {
+        "vals": {
+          "0": 75,
+          "1": 80,
+          "2": 95,
+          "3": 85,
+          "4": 90,
+          "5": 80,
+          "6": 90,
+          "7": 90
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|8": {
+        "vals": {
+          "0": 80,
+          "1": 90,
+          "2": 95,
+          "3": 90,
+          "4": 90,
+          "5": 80,
+          "6": 80,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|9": {
+        "vals": {
+          "0": 80,
+          "1": 90,
+          "2": 85,
+          "3": 80,
+          "4": 90,
+          "5": 95,
+          "6": 80,
+          "7": 95
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E14|10": {
+        "vals": {},
+        "status": "Belum",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|0": {
+        "vals": {
+          "0": 85,
+          "1": 80,
+          "2": 75,
+          "3": 85,
+          "4": 85,
+          "5": 80,
+          "6": 85,
+          "7": 75,
+          "8": 80,
+          "9": 75,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|1": {
+        "vals": {
+          "0": 75,
+          "1": 85,
+          "2": 80,
+          "3": 75,
+          "4": 75,
+          "5": 80,
+          "6": 90,
+          "7": 80,
+          "8": 90,
+          "9": 80,
+          "10": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|2": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 75,
+          "3": 90,
+          "4": 70,
+          "5": 90,
+          "6": 90,
+          "7": 75,
+          "8": 80,
+          "9": 80,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|3": {
+        "vals": {
+          "0": 85,
+          "1": 75,
+          "2": 80,
+          "3": 70,
+          "4": 85,
+          "5": 90,
+          "6": 85,
+          "7": 75,
+          "8": 80,
+          "9": 85,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|4": {
+        "vals": {
+          "0": 75,
+          "1": 90,
+          "2": 75,
+          "3": 90,
+          "4": 75,
+          "5": 90,
+          "6": 75,
+          "7": 85,
+          "8": 85,
+          "9": 75,
+          "10": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|5": {
+        "vals": {
+          "0": 85,
+          "1": 85,
+          "2": 70,
+          "3": 70,
+          "4": 90,
+          "5": 80,
+          "6": 90,
+          "7": 80,
+          "8": 80,
+          "9": 70,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|6": {
+        "vals": {
+          "0": 75,
+          "1": 85,
+          "2": 90,
+          "3": 85,
+          "4": 75,
+          "5": 75,
+          "6": 85,
+          "7": 75,
+          "8": 80,
+          "9": 70,
+          "10": 85
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|7": {
+        "vals": {
+          "0": 75,
+          "1": 85,
+          "2": 75,
+          "3": 75,
+          "4": 85,
+          "5": 85,
+          "6": 80,
+          "7": 85,
+          "8": 85,
+          "9": 70,
+          "10": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|8": {
+        "vals": {
+          "0": 85,
+          "1": 90,
+          "2": 80,
+          "3": 70,
+          "4": 80,
+          "5": 90,
+          "6": 75,
+          "7": 85,
+          "8": 85,
+          "9": 70,
+          "10": 70
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|9": {
+        "vals": {
+          "0": 90,
+          "1": 85,
+          "2": 75,
+          "3": 80,
+          "4": 80,
+          "5": 90,
+          "6": 75,
+          "7": 90,
+          "8": 80,
+          "9": 85,
+          "10": 80
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      },
+      "E15|10": {
+        "vals": {
+          "0": 85,
+          "1": 80,
+          "2": 75,
+          "3": 75,
+          "4": 85,
+          "5": 80,
+          "6": 85,
+          "7": 90,
+          "8": 90,
+          "9": 80,
+          "10": 75
+        },
+        "status": "Final",
+        "pos": "",
+        "neg": "",
+        "note": "",
+        "log": []
+      }
+    },
+    "act": [
+      {
+        "t": "10 menit lalu",
+        "who": "dr. Agus Prasetyo",
+        "txt": "mengajukan penilaian dr. Fajar Nugroho"
+      },
+      {
+        "t": "1 jam lalu",
+        "who": "dr. Hendra Kusuma",
+        "txt": "mengembalikan penilaian dr. Budi Santoso"
+      },
+      {
+        "t": "Kemarin",
+        "who": "dr. Ratna Dewi",
+        "txt": "menyetujui 3 penilaian Unit Radiologi"
+      }
+    ],
+    "set": {
+      "sb": 90,
+      "b": 80,
+      "c": 70,
+      "isi": "5 Desember 2026",
+      "setuju": "10 Desember 2026",
+      "tutup": "15 Desember 2026"
+    }
+  },
+  "accounts": [
+    {
+      "key": "hc",
+      "role": "hc",
+      "nama": "Rina Marlina",
+      "peran": "Super HC, SDM",
+      "email": "rina.marlina@rs.co.id",
+      "nip": "1980001"
+    },
+    {
+      "key": "kd:YM",
+      "role": "kd",
+      "div": "YM",
+      "nama": "dr. Hendra Kusuma, Sp.PD",
+      "peran": "Kepala Divisi Pelayanan Medis",
+      "email": "hendra.kusuma@rs.co.id",
+      "nip": "1978001"
+    },
+    {
+      "key": "kd:JM",
+      "role": "kd",
+      "div": "JM",
+      "nama": "dr. Ratna Dewi, Sp.Rad",
+      "peran": "Kepala Divisi Penunjang Medis",
+      "email": "ratna.dewi@rs.co.id",
+      "nip": "1978002"
+    },
+    {
+      "key": "ku:UGD",
+      "role": "ku",
+      "unit": "UGD",
+      "nama": "dr. Agus Prasetyo",
+      "peran": "Kepala Unit Gawat Darurat",
+      "email": "agus.prasetyo@rs.co.id",
+      "nip": "1975001"
+    },
+    {
+      "key": "ku:RI",
+      "role": "ku",
+      "unit": "RI",
+      "nama": "dr. Dewi Lestari",
+      "peran": "Kepala Unit Rawat Inap",
+      "email": "dewi.lestari@rs.co.id",
+      "nip": "1975002"
+    },
+    {
+      "key": "ku:RAD",
+      "role": "ku",
+      "unit": "RAD",
+      "nama": "dr. Rizky Hidayat, Sp.Rad",
+      "peran": "Kepala Unit Radiologi",
+      "email": "rizky.hidayat@rs.co.id",
+      "nip": "1975003"
+    },
+    {
+      "key": "ku:LAB",
+      "role": "ku",
+      "unit": "LAB",
+      "nama": "dr. Sari Puspita, Sp.PK",
+      "peran": "Kepala Unit Laboratorium PK",
+      "email": "sari.puspita@rs.co.id",
+      "nip": "1975004"
+    }
+  ]
+}

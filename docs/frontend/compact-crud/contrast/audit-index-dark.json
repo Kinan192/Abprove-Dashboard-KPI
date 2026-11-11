@@ -1,0 +1,97 @@
+{
+  "sampledPairs": 6,
+  "skippedDecorativeOrGradient": 0,
+  "issues": [],
+  "pairs": [
+    {
+      "text": "AB",
+      "color": [
+        111,
+        216,
+        171
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 8.965,
+      "required": 3
+    },
+    {
+      "text": "pro",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 3
+    },
+    {
+      "text": "RS Awal Bros Botania",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 6.928,
+      "required": 4.5
+    },
+    {
+      "text": "Audit frontend utama",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 4.5
+    },
+    {
+      "text": "1 / 37",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        11,
+        30,
+        24
+      ],
+      "ratio": 14.861,
+      "required": 4.5
+    },
+    {
+      "text": "JPG",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        31,
+        58.800000000000004,
+        49.6
+      ],
+      "ratio": 5.414,
+      "required": 4.5
+    }
+  ]
+}

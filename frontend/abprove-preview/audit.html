@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="id">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Audit desain ABprove</title>
+        <link rel="icon" href="data:," />
+        <link rel="stylesheet" href="assets/fonts.css" />
+        <link rel="stylesheet" href="assets/audit.css" />
+    </head>
+    <body>
+        <header class="audit-header">
+            <div><strong>ABprove</strong><span>Review frontend</span></div>
+            <a href="index.html" target="_blank" rel="noopener"
+                >Buka halaman masuk ↗</a
+            >
+        </header>
+        <main>
+            <div class="intro">
+                <div>
+                    <h1>Audit desain per halaman</h1>
+                    <p>
+                        Pilih role dan layar, lalu bandingkan preview dengan
+                        gambar dari folder ABprove.
+                    </p>
+                </div>
+                <span class="local-label"
+                    >Preview lokal · belum terhubung backend</span
+                >
+            </div>
+            <div class="toolbar">
+                <label>Role<select id="audit-role"></select></label>
+                <label class="screen-label"
+                    >Halaman / dialog<select id="audit-screen"></select
+                ></label>
+                <label
+                    >Viewport<select id="audit-size">
+                        <option value="1440">Desktop · 1440 px</option>
+                        <option value="1024">Tablet · 1024 px</option>
+                        <option value="390">Ponsel · 390 px</option>
+                    </select></label
+                >
+                <div class="actions">
+                    <button type="button" id="audit-prev">Sebelumnya</button
+                    ><button type="button" id="audit-next">Berikutnya</button
+                    ><a id="audit-open" target="_blank" rel="noopener"
+                        >Buka preview ↗</a
+                    >
+                </div>
+            </div>
+            <div class="review-tabs" role="tablist" aria-label="Tampilan audit">
+                <button role="tab" aria-selected="true" data-mode="split">
+                    Berdampingan</button
+                ><button role="tab" aria-selected="false" data-mode="preview">
+                    Preview</button
+                ><button role="tab" aria-selected="false" data-mode="reference">
+                    Gambar acuan
+                </button>
+            </div>
+            <div class="comparison" data-mode="split">
+                <section class="comparison-pane preview-pane">
+                    <div class="pane-label">
+                        <h2>Preview frontend</h2>
+                        <span id="audit-dimensions">1440 × 900</span>
+                    </div>
+                    <div class="preview-stage">
+                        <div class="frame-canvas">
+                            <iframe
+                                id="audit-preview"
+                                title="Preview halaman ABprove"
+                            ></iframe>
+                        </div>
+                    </div>
+                </section>
+                <section class="comparison-pane reference-pane">
+                    <div class="pane-label">
+                        <h2>Gambar acuan</h2>
+                        <a id="audit-image-open" target="_blank" rel="noopener"
+                            >Buka ukuran asli ↗</a
+                        >
+                    </div>
+                    <div class="reference-stage">
+                        <img
+                            id="audit-reference"
+                            alt="Gambar acuan halaman yang dipilih"
+                        />
+                    </div>
+                </section>
+            </div>
+            <p id="audit-counter" class="audit-counter" aria-live="polite"></p>
+            <details class="audit-notes">
+                <summary>Catatan untuk audit dan integrasi berikutnya</summary>
+                <p>
+                    Data dan akun dalam preview berasal dari HTML contoh.
+                    Perubahan hanya tersimpan di browser ini. Login, reset kata
+                    sandi, pengingat, profil, dan keputusan di preview merupakan
+                    simulasi lokal.
+                </p>
+                <p>
+                    Gambar acuan masih memuat finalisasi oleh Super HC. Preview
+                    mempertahankan alur sumber untuk pemeriksaan tampilan;
+                    backend yang sudah ada tetap menempatkan keputusan Final
+                    pada Kepala Divisi. Penyelarasan alur dilakukan setelah
+                    audit desain.
+                </p>
+                <p>
+                    Menu ganti role demo di dalam profil dihilangkan sesuai
+                    arahan sebelumnya. Pilihan role di atas hanya untuk alat
+                    audit ini. Font dibuat lokal dan kontras teks pendukung
+                    disesuaikan agar terbaca.
+                </p>
+                <p>
+                    Untuk memulai ulang data preview, gunakan Kembalikan data
+                    contoh pada halaman Pengaturan Super HC. Data aplikasi
+                    Laravel dan database tidak dipengaruhi.
+                </p>
+            </details>
+        </main>
+        <script src="assets/catalog.js"></script>
+        <script src="assets/audit.js"></script>
+    </body>
+</html>

@@ -1,0 +1,731 @@
+import {
+    $,
+    $$,
+    node,
+    text,
+    clone,
+    optionList,
+    number,
+    status,
+    labelCycle,
+    dateTime,
+    empty,
+} from './flow-dom';
+import { open, close, confirm, toast } from './ui';
+import {
+    totalValues,
+    categorize,
+    previousMonth,
+    itemSignature,
+} from './flow-store';
+export function initFlowAssessments(c, s, link) {
+    let selected,
+        working,
+        dirty = false,
+        reviewed,
+        reviewCycle = s.cycleKey,
+        peopleTab = 'all',
+        statusTab =
+            $('[data-flow-status][aria-selected="true"]')?.dataset.flowStatus ||
+            'all';
+    const selections = new Set(),
+        kind = c.page === 'nilai-kepala' ? 'unit_head' : 'member',
+        initials = (name) =>
+            name
+                .replace(/^(dr\.|apt\.|ns\.)\s*/i, '')
+                .split(/[ ,]+/)
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((x) => x[0])
+                .join('');
+    const editable = (p) =>
+        p &&
+        ['Belum', 'Dikembalikan'].includes(s.assessment(p.id).status) &&
+        !s.canWrite(p.type) &&
+        s.unit(p.unitId)?.active &&
+        s.division(p.divisionId)?.active;
+    function filtered(key = s.cycleKey, finalOnly = false) {
+        let rows = s.people('all', key),
+            values = Object.fromEntries(
+                $$('[data-filter]').map((e) => [e.dataset.filter, e.value]),
+            );
+        if (c.role === 'ku') rows = rows.filter((p) => p.type === 'member');
+        return rows.filter(
+            (p) =>
+                (!values.division || p.divisionId === values.division) &&
+                (!values.unit || p.unitId === values.unit) &&
+                (!values.type || p.type === values.type) &&
+                (!values.search ||
+                    `${p.name} ${p.nip}`
+                        .toLowerCase()
+                        .includes(values.search.toLowerCase())) &&
+                (!values.template ||
+                    s.template(p, key)?.id === values.template) &&
+                (finalOnly
+                    ? s.assessment(p.id, key).status === 'Final'
+                    : statusTab === 'all' ||
+                      s.assessment(p.id, key).status === statusTab),
+        );
+    }
+    function renderScore(root, p, a, readOnly = false, key = s.cycleKey) {
+        root.replaceChildren();
+        const k = a.snapshot || s.template(p, key);
+        if (!k) {
+            empty(
+                root,
+                'KPI untuk area dan bulan ini belum disusun. Hubungi Super HC untuk menetapkan KPI Unit atau KPI Divisi.',
+            );
+            return null;
+        }
+        const sheet = clone('flow-score-sheet', root);
+        sheet.dataset.person = p.id;
+        text(sheet, '[data-initials]', initials(p.name));
+        text(
+            sheet,
+            '[data-kind]',
+            p.type === 'member'
+                ? 'Staf · dinilai Kepala Unit'
+                : 'Kepala Unit · dinilai Kepala Divisi',
+        );
+        text(sheet, '[data-name]', p.name);
+        text(
+            sheet,
+            '[data-person-meta]',
+            `${p.job} · NIP ${p.nip} · ${p.unitName} · ${p.divisionName}`,
+        );
+        text(
+            sheet,
+            '[data-template-meta]',
+            `${k.name} · versi ${k.version} · ${labelCycle(key)}`,
+        );
+        status($('[data-status]', sheet), a.status);
+        const reason = $('[data-return-reason]', sheet);
+        reason.hidden = !a.reason;
+        reason.textContent = `Catatan Kepala Divisi: ${a.reason || ''}`;
+        const lock = $('[data-lock-reason]', sheet);
+        lock.hidden = !readOnly;
+        lock.textContent =
+            a.status === 'Final'
+                ? 'Final. Nilai, bobot dan kategori tersimpan pada snapshot dan hanya dapat dibaca.'
+                : a.status === 'Diajukan'
+                  ? 'Pengajuan sedang menunggu Kepala Divisi. Angka terkunci.'
+                  : s.canWrite(p.type) || 'Lembar hanya dapat dibaca.';
+        const previousPerson = s.person(p.id, previousMonth(key)),
+            previous = previousPerson
+                ? s.assessment(p.id, previousMonth(key))
+                : null;
+        k.items.forEach((item, i) => {
+            const row = clone('flow-score-item', $('[data-score-rows]', sheet));
+            row.dataset.index = i;
+            text(row, '[data-kpi-name]', item.name);
+            text(
+                row,
+                '[data-kpi-meta]',
+                `${item.pillar} · target ${item.target}`,
+            );
+            text(row, '[data-weight]', `${item.weight}%`);
+            const input = $('[data-score]', row);
+            input.dataset.score = i;
+            input.value = a.values[i] ?? '';
+            input.disabled = readOnly;
+            input.closest('label').hidden = readOnly;
+            text(row, '[data-score-label]', `Nilai ${item.name}`);
+            const output = $('[data-read-score]', row);
+            output.hidden = !readOnly;
+            output.textContent = a.values[i] ?? '-';
+            const match = previous?.snapshot?.items.findIndex(
+                (x) => itemSignature(x) === itemSignature(item),
+            );
+            text(
+                row,
+                '[data-previous]',
+                match >= 0 && previous.values[match] != null
+                    ? previous.values[match]
+                    : 'Tidak sebanding / belum ada',
+            );
+        });
+        $$('[data-finding]', sheet).forEach((e) => {
+            const key = e.dataset.finding;
+            e.value = a[key] || '';
+            e.hidden = readOnly;
+            const output = $(`[data-read-finding="${key}"]`, sheet);
+            output.hidden = !readOnly;
+            output.textContent = a[key] || 'Tidak ada';
+        });
+        updateTotal(sheet, k, a, key);
+        return sheet;
+    }
+    function updateTotal(root, k, a, key = s.cycleKey) {
+        if (!root) return;
+        k.items.forEach((r, i) => {
+            const row = $(`[data-index="${i}"]`, root);
+            const value = a.values[i],
+                valid =
+                    /^\d+$/.test(String(value)) &&
+                    +value >= 10 &&
+                    +value <= 100;
+            const input = $('[data-score]', row);
+            input.setAttribute(
+                'aria-invalid',
+                String(value !== '' && value != null && !valid),
+            );
+            text(
+                row,
+                '[data-result]',
+                valid ? number((+value * r.weight) / 100) : '-',
+            );
+        });
+        const total = totalValues(a.values, k.items),
+            category =
+                a.status === 'Final' && a.category
+                    ? a.category
+                    : categorize(
+                          total,
+                          s.data.cycles.find((x) => x.id === key)
+                              ?.categories || { sb: 90, b: 80, c: 70 },
+                      );
+        text(root, '[data-total]', number(total));
+        text(root, '[data-category]', category.label);
+        $('[data-category]', root).dataset.category = category.key;
+        text(
+            root,
+            '[data-score-weight]',
+            k.items.reduce((n, r) => n + r.weight, 0),
+        );
+        text(
+            root,
+            '[data-filled]',
+            `${k.items.filter((_, i) => a.values[i] != null && a.values[i] !== '').length}/${k.items.length}`,
+        );
+    }
+    function editor() {
+        if (!$('[data-flow-editor]')) return;
+        const rows = s.people(kind),
+            q = $('[data-person-search]')?.value.toLowerCase() || '';
+        if (!rows.some((p) => p.id === selected))
+            selected =
+                rows.find(
+                    (p) =>
+                        p.id ===
+                        new URLSearchParams(location.search).get('person'),
+                )?.id || rows[0]?.id;
+        const rail = $('[data-people-rail]');
+        rail.replaceChildren();
+        for (const p of rows.filter(
+            (p) =>
+                `${p.name} ${p.nip}`.toLowerCase().includes(q) &&
+                (peopleTab === 'all' || editable(p)),
+        )) {
+            const button = clone('flow-person-button', rail);
+            button.dataset.personPick = p.id;
+            button.classList.toggle('selected', p.id === selected);
+            text(button, '[data-name]', p.name);
+            text(button, '[data-initials]', initials(p.name));
+            status($('[data-status]', button), s.assessment(p.id).status);
+        }
+        if (!rail.childElementCount)
+            empty(rail, 'Tidak ada orang sesuai pencarian.');
+        const mount = $('[data-score-mount]'),
+            p = s.person(selected);
+        if (!p) {
+            mount.replaceChildren();
+            empty(
+                mount,
+                'Belum ada staf/Kepala Unit dalam tanggung jawab Anda. Hubungi Super HC untuk menyiapkan akun dan penempatan.',
+            );
+            $('[data-score-actions]').hidden = true;
+            return;
+        }
+        if (!working || working.personId !== selected)
+            working = {
+                ...structuredClone(s.assessment(selected)),
+                personId: selected,
+            };
+        const sheet = renderScore(mount, p, working, !editable(p));
+        const actions = $('[data-score-actions]');
+        actions.hidden = !sheet;
+        const hasKpi = !!s.template(p);
+        $('[data-flow-action="send-assessment"]').hidden =
+            !editable(p) || !hasKpi;
+        $('[data-flow-action="copy-previous"]').hidden =
+            !editable(p) || !hasKpi;
+        $('[data-flow-action="cancel-submission"]').hidden =
+            c.role !== 'ku' ||
+            s.assessment(p.id).status !== 'Diajukan' ||
+            !!s.canWrite();
+        text(
+            document,
+            '[data-unsent-state]',
+            editable(p)
+                ? dirty
+                    ? 'Ada perubahan belum dikirim'
+                    : 'Isi lengkap, lalu kirim'
+                : 'Hanya baca',
+        );
+    }
+    function list() {
+        const body = $('[data-assessment-body]');
+        if (!body) return;
+        body.replaceChildren();
+        const rows = filtered();
+        const validSelection = rows
+            .filter(
+                (p) =>
+                    p.type === 'member' &&
+                    s.assessment(p.id).status === 'Diajukan',
+            )
+            .map((p) => p.id);
+        for (const id of selections)
+            if (!validSelection.includes(id)) selections.delete(id);
+        for (const p of rows) {
+            const a = s.assessment(p.id),
+                tr = node('tr');
+            tr.dataset.assessmentPerson = p.id;
+            if (c.role === 'kd') {
+                const td = node('td'),
+                    check = node('input');
+                check.type = 'checkbox';
+                check.dataset.pickAssessment = p.id;
+                check.disabled = p.type !== 'member' || a.status !== 'Diajukan';
+                check.checked = selections.has(p.id);
+                check.setAttribute('aria-label', `Pilih pengajuan ${p.name}`);
+                td.append(check);
+                tr.append(td);
+            }
+            const name = node('td');
+            name.append(
+                node('strong', p.name, 'block font-semibold'),
+                node(
+                    'span',
+                    `${p.type === 'member' ? 'Staf' : 'Kepala Unit'} · NIP ${p.nip}`,
+                    'block mt-1 text-xs text-muted',
+                ),
+            );
+            const area = node('td');
+            area.append(
+                node('span', p.unitName, 'block'),
+                node('span', p.divisionName, 'block mt-1 text-xs text-muted'),
+            );
+            const st = node('td'),
+                badge = node('span', null, 'status');
+            status(badge, a.status);
+            st.append(badge);
+            const cat = s.category(p.id);
+            const ctd = node('td', cat.label, 'category text-xs');
+            ctd.dataset.category = cat.key;
+            const actions = node('td', null, 'numeric');
+            if (
+                c.role === 'ku' &&
+                ['Belum', 'Dikembalikan'].includes(a.status)
+            ) {
+                const linkEl = node(
+                    'a',
+                    a.status === 'Belum' ? 'Isi nilai' : 'Perbaiki',
+                    'link',
+                );
+                linkEl.href = link('nilai', { person: p.id });
+                actions.append(linkEl);
+            } else {
+                const button = node('button', 'Tinjau', 'link');
+                button.type = 'button';
+                button.dataset.reviewPerson = p.id;
+                actions.append(button);
+            }
+            tr.append(
+                name,
+                area,
+                st,
+                node('td', number(s.total(p.id)), 'numeric font-semibold'),
+                ctd,
+                actions,
+            );
+            body.append(tr);
+        }
+        if (!rows.length) {
+            const tr = node('tr'),
+                td = node('td', 'Tidak ada penilaian sesuai filter.', 'empty');
+            td.colSpan = 7;
+            tr.append(td);
+            body.append(tr);
+        }
+        text(
+            document,
+            '[data-list-count]',
+            `${rows.length} data sesuai filter · ${labelCycle(s.cycleKey)}`,
+        );
+        text(document, '[data-selected-count]', selections.size);
+        $$('[data-tab-count]').forEach(
+            (e) =>
+                (e.textContent = s
+                    .people()
+                    .filter(
+                        (p) =>
+                            e.dataset.tabCount === 'all' ||
+                            s.assessment(p.id).status === e.dataset.tabCount,
+                    ).length),
+        );
+    }
+    function review(id, key = s.cycleKey) {
+        const p = s.person(id, key);
+        if (!p) return;
+        reviewed = id;
+        reviewCycle = key;
+        renderScore(
+            $('[data-review-mount]'),
+            p,
+            s.assessment(id, key),
+            true,
+            key,
+        );
+        text(
+            document,
+            '[data-review-period]',
+            `${labelCycle(key)} · ${p.type === 'member' ? 'Penilaian Staf' : 'Penilaian Kepala Unit'}`,
+        );
+        const hist = $('[data-review-history]');
+        hist.replaceChildren();
+        for (const h of s.assessment(id, key).history || [])
+            hist.append(
+                node(
+                    'li',
+                    `${h.action} · ${h.who} · ${dateTime(h.at)} WIB${h.reason ? ' · ' + h.reason : ''}`,
+                ),
+            );
+        if (!hist.childElementCount)
+            empty(hist, 'Belum ada jejak perubahan pada simulasi ini.');
+        const allowed =
+            c.role === 'kd' &&
+            p.type === 'member' &&
+            key === s.cycleKey &&
+            s.assessment(id, key).status === 'Diajukan' &&
+            !s.canWrite();
+        for (const action of ['return', 'final']) {
+            const b = $(`[data-flow-action="${action}"]`);
+            if (b) b.hidden = !allowed;
+        }
+        open('review-dialog');
+    }
+    async function decide(ids, returned = false) {
+        if (c.role !== 'kd') return;
+        const message = s.canWrite();
+        if (message) return toast(message, true);
+        const rows = ids.map((id) => s.person(id)).filter(Boolean);
+        if (
+            !rows.length ||
+            rows.some(
+                (p) =>
+                    p.type !== 'member' ||
+                    s.assessment(p.id).status !== 'Diajukan',
+            )
+        )
+            return toast(
+                'Pilih pengajuan staf yang masih menunggu keputusan.',
+                true,
+            );
+        if (!returned && rows.some((p) => s.total(p.id) == null))
+            return toast('Ada pengajuan tidak lengkap. Periksa kembali.', true);
+        const answer = await confirm(
+            `${returned ? 'Kembalikan' : 'Tetapkan Final'} ${rows.length} penilaian: ${rows.map((p) => p.name).join(', ')}? ${returned ? 'KU harus memperbaiki dan mengajukan ulang.' : 'Angka akan terkunci dan menjadi hasil resmi pada simulasi.'}`,
+            {
+                reason: returned,
+                label: returned ? 'Kembalikan' : 'Tetapkan Final',
+            },
+        );
+        if (!answer) return;
+        for (const p of rows) {
+            const before = structuredClone(s.assessment(p.id)),
+                a = s.data.assessments[`${p.id}|${s.cycleKey}`];
+            a.status = returned ? 'Dikembalikan' : 'Final';
+            a.reason = returned ? answer : '';
+            if (!returned)
+                a.category = categorize(s.total(p.id), s.cycle().categories);
+            a.history.push({
+                action: a.status,
+                who: s.actor.name,
+                at: new Date().toISOString(),
+                reason: a.reason,
+            });
+            s.save(
+                a.status,
+                `${p.name}${a.reason ? ' · ' + a.reason : ''}`,
+                before,
+                a,
+            );
+        }
+        selections.clear();
+        close('review-dialog');
+        sync();
+        toast('Keputusan tercatat pada simulasi.');
+    }
+    function sync() {
+        list();
+        if (!dirty) {
+            working = null;
+            editor();
+        }
+        document.dispatchEvent(new Event('flow-assessments-rendered'));
+    }
+    document.addEventListener('input', (e) => {
+        if (e.target.matches('[data-score]')) {
+            const p = s.person(selected);
+            if (!editable(p) || !working) return;
+            working.values[e.target.dataset.score] = e.target.value;
+            dirty = true;
+            updateTotal($('[data-score-mount]'), s.template(p), working);
+            text(
+                document,
+                '[data-unsent-state]',
+                'Ada perubahan belum dikirim',
+            );
+        }
+        if (
+            e.target.dataset.finding &&
+            e.target.closest('[data-score-mount]')
+        ) {
+            working[e.target.dataset.finding] = e.target.value;
+            dirty = true;
+        }
+        if (e.target.matches('[data-person-search]')) {
+            const root = $('[data-people-rail]');
+            const q = e.target.value.toLowerCase();
+            $$('[data-person-pick]', root).forEach(
+                (b) => (b.hidden = !b.textContent.toLowerCase().includes(q)),
+            );
+        }
+        if (e.target.matches('[data-filter]')) {
+            list();
+            document.dispatchEvent(new Event('flow-filtered'));
+        }
+    });
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('[data-filter]')) {
+            list();
+            document.dispatchEvent(new Event('flow-filtered'));
+        }
+        if (e.target.dataset.pickAssessment) {
+            if (e.target.checked)
+                selections.add(e.target.dataset.pickAssessment);
+            else selections.delete(e.target.dataset.pickAssessment);
+            text(document, '[data-selected-count]', selections.size);
+        }
+        if (e.target.matches('[data-flow-select-all]')) {
+            filtered()
+                .filter(
+                    (p) =>
+                        p.type === 'member' &&
+                        s.assessment(p.id).status === 'Diajukan',
+                )
+                .forEach((p) =>
+                    e.target.checked
+                        ? selections.add(p.id)
+                        : selections.delete(p.id),
+                );
+            list();
+        }
+    });
+    async function select(id) {
+        if (
+            dirty &&
+            !(await confirm(
+                'Pindah dan buang pengisian yang belum dikirim? Isian tidak disimpan.',
+            ))
+        )
+            return;
+        selected = id;
+        working = null;
+        dirty = false;
+        editor();
+    }
+    document.addEventListener('click', async (e) => {
+        const pick = e.target.closest('[data-person-pick]');
+        if (pick) await select(pick.dataset.personPick);
+        const tab = e.target.closest('[data-people-filter]');
+        if (tab) {
+            peopleTab = tab.dataset.peopleFilter;
+            $$('[data-people-filter]').forEach((b) =>
+                b.classList.toggle('active', b === tab),
+            );
+            editor();
+        }
+        const st = e.target.closest('[data-flow-status]');
+        if (st) {
+            statusTab = st.dataset.flowStatus;
+            $$('[data-flow-status]').forEach((b) =>
+                b.setAttribute('aria-selected', String(b === st)),
+            );
+            list();
+        }
+        const r = e.target.closest('[data-review-person]');
+        if (r)
+            review(r.dataset.reviewPerson, r.dataset.reviewCycle || s.cycleKey);
+        const action =
+            e.target.closest('[data-flow-action]')?.dataset.flowAction;
+        if (action === 'final') await decide([reviewed]);
+        if (action === 'return') await decide([reviewed], true);
+        if (action === 'bulk-final') await decide([...selections]);
+        if (action === 'next-review') {
+            const ids = filtered()
+                .filter(
+                    (p) =>
+                        p.type === 'member' &&
+                        s.assessment(p.id).status === 'Diajukan',
+                )
+                .map((p) => p.id);
+            const next = ids[ids.indexOf(reviewed) + 1] || ids[0];
+            if (next) review(next);
+            else {
+                close('review-dialog');
+                toast('Tidak ada pengajuan menunggu pada filter ini.');
+            }
+        }
+        if (action === 'next-person') {
+            const rows = s
+                .people(kind)
+                .filter((p) => editable(p) && p.id !== selected);
+            if (rows.length) await select(rows[0].id);
+            else toast('Tidak ada orang berikutnya yang perlu diisi.');
+        }
+        const p = s.person(selected);
+        if (!p) return;
+        if (action === 'copy-previous' && editable(p)) {
+            const before = s.assessment(p.id, previousMonth(s.cycleKey)),
+                target = s.template(p);
+            if (!before.snapshot)
+                return toast(
+                    'Tidak ada lembar bulan lalu yang dapat dibandingkan.',
+                    true,
+                );
+            let count = 0;
+            target.items.forEach((item, i) => {
+                const j = before.snapshot.items.findIndex(
+                    (x) => itemSignature(x) === itemSignature(item),
+                );
+                if (j >= 0 && before.values[j] != null) {
+                    working.values[i] = before.values[j];
+                    count++;
+                }
+            });
+            dirty = count > 0;
+            editor();
+            toast(
+                count
+                    ? `${count} KPI yang cocok disalin. Periksa lalu kirim.`
+                    : 'Tidak ada KPI yang cocok pada kedua versi.',
+                !count,
+            );
+        }
+        if (action === 'send-assessment' && editable(p)) {
+            const k = s.template(p),
+                root = $('[data-score-mount]');
+            if (!k) return;
+            const total = totalValues(working.values, k.items);
+            if (
+                total == null ||
+                Math.abs(k.items.reduce((n, r) => n + r.weight, 0) - 100) >
+                    0.0001
+            ) {
+                const el = $('[data-score-error]', root);
+                el.textContent =
+                    'Lengkapi seluruh KPI dengan bilangan bulat 10-100 dan bobot tepat 100%.';
+                el.hidden = false;
+                return;
+            }
+            if (
+                !(await confirm(
+                    `${c.role === 'ku' ? 'Ajukan ke Kepala Divisi' : 'Tetapkan Final'} untuk ${p.name}, ${labelCycle(s.cycleKey)}, total ${number(total)}? ${c.role === 'ku' ? 'Angka dikunci selama menunggu keputusan.' : 'Hasil menjadi Final dan hanya baca.'}`,
+                ))
+            )
+                return;
+            const before = structuredClone(s.assessment(p.id)),
+                a = {
+                    status: c.role === 'ku' ? 'Diajukan' : 'Final',
+                    values: structuredClone(working.values),
+                    positive: working.positive || '',
+                    negative: working.negative || '',
+                    reason: '',
+                    snapshot: structuredClone(k),
+                    scope: { unitId: p.unitId, divisionId: p.divisionId },
+                    history: [
+                        ...(before.history || []),
+                        {
+                            action: c.role === 'ku' ? 'Diajukan' : 'Final',
+                            who: s.actor.name,
+                            at: new Date().toISOString(),
+                        },
+                    ],
+                    category:
+                        c.role === 'kd'
+                            ? categorize(total, s.cycle().categories)
+                            : null,
+                };
+            s.data.assessments[`${p.id}|${s.cycleKey}`] = a;
+            dirty = false;
+            working = null;
+            s.save(a.status, p.name, before, a);
+            sync();
+            toast(
+                c.role === 'ku'
+                    ? 'Penilaian diajukan. Lanjutkan ke staf berikutnya.'
+                    : 'Nilai Kepala Unit sudah Final.',
+            );
+        }
+        if (
+            action === 'cancel-submission' &&
+            c.role === 'ku' &&
+            s.assessment(p.id).status === 'Diajukan' &&
+            !s.canWrite()
+        ) {
+            if (
+                !(await confirm(
+                    `Batalkan pengajuan ${p.name}? Seluruh angka dan temuan pengajuan dihapus. Status menjadi Belum diisi dan harus diisi ulang.`,
+                ))
+            )
+                return;
+            const before = structuredClone(s.assessment(p.id));
+            delete s.data.assessments[`${p.id}|${s.cycleKey}`];
+            dirty = false;
+            working = null;
+            s.save('Batalkan pengajuan', p.name, before, null);
+            sync();
+            toast(
+                'Pengajuan dibatalkan. Tidak ada nilai sementara yang disimpan.',
+            );
+        }
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.matches('[data-score]')) {
+            e.preventDefault();
+            const list = $$(
+                '[data-score]:not(:disabled)',
+                $('[data-score-mount]'),
+            );
+            list[list.indexOf(e.target) + 1]?.focus();
+        }
+    });
+    window.addEventListener('beforeunload', (e) => {
+        if (dirty) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    const divisions = s.data.divisions.filter(
+        (d) => c.role === 'hc' || d.headId === s.actor?.id,
+    );
+    optionList($('[data-filter="division"]'), divisions, 'Semua divisi');
+    optionList($('[data-filter="unit"]'), s.scopedUnits(), 'Semua unit');
+    if (c.page === 'persetujuan' && $('[data-filter="type"]'))
+        $('[data-filter="type"]').value = 'member';
+    const qs = new URLSearchParams(location.search);
+    if (qs.get('unit') && $('[data-filter="unit"]'))
+        $('[data-filter="unit"]').value = qs.get('unit');
+    document.addEventListener('flow-updated', sync);
+    sync();
+    if (c.state === 'review')
+        review(
+            s
+                .people('member')
+                .find((p) => s.assessment(p.id).status === 'Diajukan')?.id,
+        );
+    if (qs.get('person') && !$('[data-flow-editor]')) review(qs.get('person'));
+    return { filtered, review, sync, getStatus: () => statusTab };
+}

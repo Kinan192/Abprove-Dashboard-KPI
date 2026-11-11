@@ -1,0 +1,232 @@
+{
+  "sampledPairs": 15,
+  "skippedDecorativeOrGradient": 0,
+  "issues": [],
+  "pairs": [
+    {
+      "text": "Langsung ke konten",
+      "color": [
+        29,
+        36,
+        51
+      ],
+      "background": [
+        255,
+        255,
+        255
+      ],
+      "ratio": 15.528,
+      "required": 4.5
+    },
+    {
+      "text": "AB",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 9.719,
+      "required": 3
+    },
+    {
+      "text": "pro",
+      "color": [
+        209,
+        234,
+        223
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 7.658,
+      "required": 3
+    },
+    {
+      "text": "RS Awal Bros Botania",
+      "color": [
+        189,
+        216,
+        205
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 6.418,
+      "required": 4.5
+    },
+    {
+      "text": "Beranda",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 9.719,
+      "required": 4.5
+    },
+    {
+      "text": "Divisi & Unit",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        41.15294117647059,
+        102.98823529411766,
+        86.67058823529412
+      ],
+      "ratio": 6.622,
+      "required": 4.5
+    },
+    {
+      "text": "5",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        220,
+        38,
+        38
+      ],
+      "ratio": 4.829,
+      "required": 4.5
+    },
+    {
+      "text": "Divisi & tim",
+      "color": [
+        29,
+        36,
+        51
+      ],
+      "background": [
+        244,
+        245.94901960784313,
+        247
+      ],
+      "ratio": 14.32,
+      "required": 4.5
+    },
+    {
+      "text": "Seluruh organisasi",
+      "color": [
+        93,
+        102,
+        117
+      ],
+      "background": [
+        244,
+        245.94901960784313,
+        247
+      ],
+      "ratio": 5.345,
+      "required": 4.5
+    },
+    {
+      "text": "Cari halaman, nama, atau NIP",
+      "color": [
+        93,
+        102,
+        117
+      ],
+      "background": [
+        255,
+        255,
+        255
+      ],
+      "ratio": 5.797,
+      "required": 4.5
+    },
+    {
+      "text": "Ctrl K",
+      "color": [
+        93,
+        102,
+        117
+      ],
+      "background": [
+        242,
+        243,
+        240
+      ],
+      "ratio": 5.204,
+      "required": 4.5
+    },
+    {
+      "text": "Pilih Kepala Divisi dari akun KD aktif yang sudah dibuat.",
+      "color": [
+        93,
+        102,
+        117
+      ],
+      "background": [
+        244,
+        245,
+        247
+      ],
+      "ratio": 5.314,
+      "required": 4.5
+    },
+    {
+      "text": "Unit",
+      "color": [
+        93,
+        102,
+        117
+      ],
+      "background": [
+        230.4,
+        233,
+        229.39999999999998
+      ],
+      "ratio": 4.739,
+      "required": 4.5
+    },
+    {
+      "text": "Aktif",
+      "color": [
+        14,
+        122,
+        85
+      ],
+      "background": [
+        255,
+        255,
+        255
+      ],
+      "ratio": 5.339,
+      "required": 4.5
+    },
+    {
+      "text": "Ubah",
+      "color": [
+        185,
+        28,
+        28
+      ],
+      "background": [
+        255,
+        255,
+        255
+      ],
+      "ratio": 6.47,
+      "required": 4.5
+    }
+  ]
+}

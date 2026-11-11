@@ -1,0 +1,32 @@
+<?php
+// Installs a separate local development database. Existing databases are never dropped or rewritten.
+require __DIR__.'/../vendor/autoload.php';
+$app=require __DIR__.'/../bootstrap/app.php';
+$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+if (!app()->environment('local')) throw new RuntimeException('Local environment required.');
+$target='kpi_kinerja_v3_dev';
+$old=DB::connection()->getDatabaseName();
+$backup=storage_path('app/private/integration-backup');File::ensureDirectoryExists($backup);
+if (!File::exists($backup.'/.env.before-v3')) File::copy(base_path('.env'),$backup.'/.env.before-v3');
+$counts=[];foreach(['users','employees','assessments'] as $t) $counts[$t]=DB::table($t)->count();
+DB::statement('CREATE DATABASE IF NOT EXISTS `'.$target.'` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci');
+config(['database.connections.mysql.database'=>$target]);DB::purge('mysql');
+if (DB::select("SHOW TABLES") && !Illuminate\Support\Facades\Schema::hasTable('domain_schema_versions')) throw new RuntimeException('Target database is not an empty/v2 development database.');
+Artisan::call('migrate',['--force'=>true]);echo Artisan::output();
+Artisan::call('db:seed',['--class'=>Database\Seeders\LocalDemoSeeder::class,'--force'=>true]);echo Artisan::output();
+$stats=[];foreach(['users','employees','assessments','auth_accounts'] as $t) $stats[$t]=DB::table($t)->count();
+if ($stats['users']<12 || $stats['auth_accounts']!==$stats['users']) throw new RuntimeException('Credential/seed verification failed.');
+$roles=DB::table('users')->selectRaw('role_key,COUNT(*) total')->groupBy('role_key')->pluck('total','role_key')->all();
+foreach (['super_hc','kepala_divisi','kepala_unit'] as $role) if (($roles[$role]??0)<4) throw new RuntimeException('Role seeding incomplete.');
+$env=File::get(base_path('.env'));
+$values=['DB_DATABASE'=>$target,'APP_URL'=>'http://127.0.0.1:8000','AUTH_GUARD'=>'web','BETTER_AUTH_INTERNAL_URL'=>'http://127.0.0.1:3031','BETTER_AUTH_PORT'=>'3031'];
+if (!preg_match('/^BETTER_AUTH_SECRET=.{32,}$/m',$env)) $values['BETTER_AUTH_SECRET']=bin2hex(random_bytes(32));
+foreach($values as $key=>$value) $env=preg_match('/^'.preg_quote($key,'/').'=/m',$env)?preg_replace('/^'.preg_quote($key,'/').'=.*$/m',$key.'='.$value,$env):rtrim($env)."\n".$key.'='.$value."\n";
+File::put(base_path('.env'),$env);
+File::ensureDirectoryExists(base_path('docs/backend/v3'));
+$report=['previousDatabase'=>$old,'previousCounts'=>$counts,'previousDatabaseModified'=>false,'activeDatabase'=>$target,'counts'=>$stats,'roles'=>$roles,'activatedAt'=>date(DATE_ATOM),'legacyDataImported'=>false];
+File::put(base_path('docs/backend/v3/local-activation.json'),json_encode($report,JSON_PRETTY_PRINT));
+echo json_encode($report,JSON_PRETTY_PRINT)."\n";

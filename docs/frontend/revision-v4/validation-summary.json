@@ -1,0 +1,60 @@
+{
+  "contract": "ui-backend-revision-v4",
+  "generatedAt": "2026-11-10T03:33:00.549163+00:00",
+  "backendTests": 80,
+  "backendAssertions": 723,
+  "backendExitCode": 0,
+  "liveBrowserScenarios": 9,
+  "liveBrowserFailures": 0,
+  "reviewTests": 34,
+  "reviewFailures": 0,
+  "realBetterAuth": true,
+  "mysqlServerTimezoneTest": "+07:00",
+  "existingDatabaseUsedAsFixture": false,
+  "isolatedInstanceStopped": true,
+  "build": "npm.cmd run build: PASS",
+  "phpStyle": "php vendor/bin/pint --test app routes database/seeders tests/Feature tests/Support: PASS",
+  "demo": {
+    "capturedAt": "2026-11-10T03:29:42+00:00",
+    "database": "kpi_kinerja_v3_dev",
+    "demoRoles": {
+      "kepala_divisi": 4,
+      "kepala_unit": 8,
+      "super_hc": 4
+    },
+    "demoStaff": 96,
+    "demoUnits": 8,
+    "demoDivisions": 4,
+    "allAssessmentStatuses": {
+      "final": 33,
+      "returned": 8,
+      "submitted": 8
+    },
+    "businessDataReset": false
+  },
+  "finalVerifiedAt": "2026-11-10T03:34:04.131463+00:00",
+  "responsivePageChecks": 99,
+  "responsivePages": 33,
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "pageErrors": 0,
+  "horizontalOverflows": 0,
+  "desktopVerticalOverflows": 0,
+  "contrastSampledPairs": 1442,
+  "contrastIssues": 0,
+  "protectedAssetChanges": [],
+  "syntaxErrors": [],
+  "gate": "PASS"
+}

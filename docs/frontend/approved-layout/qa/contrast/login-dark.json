@@ -1,0 +1,82 @@
+{
+  "sampledPairs": 5,
+  "skippedDecorativeOrGradient": 5,
+  "issues": [],
+  "pairs": [
+    {
+      "text": "Masuk",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 3
+    },
+    {
+      "text": "Masuk ke akun Anda",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 4.5
+    },
+    {
+      "text": "Lupa kata sandi?",
+      "color": [
+        111,
+        216,
+        171
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 8.965,
+      "required": 4.5
+    },
+    {
+      "text": "Masuk",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        16,
+        107,
+        80
+      ],
+      "ratio": 6.48,
+      "required": 4.5
+    },
+    {
+      "text": "Audit desain · akun contoh ABprove",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        11,
+        30,
+        24
+      ],
+      "ratio": 7.699,
+      "required": 4.5
+    }
+  ]
+}

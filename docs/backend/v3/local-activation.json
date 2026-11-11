@@ -1,0 +1,23 @@
+{
+    "previousDatabase": "kpi_kinerja_dev",
+    "previousCounts": {
+        "users": 7,
+        "employees": 9,
+        "assessments": 1
+    },
+    "previousDatabaseModified": false,
+    "activeDatabase": "kpi_kinerja_v3_dev",
+    "counts": {
+        "users": 16,
+        "employees": 40,
+        "assessments": 25,
+        "auth_accounts": 16
+    },
+    "roles": {
+        "kepala_divisi": 4,
+        "kepala_unit": 8,
+        "super_hc": 4
+    },
+    "activatedAt": "2026-11-10T00:05:17+00:00",
+    "legacyDataImported": false
+}

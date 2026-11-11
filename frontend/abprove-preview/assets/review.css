@@ -1,0 +1,117 @@
+/* Preview-only resilience. Brand, geometry and content come from ABprove. */
+:root {
+    --mute: #5d6675;
+}
+.link {
+    color: var(--red-d);
+}
+.content svg text {
+    fill: var(--mute);
+}
+.app {
+    background: var(--green);
+}
+.lg-copy {
+    color: #fff;
+}
+.st-Belum {
+    color: #667181;
+}
+[data-theme='dark'] {
+    --mute: #9cb2a7;
+    --red: #ff8991;
+    --red-d: #ff8991;
+}
+[data-theme='dark'] .app {
+    background: #064e3b;
+}
+[data-theme='dark'] .btn.pri,
+[data-theme='dark'] .badge,
+[data-theme='dark'] .nav .count {
+    background: #cc3a3f;
+    color: #fff;
+}
+[data-theme='dark'] .btn.pri:hover {
+    background: #b02d34;
+}
+[data-theme='dark'] .acct .av {
+    background: #064e3b;
+    color: #fff;
+}
+[data-theme='dark'] .st-Belum,
+[data-theme='dark'] .st-Draft {
+    color: #a8b8b0;
+}
+.review-skip {
+    position: fixed;
+    left: 16px;
+    top: -80px;
+    z-index: 1000;
+    padding: 10px 16px;
+    background: var(--paper);
+    color: var(--green-m);
+    border: 2px solid var(--green-m);
+    border-radius: 8px;
+}
+.review-skip:focus {
+    top: 12px;
+}
+.drawer:not(.on),
+.modal:not(.on),
+.menu:not(.on) {
+    visibility: hidden;
+}
+.drawer.on,
+.modal.on,
+.menu.on {
+    visibility: visible;
+}
+.toasts {
+    pointer-events: none;
+}
+.toast {
+    max-width: min(440px, calc(100vw - 32px));
+}
+input,
+textarea,
+select {
+    scroll-margin-block: 90px;
+}
+@media (max-width: 900px) {
+    .side:not(.mob-open .side) {
+        visibility: hidden;
+    }
+    .app.mob-open .side {
+        visibility: visible;
+    }
+    .main,
+    .sheet,
+    .content,
+    .pane,
+    .content > *,
+    .split > * {
+        min-width: 0;
+    }
+}
+@media (max-width: 600px) {
+    .iconbtn,
+    .btn,
+    .seg button,
+    .lg-eye,
+    .menu button,
+    .pzc,
+    .pz-chip button {
+        min-height: 44px;
+    }
+    .iconbtn,
+    .lg-eye {
+        min-width: 44px;
+    }
+    .content .row.between {
+        flex-wrap: wrap;
+    }
+    .lg-opts {
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+}

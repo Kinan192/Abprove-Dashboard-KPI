@@ -1,0 +1,18 @@
+{
+    "capturedAt": "2026-11-10T03:29:42+00:00",
+    "database": "kpi_kinerja_v3_dev",
+    "demoRoles": {
+        "kepala_divisi": 4,
+        "kepala_unit": 8,
+        "super_hc": 4
+    },
+    "demoStaff": 96,
+    "demoUnits": 8,
+    "demoDivisions": 4,
+    "allAssessmentStatuses": {
+        "final": 33,
+        "returned": 8,
+        "submitted": 8
+    },
+    "businessDataReset": false
+}

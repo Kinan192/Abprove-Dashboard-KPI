@@ -1,0 +1,2 @@
+@extends('layouts.app')
+@section('content')<div class="page-content page-stack"><div><h2 class="lead">{{ $vm->role==='ku'?'Anggota Unit':'Tim Divisi' }}</h2><p class="mt-2 text-muted">Struktur kepala dan anggota sesuai cakupan. Perubahan penempatan dikelola Super HC.</p></div><div data-team-structure class="grid gap-5 min-[1100px]:grid-cols-2"></div><a class="btn w-fit" href="{{ $vm->link($vm->role==='ku'?'nilai':'persetujuan') }}">Buka penilaian</a></div>@endsection

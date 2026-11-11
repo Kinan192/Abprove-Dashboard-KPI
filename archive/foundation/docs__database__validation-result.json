@@ -1,0 +1,176 @@
+{
+  "engine": "C:\\Users\\Kinan\\AppData\\Local\\Programs\\FlyEnv-Data\\app\\mysql-9.6.0\\mysql-9.6.0-winx64\\bin\\mysqld.exe  Ver 9.6.0 for Win64 on x86_64 (MySQL Community Server - GPL)",
+  "target": "MySQL 8.4 LTS",
+  "targetVersionTested": false,
+  "isolatedInstanceStopped": true,
+  "temporaryDataDir": "C:\\Users\\Kinan\\AppData\\Local\\Temp\\kpi-schema-4gkerzrv",
+  "cases": [
+    {
+      "name": "16 domain tables",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "3 role seeds",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Two-division fixture",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Generated results SUM = 82.750000",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Score zero rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Score 101 rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Generated result cannot be overridden",
+      "pass": true,
+      "expectedError": 3105
+    },
+    {
+      "name": "Wrong unit/division rejected",
+      "pass": true,
+      "expectedError": 1452
+    },
+    {
+      "name": "Double active placement rejected",
+      "pass": true,
+      "expectedError": 1062
+    },
+    {
+      "name": "Revoked historical placement allowed",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Second active division head rejected",
+      "pass": true,
+      "expectedError": 1062
+    },
+    {
+      "name": "Role-scope shape rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Ineligible role assignment rejected",
+      "pass": true,
+      "expectedError": 1452
+    },
+    {
+      "name": "Revoked historical head allowed",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Empty login identifiers rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Cycle date must be first of month",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Invalid deadline order rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Assessment employee-placement mismatch rejected",
+      "pass": true,
+      "expectedError": 1452
+    },
+    {
+      "name": "Assessment template-position mismatch rejected",
+      "pass": true,
+      "expectedError": 1452
+    },
+    {
+      "name": "Item source-template mismatch rejected",
+      "pass": true,
+      "expectedError": 1452
+    },
+    {
+      "name": "Item assessment-template mismatch rejected",
+      "pass": true,
+      "expectedError": 1452
+    },
+    {
+      "name": "One assessment per employee-cycle",
+      "pass": true,
+      "expectedError": 1062
+    },
+    {
+      "name": "Incomplete Final rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Complete Final accepted",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Final category mismatch rejected",
+      "pass": true,
+      "expectedError": 3819
+    },
+    {
+      "name": "Historical parent delete restricted",
+      "pass": true,
+      "expectedError": 1451
+    },
+    {
+      "name": "Snapshot survives master label changes",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Audit request key unique",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Duplicate audit request rejected",
+      "pass": true,
+      "expectedError": 1062
+    },
+    {
+      "name": "Transactional audit rolls back",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Division-1 query excludes division-2",
+      "pass": true,
+      "expectedError": null
+    },
+    {
+      "name": "Unit-1 query excludes unit-3",
+      "pass": true,
+      "expectedError": null
+    }
+  ],
+  "passed": 32,
+  "total": 32,
+  "limitations": [
+    "No Laravel runtime or application authorization implemented/tested.",
+    "Cross-row business invariants and Final immutability require application policies/services/DB privileges.",
+    "Run again on target MySQL 8.4 before migrations are accepted."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@kpi/auth",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "better-auth": "1.7.18",
+    "dotenv": "17.2.3",
+    "mysql2": "3.24.6"
+  }
+}

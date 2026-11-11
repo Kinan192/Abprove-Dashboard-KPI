@@ -1,0 +1,28 @@
+{
+  "root": "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX",
+  "domainTables": [
+    "users",
+    "roles",
+    "user_roles",
+    "divisions",
+    "units",
+    "positions",
+    "employees",
+    "scope_assignments",
+    "employee_placements",
+    "kpi_templates",
+    "kpi_items",
+    "assessment_cycles",
+    "cycle_categories",
+    "assessments",
+    "assessment_items",
+    "audit_events"
+  ],
+  "databaseCasesPassed": 32,
+  "mysqlVersionUsed": "C:\\Users\\Kinan\\AppData\\Local\\Programs\\FlyEnv-Data\\app\\mysql-9.6.0\\mysql-9.6.0-winx64\\bin\\mysqld.exe  Ver 9.6.0 for Win64 on x86_64 (MySQL Community Server - GPL)",
+  "target84Tested": false,
+  "originalInputsPreserved": true,
+  "mvcDirectoriesExist": true,
+  "noBackendRuntimeClaimed": true,
+  "noVendorInstalled": true
+}

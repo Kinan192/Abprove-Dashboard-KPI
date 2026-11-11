@@ -1,0 +1,247 @@
+{
+  "sampledPairs": 16,
+  "skippedDecorativeOrGradient": 0,
+  "issues": [],
+  "pairs": [
+    {
+      "text": "Langsung ke konten",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 13.372,
+      "required": 4.5
+    },
+    {
+      "text": "AB",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 9.719,
+      "required": 3
+    },
+    {
+      "text": "pro",
+      "color": [
+        209,
+        234,
+        223
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 7.658,
+      "required": 3
+    },
+    {
+      "text": "RS Awal Bros Botania",
+      "color": [
+        189,
+        216,
+        205
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 6.418,
+      "required": 4.5
+    },
+    {
+      "text": "Beranda",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        6,
+        78,
+        59
+      ],
+      "ratio": 9.719,
+      "required": 4.5
+    },
+    {
+      "text": "5",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        204,
+        58,
+        63
+      ],
+      "ratio": 4.948,
+      "required": 4.5
+    },
+    {
+      "text": "Pengaturan",
+      "color": [
+        255,
+        255,
+        255
+      ],
+      "background": [
+        41.15294117647059,
+        102.98823529411766,
+        86.67058823529412
+      ],
+      "ratio": 6.622,
+      "required": 4.5
+    },
+    {
+      "text": "Pengaturan",
+      "color": [
+        230,
+        240,
+        235
+      ],
+      "background": [
+        11,
+        30,
+        24
+      ],
+      "ratio": 14.861,
+      "required": 4.5
+    },
+    {
+      "text": "Seluruh rumah sakit",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        11,
+        30,
+        24
+      ],
+      "ratio": 7.699,
+      "required": 4.5
+    },
+    {
+      "text": "Cari halaman, nama, atau NIP",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 6.928,
+      "required": 4.5
+    },
+    {
+      "text": "Ctrl K",
+      "color": [
+        156,
+        178,
+        167
+      ],
+      "background": [
+        24,
+        51,
+        41
+      ],
+      "ratio": 6.048,
+      "required": 4.5
+    },
+    {
+      "text": "Sangat Baik",
+      "color": [
+        111,
+        216,
+        171
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 8.965,
+      "required": 4.5
+    },
+    {
+      "text": "Baik",
+      "color": [
+        127,
+        168,
+        242
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 6.517,
+      "required": 4.5
+    },
+    {
+      "text": "Cukup",
+      "color": [
+        240,
+        165,
+        74
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 7.555,
+      "required": 4.5
+    },
+    {
+      "text": "Kurang",
+      "color": [
+        255,
+        137,
+        145
+      ],
+      "background": [
+        17,
+        40,
+        32
+      ],
+      "ratio": 6.853,
+      "required": 4.5
+    },
+    {
+      "text": "RM",
+      "color": [
+        221,
+        240,
+        229
+      ],
+      "background": [
+        23,
+        63,
+        50
+      ],
+      "ratio": 9.852,
+      "required": 4.5
+    }
+  ]
+}
