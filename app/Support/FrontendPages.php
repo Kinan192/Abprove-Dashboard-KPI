@@ -8,9 +8,9 @@ class FrontendPages
     {
         $common = [['help', 'Bantuan', 'help'], ['notifications', 'Notifikasi', 'bell']];
         $items = match ($role) {
-            'kepala_unit' => [['dashboard', 'Beranda', 'grid'], ['score', 'Isi Nilai', 'clipboard'], ['submissions', 'Pengajuan', 'upload'], ['history', 'Riwayat', 'clock'], ['kpis', 'KPI Unit', 'table'], ['members', 'Anggota Unit', 'users']],
-            'kepala_divisi' => [['dashboard', 'Beranda', 'grid'], ['approvals', 'Persetujuan', 'check'], ['heads', 'Nilai Kepala Unit', 'clipboard'], ['analytics', 'Dashboard Divisi', 'chart'], ['team', 'Tim Divisi', 'users']],
-            'super_hc' => [['dashboard', 'Beranda', 'grid'], ['recap', 'Rekap Penilaian', 'check'], ['kpi-templates', 'Master KPI', 'table'], ['settings', 'Pengaturan', 'settings'], ['organization', 'Pengguna & Struktur', 'users'], ['analytics', 'Analitik', 'chart'], ['audit', 'Riwayat Aktivitas', 'clock']],
+            'kepala_unit' => [['dashboard', 'Dashboard', 'chart'], ['score', 'Isi Nilai', 'clipboard'], ['submissions', 'Pengajuan', 'upload'], ['history', 'Riwayat', 'clock'], ['kpis', 'KPI Unit', 'table'], ['members', 'Anggota Unit', 'users']],
+            'kepala_divisi' => [['dashboard', 'Dashboard Divisi', 'chart'], ['approvals', 'Persetujuan', 'check'], ['heads', 'Nilai Kepala Unit', 'clipboard'], ['team', 'Tim Divisi', 'users']],
+            'super_hc' => [['dashboard', 'Dashboard', 'chart'], ['recap', 'Rekap Penilaian', 'check'], ['kpi-templates', 'Master KPI', 'table'], ['settings', 'Pengaturan', 'settings'], ['organization', 'Pengguna & Struktur', 'users'], ['audit', 'Riwayat Aktivitas', 'clock']],
         };
 
         return array_merge($items, $common);

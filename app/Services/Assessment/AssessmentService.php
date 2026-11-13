@@ -10,6 +10,7 @@ use App\Models\KpiTemplate;
 use App\Queries\ScopedRecords;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\AccessContext;
+use App\Services\KpiMaster\KpiFormula;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentService
@@ -27,7 +28,13 @@ class AssessmentService
         if ($heads && (int) $id === $ctx->userId) {
             abort(403, 'Tidak dapat menilai diri sendiri.');
         }
+        $personKey = ($heads ? 'head-' : 'staff-').$id;
+        $publication = DB::table('kpi_workspace_publications')->where('assessment_month', $month)->where('person_key', $personKey)->first();
+        if (($publication && ! $publication->template_id) || (! $publication && $cycle->workspace_managed)) {
+            throw new BusinessRule('TEMPLATE_UNRESOLVED', 'KPI penerima pada bulan ini belum lengkap atau bobot belum 100%.', 422);
+        }
         $q = KpiTemplate::where('scope_level', $heads ? 'division' : 'unit')->where('scope_key', $heads ? $subject->division_id : $subject->unit_id)
+            ->when($publication, fn ($q) => $q->whereKey($publication->template_id), fn ($q) => $q->whereNull('workspace_hash'))
             ->whereNotNull('sealed_at')->where('effective_from', '<=', $month)->where(fn ($q) => $q->whereNull('effective_until')->orWhere('effective_until', '>=', $month));
         $templates = $q->with('items')->get();
         if ($templates->count() !== 1) {
@@ -79,7 +86,7 @@ class AssessmentService
                 'assessment_id' => $a->id, 'source_kpi_item_id' => $item->id, 'source_template_id' => $t->id, 'sort_order' => $item->sort_order,
                 'pillar_snapshot' => $item->pillar, 'kpi_name_snapshot' => $item->name, 'numerator_snapshot' => $item->numerator, 'denominator_snapshot' => $item->denominator,
                 'formula_snapshot' => $item->measurement_formula, 'target_snapshot' => $item->target_text, 'weight_percent_snapshot' => $item->weight_percent,
-                'score' => $values['scores'][$item->id],
+                'score' => (int) round($values['scores'][$item->id]), 'computed_score' => $item->workspace_definition && $item->workspace_definition['method'] === 'formula' ? $values['scores'][$item->id] : null, 'definition_snapshot' => $item->workspace_definition, 'measurement_inputs' => $values['inputs'][$item->id] ?? null,
             ]);
         }
         if ($heads) {
@@ -135,12 +142,15 @@ class AssessmentService
             $source = $a->items()->lockForUpdate()->get()->map(function ($item) {
                 $item->weight_percent = $item->weight_percent_snapshot;
                 $item->id = $item->source_kpi_item_id;
+                $item->workspace_definition = $item->definition_snapshot;
 
                 return $item;
             });
             $values = $this->scores($source, $data);
             foreach ($a->items()->lockForUpdate()->get() as $item) {
-                $item->score = $values['scores'][$item->source_kpi_item_id];
+                $item->score = (int) round($values['scores'][$item->source_kpi_item_id]);
+                $item->computed_score = $item->definition_snapshot && $item->definition_snapshot['method'] === 'formula' ? $values['scores'][$item->source_kpi_item_id] : null;
+                $item->measurement_inputs = $values['inputs'][$item->source_kpi_item_id] ?? null;
                 $item->save();
             }
             $a->positive_finding = $data['positive_finding'] ?? null;
@@ -176,8 +186,19 @@ class AssessmentService
         $weight = '0';
         $total = '0';
         $scores = [];
+        $inputs = [];
         foreach ($items as $item) {
-            $value = (int) $input[$item->id]['score'];
+            $definition = $item->workspace_definition;
+            if ($definition && $definition['method'] === 'formula') {
+                $computed = app(KpiFormula::class)->score($definition, $input[$item->id]['inputs'] ?? []);
+                $value = $computed['score'];
+                $inputs[$item->id] = $computed['inputs'];
+            } else {
+                $raw = $input[$item->id]['score'] ?? null;
+                if (! preg_match('/^\d+$/D', (string) $raw) || $raw < 10 || $raw > 100) throw new BusinessRule('INVALID_SCORE', 'Nilai manual harus bilangan bulat 10–100.', 422);
+                $value = (int) $raw;
+                $inputs[$item->id] = ['value' => $value];
+            }
             $scores[$item->id] = $value;
             $weight = bcadd($weight, (string) $item->weight_percent, 4);
             $total = bcadd($total, bcdiv(bcmul((string) $value, (string) $item->weight_percent, 6), '100', 6), 6);
@@ -186,7 +207,7 @@ class AssessmentService
             throw new BusinessRule('INVALID_WEIGHT', 'Bobot KPI harus 100%.', 422);
         }
 
-        return ['scores' => $scores, 'total' => $total];
+        return ['scores' => $scores, 'total' => $total, 'inputs' => $inputs];
     }
 
     private function finalize(AccessContext $ctx, Assessment $a): void

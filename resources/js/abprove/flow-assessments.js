@@ -14,6 +14,7 @@ import {
 import { open, close, confirm, toast } from './ui';
 import { paginate, reveal } from './pagination';
 import { activityLabel } from './activity-labels';
+import { calculate } from '../design-review/kpi-periode/model.js';
 import {
     totalValues,
     categorize,
@@ -28,6 +29,7 @@ export function initFlowAssessments(c, s, link) {
         reviewCycle = s.cycleKey,
         peopleTab = 'all',
         statusTab =
+            $('[data-flow-status-select]')?.value ||
             $('[data-flow-status][aria-selected="true"]')?.dataset.flowStatus ||
             'all';
     const requestedStatus = new URLSearchParams(location.search).get('status');
@@ -37,6 +39,8 @@ export function initFlowAssessments(c, s, link) {
         )
     ) {
         statusTab = requestedStatus;
+        if ($('[data-flow-status-select]'))
+            $('[data-flow-status-select]').value = requestedStatus;
         $$('[data-flow-status]').forEach((b) =>
             b.setAttribute(
                 'aria-selected',
@@ -60,6 +64,17 @@ export function initFlowAssessments(c, s, link) {
         !s.canWrite(p.type) &&
         s.unit(p.unitId)?.active &&
         s.division(p.divisionId)?.active;
+    function updateUnitFilter() {
+        const division = $('[data-filter="division"]');
+        const unit = $('[data-filter="unit"]');
+        if (c.role !== 'hc' || !division || !unit) return;
+        const units = s
+            .scopedUnits()
+            .filter(
+                (row) => !division.value || row.divisionId === division.value,
+            );
+        optionList(unit, units, 'Semua unit');
+    }
     function filtered(key = s.cycleKey, finalOnly = false) {
         let rows = s.people('all', key),
             values = Object.fromEntries(
@@ -165,6 +180,32 @@ export function initFlowAssessments(c, s, link) {
             const output = $('[data-read-score]', row);
             output.hidden = !readOnly;
             output.textContent = a.values[i] ?? '-';
+            if (item.config?.method === 'formula') {
+                const cell = input.closest('td');
+                cell.replaceChildren();
+                a.inputs ||= {};
+                a.inputs[i] ||= {};
+                for (const variable of item.config.variables) {
+                    const label = node('label', null, 'block mb-2 text-xs');
+                    label.append(node('span', variable.label));
+                    const field = node('input', null, 'field');
+                    field.type = 'number';
+                    field.step = 'any';
+                    field.dataset.measurement = i;
+                    field.dataset.variable = variable.key;
+                    field.setAttribute('aria-label', `${item.name}: ${variable.label}`);
+                    field.readOnly = readOnly || variable.source === 'fixed';
+                    if (variable.source === 'fixed') a.inputs[i][`variable_${variable.key}`] = variable.value;
+                    field.value = a.inputs[i][`variable_${variable.key}`] ?? '';
+                    label.append(field);
+                    cell.append(label);
+                }
+                const result = calculate(item.config, a.inputs[i]);
+                if (!readOnly) a.values[i] = result.score;
+                const summary = node('p', result.message || `Nilai otomatis: ${number(a.values[i])}`, 'text-xs text-muted');
+                summary.dataset.measurementResult = i;
+                cell.append(summary);
+            }
             const definition = (r) =>
                 JSON.stringify([
                     r.pillar,
@@ -247,12 +288,11 @@ export function initFlowAssessments(c, s, link) {
         k.items.forEach((r, i) => {
             const row = $(`[data-index="${i}"]`, root);
             const value = a.values[i],
-                valid =
-                    /^\d+$/.test(String(value)) &&
-                    +value >= 10 &&
-                    +value <= 100;
+                valid = r.config?.method === 'formula'
+                    ? value !== '' && value != null && Number.isFinite(+value) && +value >= 0 && +value <= 100
+                    : /^\d+$/.test(String(value)) && +value >= 10 && +value <= 100;
             const input = $('[data-score]', row);
-            input.setAttribute(
+            input?.setAttribute(
                 'aria-invalid',
                 String(value !== '' && value != null && !valid),
             );
@@ -667,6 +707,7 @@ export function initFlowAssessments(c, s, link) {
         toast('Keputusan tercatat pada simulasi.');
     }
     function sync() {
+        updateUnitFilter();
         list();
         if (!dirty) {
             working = null;
@@ -675,6 +716,21 @@ export function initFlowAssessments(c, s, link) {
         document.dispatchEvent(new Event('flow-assessments-rendered'));
     }
     document.addEventListener('input', (e) => {
+        if (e.target.matches('[data-measurement]')) {
+            const p = s.person(selected);
+            if (!editable(p) || !working) return;
+            const index = +e.target.dataset.measurement;
+            const config = s.template(p).items[index].config;
+            working.inputs ||= {};
+            working.inputs[index] ||= {};
+            working.inputs[index][`variable_${e.target.dataset.variable}`] = e.target.value;
+            const result = calculate(config, working.inputs[index]);
+            working.values[index] = result.score;
+            dirty = true;
+            text(document, `[data-measurement-result="${index}"]`, result.message || `Nilai otomatis: ${number(result.score)}`);
+            updateTotal($('[data-score-mount]'), s.template(p), working);
+            text(document, '[data-unsent-state]', 'Ada perubahan belum dikirim');
+        }
         if (e.target.matches('[data-score]')) {
             const p = s.person(selected);
             if (!editable(p) || !working) return;
@@ -695,15 +751,22 @@ export function initFlowAssessments(c, s, link) {
             dirty = true;
         }
         if (e.target.matches('[data-person-search]')) editor();
-        if (e.target.matches('[data-filter]')) {
+        if (e.target.matches('input[data-filter]')) {
+            if (e.target.dataset.filter === 'division') updateUnitFilter();
             list();
             document.dispatchEvent(new Event('flow-filtered'));
         }
     });
     document.addEventListener('change', (e) => {
+        if (e.target.matches('[data-flow-status-select]')) {
+            statusTab = e.target.value;
+            list();
+            document.dispatchEvent(new Event('flow-filtered'));
+        }
         if (e.target.matches('[data-score-order]')) list();
         if (e.target.matches('[data-mobile-person]')) select(e.target.value);
-        if (e.target.matches('[data-filter]')) {
+        if (e.target.matches('select[data-filter]')) {
+            if (e.target.dataset.filter === 'division') updateUnitFilter();
             list();
             document.dispatchEvent(new Event('flow-filtered'));
         }
@@ -835,6 +898,10 @@ export function initFlowAssessments(c, s, link) {
                 );
                 if (j >= 0 && before.values[j] != null) {
                     working.values[i] = before.values[j];
+                    if (item.config?.method === 'formula') {
+                        working.inputs ||= {};
+                        working.inputs[i] = structuredClone(before.inputs?.[j] || {});
+                    }
                     count++;
                 }
             });
@@ -907,7 +974,9 @@ export function initFlowAssessments(c, s, link) {
                     const payload = {
                         scores: k.items.map((item, i) => ({
                             source_kpi_item_id: +item.id,
-                            score: +working.values[i],
+                            ...(item.config?.method === 'formula'
+                                ? { inputs: working.inputs?.[i] || {} }
+                                : { score: +working.values[i] }),
                         })),
                         positive_finding: working.positive || '',
                         negative_finding: working.negative || '',
@@ -1034,6 +1103,7 @@ export function initFlowAssessments(c, s, link) {
     const qs = new URLSearchParams(location.search);
     if (qs.get('division') && $('[data-filter="division"]'))
         $('[data-filter="division"]').value = qs.get('division');
+    updateUnitFilter();
     if (qs.get('unit') && $('[data-filter="unit"]'))
         $('[data-filter="unit"]').value = qs.get('unit');
     document.addEventListener('flow-updated', sync);

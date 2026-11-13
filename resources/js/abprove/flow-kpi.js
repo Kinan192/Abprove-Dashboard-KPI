@@ -106,9 +106,64 @@ export function initKpi(c, s) {
         $$('input,select', f).forEach((e) => {
             e.disabled = c.role !== 'hc';
         });
+        const method = $('[data-kpi-method]', f);
+        if (method) method.value = item.formula ? 'formula' : 'manual';
+        syncMethod(method?.value === 'formula');
+        fillRecipients();
         $('[data-form-error]', f).hidden = true;
         open('indicator-dialog');
     }
+    function syncMethod(showFormula) {
+        const box = $('[data-kpi-formula-fields]');
+        if (!box) return;
+        box.hidden = !showFormula;
+        box.querySelectorAll('input,textarea,select').forEach((el) => {
+            el.disabled = !showFormula || c.role !== 'hc';
+        });
+        const help = $('[data-kpi-method-help]');
+        if (help)
+            help.textContent = showFormula
+                ? 'Formula disimpan sebagai definisi pengukuran. Penilai tetap memasukkan nilai 10–100 pada backend.'
+                : 'Penilai memasukkan satu nilai 10–100. Formula tidak dipakai.';
+    }
+    function fillRecipients() {
+        const box = $('[data-kpi-recipients]');
+        if (!box) return;
+        const area = areas().find((a) => a.id === areaId);
+        if (!area || !areaId) {
+            box.textContent = 'Pilih area KPI untuk melihat penerima.';
+            return;
+        }
+        if (level === 'unit') {
+            const people = (s.data.staff || []).filter((st) =>
+                (st.placements || []).some(
+                    (p) =>
+                        p.unitId === areaId &&
+                        p.from <= s.cycleKey &&
+                        (!p.until || p.until >= s.cycleKey),
+                ),
+            );
+            const names = people
+                .slice(0, 3)
+                .map((p) => p.name)
+                .join(', ');
+            box.textContent = `${people.length} staf ${area.name}${names ? ': ' + names + (people.length > 3 ? ', …' : '') : ''}`;
+        } else {
+            const head = (s.data.heads || []).find(
+                (h) =>
+                    h.divisionId === areaId &&
+                    h.from <= s.cycleKey &&
+                    (!h.until || h.until >= s.cycleKey),
+            );
+            const account = head ? s.account(head.accountId) : null;
+            box.textContent = account
+                ? `Kepala Unit di ${area.name}: ${account.name}`
+                : `Belum ada Kepala Unit aktif untuk ${area.name}.`;
+        }
+    }
+    $('[data-kpi-method]')?.addEventListener('change', (e) =>
+        syncMethod(e.target.value === 'formula'),
+    );
     $('#indicator-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         if (c.role !== 'hc' || !e.target.reportValidity()) return;
@@ -181,6 +236,11 @@ export function initKpi(c, s) {
     }
     function render() {
         if (!editor) return;
+        const errorBox = $('[data-kpi-error]');
+        if (errorBox) {
+            errorBox.hidden = true;
+            errorBox.textContent = '';
+        }
         $$('[data-kpi-level]').forEach((button) =>
             button.classList.toggle(
                 'active',

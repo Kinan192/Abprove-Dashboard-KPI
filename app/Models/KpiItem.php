@@ -10,7 +10,7 @@ class KpiItem extends DomainModel
 
     protected function casts(): array
     {
-        return ['weight_percent' => 'decimal:4'];
+        return ['weight_percent' => 'decimal:4', 'workspace_definition' => 'array'];
     }
 
     protected static function booted(): void

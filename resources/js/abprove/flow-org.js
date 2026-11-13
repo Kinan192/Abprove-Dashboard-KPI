@@ -8,6 +8,7 @@ import {
     error,
     dateTime,
     empty,
+    initials,
 } from './flow-dom';
 import { open, close, confirm, toast } from './ui';
 import { uid, previousMonth } from './flow-store';
@@ -268,19 +269,7 @@ export function initOrganization(c, s, link) {
                 const copy = node('div');
                 copy.append(...identity.childNodes);
                 const who = node('div', null, 'reference-person');
-                who.append(
-                    node(
-                        'span',
-                        r.name
-                            .split(/[ ,]+/)
-                            .filter(Boolean)
-                            .slice(0, 2)
-                            .map((x) => x[0])
-                            .join(''),
-                        'avatar',
-                    ),
-                    copy,
-                );
+                who.append(node('span', initials(r.name), 'avatar'), copy);
                 identity.append(who);
             }
             tr.append(identity);
@@ -339,13 +328,15 @@ export function initOrganization(c, s, link) {
                     ),
                 );
             }
-            tr.append(
-                node(
-                    'td',
-                    r.active ? 'Aktif' : 'Nonaktif',
-                    r.active ? 'text-success text-xs' : 'text-muted text-xs',
-                ),
+            const activeCell = node('td');
+            const activeBadge = node(
+                'span',
+                r.active ? 'Aktif' : 'Nonaktif',
+                'status',
             );
+            activeBadge.dataset.status = r.active ? 'Aktif' : 'Nonaktif';
+            activeCell.append(activeBadge);
+            tr.append(activeCell);
             const actions = node('td', null, 'numeric');
             const actionGroup = node('div', null, 'table-row-actions');
             const edit = node('button', 'Ubah', 'link v2-row-action');
@@ -535,7 +526,7 @@ export function initOrganization(c, s, link) {
             )
         ) {
             const a = node('a', 'Lihat cakupan akun', 'menu-item');
-            a.href = `/design-review/${r.role}/beranda?account=${encodeURIComponent(r.id)}&cycle=${s.cycleKey}`;
+            a.href = `/design-review/${r.role}/dashboard?account=${encodeURIComponent(r.id)}&cycle=${s.cycleKey}`;
             root.append(a);
         }
         text(

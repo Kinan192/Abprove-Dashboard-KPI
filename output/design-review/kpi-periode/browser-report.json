@@ -1,0 +1,535 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=playwright.goals.config.js"
+    ],
+    "configFile": "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX\\playwright.goals.config.js",
+    "rootDir": "D:/Produktif/BantuanIT File/Project/KPI-Kinerja-UIUX/tests/GoalsPrototype",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/Produktif/BantuanIT File/Project/KPI-Kinerja-UIUX/test-results/goals-prototype",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "D:/Produktif/BantuanIT File/Project/KPI-Kinerja-UIUX/tests/GoalsPrototype",
+        "testIgnore": [],
+        "testMatch": [
+          "/prototype\\.spec\\.js/"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX\\test-results\\goals-prototype",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX\\tests\\GoalsPrototype",
+        "snapshotDir": "D:\\Produktif\\BantuanIT File\\Project\\KPI-Kinerja-UIUX\\tests\\GoalsPrototype",
+        "testIgnore": [],
+        "testMatch": {},
+        "timeout": 30000,
+        "use": {
+          "baseURL": "http://127.0.0.1:8026",
+          "viewport": {
+            "width": 1440,
+            "height": 900
+          },
+          "headless": true,
+          "launchOptions": {
+            "executablePath": "C:/Program Files/Google/Chrome/Application/chrome.exe"
+          },
+          "screenshot": "only-on-failure",
+          "trace": "retain-on-failure"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "output/design-review/kpi-periode/browser-report.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.65.0",
+    "workers": 1,
+    "webServer": {
+      "command": "php -S 127.0.0.1:8026 -t public tools/testing/server.php",
+      "url": "http://127.0.0.1:8026/design-review/hc/kpi",
+      "reuseExistingServer": true,
+      "stdout": "ignore",
+      "stderr": "ignore",
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "prototype.spec.js",
+      "file": "prototype.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Daftar, filter, pagination 5, format foto, dan ekspor KPI",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1081,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:10.167Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-32fdc569abec76b2eaea",
+          "file": "prototype.spec.js",
+          "line": 75,
+          "column": 1
+        },
+        {
+          "title": "Create, KR drawer, konfigurasi, publikasi, duplikasi dan hapus Draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1617,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:11.419Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-87cd0347dccb5ada8ac4",
+          "file": "prototype.spec.js",
+          "line": 132,
+          "column": 1
+        },
+        {
+          "title": "Empat tipe Goal berfungsi; simpan parsial, keyboard dan konfirmasi keluar",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2873,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:13.046Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-ec86ffa8b7344b6fdcb6",
+          "file": "prototype.spec.js",
+          "line": 202,
+          "column": 1
+        },
+        {
+          "title": "Periode: validasi bulan unik, jadwal WIB, kategori, detail dan activation guard",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 790,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:15.928Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-38ee018fa04fa0484782",
+          "file": "prototype.spec.js",
+          "line": 239,
+          "column": 1
+        },
+        {
+          "title": "Duplikasi periode tidak membawa hasil, publikasi template dan aktivasi snapshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1921,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:16.727Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-c946b0e2a81c78f0c6c3",
+          "file": "prototype.spec.js",
+          "line": 278,
+          "column": 1
+        },
+        {
+          "title": "Siklus penuh KU → KD → HC, nilai integer, scope, keputusan dan Final terkunci",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2661,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:18.656Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-76d41f508c0aaf3e259a",
+          "file": "prototype.spec.js",
+          "line": 340,
+          "column": 1
+        },
+        {
+          "title": "Aktual bukan nilai, progress di atas 100%, dan snapshot tetap utuh",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 999,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:21.327Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-e53a79968795a6dd0918",
+          "file": "prototype.spec.js",
+          "line": 428,
+          "column": 1
+        },
+        {
+          "title": "Drawer tidak membuang isian diam-diam dan error penyimpanan tidak menjadi sukses",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 834,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:22.336Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-3ff7faab992feca65f83",
+          "file": "prototype.spec.js",
+          "line": 461,
+          "column": 1
+        },
+        {
+          "title": "Responsif, tombol pagination, dan screenshot audit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4190,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:23.179Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-e646a8c5b12e37914100",
+          "file": "prototype.spec.js",
+          "line": 491,
+          "column": 1
+        },
+        {
+          "title": "Konflik antar-tab dan data rusak tidak ditimpa diam-diam",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1079,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:27.379Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-e9b1c59221988fc21b17",
+          "file": "prototype.spec.js",
+          "line": 560,
+          "column": 1
+        },
+        {
+          "title": "Gagal memuat modul menampilkan error dan tombol muat ulang",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 429,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:28.469Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-a14cdfc75c6b11bb1151",
+          "file": "prototype.spec.js",
+          "line": 593,
+          "column": 1
+        },
+        {
+          "title": "Dari Buat Periode dan Goal baru sampai seluruh anggota Final dan periode ditutup",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4554,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T09:49:28.907Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "2b3c8b82b523caaa9a01-dd692651b0b19e188b65",
+          "file": "prototype.spec.js",
+          "line": 606,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-12T09:49:09.292Z",
+    "duration": 24536.659,
+    "expected": 12,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

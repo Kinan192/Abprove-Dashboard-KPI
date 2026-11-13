@@ -528,16 +528,23 @@ body[data-app-shell] .score-table [data-kpi-meta] {
     font-size: 12px;
     line-height: 18px;
 }
+body[data-app-shell] .score-pane {
+    padding-bottom: 28px;
+}
 body[data-app-shell] .score-footer {
-    position: sticky;
-    bottom: 16px;
-    max-width: 650px;
-    margin: 24px 0 0 auto;
-    padding: 14px 16px;
+    position: static;
+    z-index: auto;
+    max-width: none;
+    width: 100%;
+    margin: 20px 0 0;
+    padding: 12px 14px;
     border: 1px solid var(--color-line);
     border-radius: 12px;
     background: var(--color-paper);
-    box-shadow: 0 4px 20px rgb(29 36 51 / 0.06);
+    box-shadow: 0 1px 2px rgb(12 32 26/0.04);
+}
+body[data-app-shell] .score-footer .btn {
+    flex: 0 0 auto;
 }
 .reference-home-grid {
     display: grid;
@@ -925,6 +932,25 @@ body[data-app-shell] .reference-home [data-home-progress].page-stack {
 .reference-unit-average {
     margin-bottom: 18px;
 }
+.notification-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 .reference-unit-average .reference-bar {
     margin-top: 6px;
     height: 5px;
@@ -1070,7 +1096,7 @@ body[data-app-shell] .reference-kpi-table th:nth-child(9) {
     overflow: hidden;
 }
 .reference-kpi-table tfoot td {
-    background: var(--color-warning-soft);
+    background: var(--color-subtle);
     font-weight: 650;
 }
 body[data-app-shell][data-role='hc'] .reference-kpi-table .kpi-table-summary {
@@ -1272,6 +1298,10 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     body[data-app-shell] .workspace-tabs [role='tab'] {
         min-height: 44px;
     }
+    body[data-app-shell][data-role='hc'] .reference-ranking-table td {
+        width: auto;
+        padding: 0;
+    }
     body[data-app-shell] .reference-kpi-table .icon-button {
         width: 44px;
         height: 44px;
@@ -1401,5 +1431,107 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     }
     .reference-chart {
         padding: 10px 4px;
+    }
+}
+
+/* KPI and period workspace aligned with the design-review layout. */
+.kpi-page-heading,
+.period-page-heading {
+    align-items: flex-start;
+}
+.kpi-workspace-head {
+    align-items: flex-start;
+}
+.kpi-workspace .kpi-editor-form {
+    gap: 0;
+}
+.kpi-workspace .table-wrap {
+    border: 0;
+    border-radius: 0;
+}
+.kpi-workspace .kpi-workspace-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-line);
+}
+.kpi-workspace .reference-kpi-history {
+    border: 0;
+    padding: 0;
+}
+.kpi-workspace .kpi-definition-meta {
+    margin-top: 12px;
+}
+.period-tabs-row {
+    justify-content: flex-start;
+}
+.inline-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--color-muted);
+    white-space: nowrap;
+}
+.inline-filter .field {
+    width: auto;
+    min-width: 190px;
+    padding-block: 7px;
+}
+.kpi-workspace .inline-filter .field {
+    min-width: 220px;
+}
+.org-card .inline-filter .field {
+    min-width: 140px;
+}
+@media (max-width: 600px) {
+    .kpi-page-heading,
+    .period-page-heading,
+    .kpi-workspace .card-toolbar {
+        align-items: stretch;
+    }
+    .inline-filter {
+        width: 100%;
+    }
+    .inline-filter .field {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.kpi-flow-hint {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin: -6px 0 0;
+    padding: 9px 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: var(--color-subtle);
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 18px;
+}
+.kpi-form-section + .kpi-form-section {
+    padding-top: 16px;
+    border-top: 1px solid var(--color-line);
+}
+.kpi-form-title {
+    margin: 0 0 10px;
+    color: var(--color-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+.kpi-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.kpi-form-span {
+    grid-column: 1 / -1;
+}
+@media (max-width: 600px) {
+    .kpi-form-grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

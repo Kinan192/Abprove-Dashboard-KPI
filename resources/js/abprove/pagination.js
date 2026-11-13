@@ -48,6 +48,15 @@ export function paginate(
         host.after(footer);
     }
     state.footer = footer;
+    state.isTable =
+        container.tagName === 'TBODY' && !container.closest('.score-table');
+    footer.toggleAttribute('data-table-pagination', state.isTable);
+    const sizeWrap = $('[data-page-size-wrap]', footer);
+    if (sizeWrap) sizeWrap.hidden = !state.isTable;
+    if (state.isTable) {
+        state.userSize ||= 10;
+        $('[data-page-size]', footer).value = String(state.userSize);
+    }
     apply(state);
 }
 function apply(state) {
@@ -65,8 +74,11 @@ function apply(state) {
           ? 0
           : rows.length;
     const size =
-            (typeof state.size === 'function' ? state.size() : state.size) ||
-            pageSize(state.kind),
+            (state.isTable
+                ? state.userSize
+                : typeof state.size === 'function'
+                  ? state.size()
+                  : state.size) || pageSize(state.kind),
         pages = Math.max(1, Math.ceil(count / size));
     state.page = Math.max(0, Math.min(state.page, pages - 1));
     state.perPage = size;
@@ -140,6 +152,17 @@ document.addEventListener('click', (event) => {
         state = lists.get(footer?.dataset.pagination);
     if (!state) return;
     state.page += button.hasAttribute('data-page-prev') ? -1 : 1;
+    apply(state);
+});
+document.addEventListener('change', (event) => {
+    if (!event.target.matches('[data-page-size]')) return;
+    const state = lists.get(
+            event.target.closest('[data-pagination]')?.dataset.pagination,
+        ),
+        size = +event.target.value;
+    if (!state || ![10, 25, 50].includes(size)) return;
+    state.userSize = size;
+    state.page = 0;
     apply(state);
 });
 let resize;

@@ -44,7 +44,7 @@ class RevisionV4Test extends BackendTestCase
     public function test_grouped_navigation_keeps_active_views_accessible_without_removed_coverage(): void
     {
         $this->asRole('hc')->get('/hc/organization')->assertOk()->assertSee('Tambah unit')->assertSee('data-org-tab="position"', false)->assertSee('data-org-tab="staff"', false)->assertDontSee('label="Kode"', false);
-        $this->get('/hc/kpi-templates')->assertOk()->assertSee('KPI &amp; Periode', false)->assertDontSee('Cakupan KPI')->assertSee('Bobot (%)')->assertSee('Ekspor KPI')->assertDontSee('Versi &amp; masa berlaku', false);
+        $this->get('/hc/kpi-templates')->assertOk()->assertSee('data-simple-kpi', false)->assertSee('Memuat KPI &amp; periode', false);
         $this->asRole('ku1')->get('/unit/history')->assertOk()->assertSee('Nilai per karyawan')->assertSee('Temuan staf')->assertSee('data-reference-layout="report"', false);
         $this->asRole('kd1')->get('/division/dashboard')->assertOk()->assertSee('Progres per unit')->assertSee('Menunggu persetujuan');
     }

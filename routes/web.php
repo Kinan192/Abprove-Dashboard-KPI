@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController as Sessions;
 use App\Http\Controllers\DesignReviewController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\FrontendDataController;
+use App\Http\Controllers\KpiWorkspaceController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportingController;
@@ -13,12 +14,13 @@ use App\Http\Controllers\SuperHc\KpiTemplateController;
 use App\Http\Controllers\SuperHc\OrganizationController;
 use App\Http\Controllers\SuperHc\TemplateImportController;
 use App\Http\Controllers\WorkspaceController;
+use App\Support\ProjectIdentity;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [FrontendController::class, 'landing']);
 Route::get('/_kpi/health', fn () => response()->json([
     'service' => 'kpi-kinerja',
-    'project' => \App\Support\ProjectIdentity::fingerprint(),
+    'project' => ProjectIdentity::fingerprint(),
     'pid' => getmypid(),
     'ready' => true,
 ]));
@@ -113,6 +115,8 @@ Route::prefix('hc')->middleware(['context:super_hc', 'frontend', 'schema.v2'])->
     Route::post('/assignments/{assignment}/revoke', [OrganizationController::class, 'revoke'])->whereNumber('assignment');
     Route::post('/users/{user}/grant-hc', [OrganizationController::class, 'grantHc'])->whereNumber('user');
     Route::get('/kpi-templates', [KpiTemplateController::class, 'index']);
+    Route::get('/kpi-workspace', [KpiWorkspaceController::class, 'show']);
+    Route::put('/kpi-workspace', [KpiWorkspaceController::class, 'update']);
     Route::get('/kpi-templates/new', [FrontendController::class, 'show']);
     Route::get('/kpi-templates/{template}', [KpiTemplateController::class, 'show'])->whereNumber('template');
     Route::post('/kpi-templates', [KpiTemplateController::class, 'store']);

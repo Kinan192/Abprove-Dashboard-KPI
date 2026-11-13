@@ -20,13 +20,14 @@ class AbproveDesign
     public const ROLE_NAMES = ['ku' => 'Kepala Unit', 'kd' => 'Kepala Divisi', 'hc' => 'Super HC'];
 
     public const VIEWS = [
-        'ku' => ['beranda', 'nilai', 'pengajuan', 'riwayat', 'kpi', 'tim', 'panduan', 'profil', 'notifikasi'],
-        'kd' => ['beranda', 'persetujuan', 'dashboard', 'kpi', 'nilai-kepala', 'tim', 'panduan', 'profil', 'notifikasi'],
-        'hc' => ['beranda', 'rekap', 'dashboard', 'karyawan', 'struktur', 'akun', 'jabatan', 'kpi', 'pengaturan', 'aktivitas', 'impor', 'panduan', 'profil', 'notifikasi'],
+        'ku' => ['dashboard', 'nilai', 'pengajuan', 'riwayat', 'kpi', 'tim', 'panduan', 'profil', 'notifikasi'],
+        'kd' => ['dashboard', 'persetujuan', 'kpi', 'nilai-kepala', 'tim', 'panduan', 'profil', 'notifikasi'],
+        'hc' => ['dashboard', 'rekap', 'karyawan', 'struktur', 'akun', 'jabatan', 'kpi', 'pengaturan', 'aktivitas', 'impor', 'panduan', 'profil', 'notifikasi'],
     ];
 
     public function __construct(public string $role, public string $page, public bool $review = false, ?Request $request = null)
     {
+        $this->page = $page === 'beranda' ? 'dashboard' : $page;
         $this->data = json_decode(File::get(resource_path('data/abprove-demo.json')), true, 512, JSON_THROW_ON_ERROR);
         $this->actor = $this->data['actors'][$role] ?? ['nama' => 'ABprove', 'short' => 'Login'];
         if ($review && $request?->query('account')) {
@@ -50,11 +51,12 @@ class AbproveDesign
     public function title(): string
     {
         return match ($this->page) {
-            'beranda' => 'Beranda', 'nilai' => 'Isi nilai', 'pengajuan' => 'Pengajuan', 'riwayat' => 'Riwayat penilaian',
-            'kpi' => ['ku' => 'KPI unit', 'kd' => 'KPI divisi', 'hc' => 'KPI & Periode'][$this->role],
+            'nilai' => 'Isi nilai', 'pengajuan' => 'Pengajuan', 'riwayat' => 'Riwayat penilaian',
+            'kpi' => ['ku' => 'KPI unit', 'kd' => 'KPI divisi', 'hc' => 'Master KPI'][$this->role],
             'persetujuan' => 'Persetujuan', 'nilai-kepala' => 'Nilai Kepala Unit', 'dashboard' => $this->role === 'kd' ? 'Dashboard divisi' : 'Dashboard',
+            'tim' => $this->role === 'ku' ? 'Anggota Unit' : 'Tim Divisi',
             'rekap' => 'Rekap penilaian', 'karyawan','struktur','jabatan' => 'Struktur & Staf', 'akun' => 'Pengguna & akses',
-            'penempatan' => 'Cakupan KPI', 'pengaturan' => 'Periode & Kategori', 'aktivitas' => 'Riwayat aktivitas', 'impor' => 'Upload master KPI',
+            'penempatan' => 'Cakupan KPI', 'pengaturan' => 'Pengaturan Periode', 'aktivitas' => 'Riwayat aktivitas', 'impor' => 'Upload master KPI',
             'panduan' => 'Panduan', 'profil' => 'Profil', 'notifikasi' => 'Notifikasi', default => 'ABprove',
         };
     }
@@ -74,13 +76,14 @@ class AbproveDesign
 
     public function link(string $view): string
     {
+        $view = $view === 'beranda' ? 'dashboard' : $view;
         if ($this->review) {
             return url('/design-review/'.$this->role.'/'.$view).'?'.http_build_query(array_filter(['month' => $this->month, 'account' => $this->actor['key'] ?? null], fn ($v) => $v !== null));
         }
         $prefix = ['ku' => '/unit', 'kd' => '/division', 'hc' => '/hc'][$this->role];
         $path = match ($view) {
             'notifikasi' => 'notifications','beranda' => 'dashboard','nilai' => 'score','pengajuan' => 'submissions','riwayat' => 'history','persetujuan' => 'approvals','nilai-kepala' => 'heads',
-            'dashboard' => 'analytics','kpi' => $this->role === 'hc' ? 'kpi-templates' : 'kpis','rekap' => 'recap','karyawan' => 'organization/employees',
+            'dashboard' => 'dashboard','kpi' => $this->role === 'hc' ? 'kpi-templates' : 'kpis','rekap' => 'recap','karyawan' => 'organization/employees',
             'struktur' => 'organization','akun' => 'organization/users','jabatan' => 'organization/positions','pengaturan' => 'settings','penempatan' => 'placement',
             'aktivitas' => 'audit','impor' => 'import','panduan' => 'help','profil' => 'profile','tim' => $this->role === 'ku' ? 'members' : 'team',default => $view,
         };
@@ -91,9 +94,9 @@ class AbproveDesign
     public function navigation(): array
     {
         $menu = match ($this->role) {
-            'ku' => [['beranda', 'Beranda', 'home'], ['nilai', 'Isi nilai', 'edit'], ['pengajuan', 'Pengajuan', 'inbox'], ['riwayat', 'Riwayat', 'clock'], ['kpi', 'KPI Unit', 'table'], ['tim', 'Anggota Unit', 'users']],
-            'kd' => [['beranda', 'Beranda', 'home'], ['persetujuan', 'Persetujuan', 'check'], ['dashboard', 'Dashboard divisi', 'chart'], ['kpi', 'KPI Divisi', 'table'], ['nilai-kepala', 'Nilai Kepala Unit', 'clipboard'], ['tim', 'Tim Divisi', 'users']],
-            'hc' => [['beranda', 'Beranda', 'home'], ['rekap', 'Rekap Penilaian', 'check'], ['dashboard', 'Dashboard', 'chart'], ['struktur', 'Struktur & Staf', 'users'], ['akun', 'Akun Kepala', 'user'], ['kpi', 'KPI & Periode', 'table'], ['aktivitas', 'Riwayat Aktivitas', 'clock']],
+            'ku' => [['dashboard', 'Dashboard', 'chart'], ['nilai', 'Isi nilai', 'edit'], ['pengajuan', 'Pengajuan', 'inbox'], ['riwayat', 'Riwayat', 'clock'], ['kpi', 'KPI Unit', 'table'], ['tim', 'Anggota Unit', 'users']],
+            'kd' => [['dashboard', 'Dashboard divisi', 'chart'], ['persetujuan', 'Persetujuan', 'check'], ['kpi', 'KPI Divisi', 'table'], ['nilai-kepala', 'Nilai Kepala Unit', 'clipboard'], ['tim', 'Tim Divisi', 'users']],
+            'hc' => [['dashboard', 'Dashboard', 'chart'], ['rekap', 'Rekap Penilaian', 'check'], ['struktur', 'Struktur & Staf', 'users'], ['akun', 'Akun Kepala', 'user'], ['kpi', 'KPI & Periode', 'table'], ['aktivitas', 'Riwayat Aktivitas', 'clock']],
         };
 
         return collect($menu)->map(fn ($item) => ['id' => $item[0], 'label' => $item[1], 'icon' => $item[2], 'href' => $this->link($item[0])])->all();
@@ -138,9 +141,9 @@ class AbproveDesign
 
     public static function initials(string $name): string
     {
-        $clean = preg_replace('/^(dr\.|apt\.|ns\.)\s*/i', '', $name);
+        $clean = preg_replace('/^(drg?\.|apt\.|ns\.|prof\.|drs\.|dra\.)\s*/i', '', $name);
 
-        return collect(explode(' ', explode(',', $clean)[0]))->filter()->take(2)->map(fn ($s) => mb_substr($s, 0, 1))->implode('');
+        return collect(explode(' ', explode(',', $clean)[0]))->filter()->take(2)->map(fn ($s) => mb_strtoupper(mb_substr($s, 0, 1)))->implode('');
     }
 
     public function assessment(string $id): array
@@ -205,15 +208,19 @@ class AbproveDesign
 
     public function view(): string
     {
+        if ($this->role === 'hc' && ! $this->review && in_array($this->page, ['kpi', 'pengaturan'], true)) {
+            return 'v4.kpi-workspace';
+        }
+
         return match ($this->page) {
-            'beranda' => 'reference.home',
             'nilai', 'nilai-kepala' => 'v2.editor',
             'pengajuan', 'persetujuan', 'rekap' => 'v2.list',
             'akun', 'jabatan', 'struktur', 'karyawan' => 'v2.organization',
             'kpi', 'impor' => 'v4.kpi',
             'penempatan' => 'v2.coverage',
             'pengaturan' => 'v2.cycles',
-            'dashboard', 'riwayat' => 'reference.analytics',
+            'dashboard' => request()->query('detail') === 'laporan' || request()->is('*/analytics') ? 'reference.analytics' : 'redesign.dashboard',
+            'riwayat' => 'reference.analytics',
             'tim' => 'v2.team',
             'aktivitas' => 'v2.activity',
             'panduan' => 'v2.guide',
@@ -225,7 +232,7 @@ class AbproveDesign
     public function clientConfig(): array
     {
         if (! $this->review) {
-            return ['mode' => 'live-v3', 'role' => $this->role, 'page' => $this->page, 'month' => $this->month, 'state' => '', 'review' => false, 'links' => collect(self::VIEWS[$this->role])->mapWithKeys(fn ($v) => [$v => $this->link($v)])->all(), 'actor' => $this->actor];
+            return ['mode' => 'live-v3', 'role' => $this->role, 'page' => $this->page, 'month' => $this->month, 'state' => '', 'review' => false, 'kpiWorkspace' => $this->role === 'hc' && in_array($this->page, ['kpi', 'pengaturan'], true), 'links' => collect(self::VIEWS[$this->role])->mapWithKeys(fn ($v) => [$v => $this->link($v)])->all(), 'actor' => $this->actor];
         }
 
         return ['mode' => 'flow-preview-v2', 'role' => $this->role, 'page' => $this->page, 'month' => $this->month, 'state' => $this->state, 'review' => $this->review, 'links' => collect(self::VIEWS[$this->role])->mapWithKeys(fn ($v) => [$v => $this->link($v)])->all(), 'fixture' => $this->data, 'people' => $this->people($this->page === 'nilai-kepala'), 'actor' => $this->actor];

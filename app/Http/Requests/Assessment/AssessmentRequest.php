@@ -12,9 +12,11 @@ class AssessmentRequest extends MutationRequest
         $action = $this->route()->getActionMethod();
         $scores = [
             'scores' => ['required', 'array', 'min:1', 'max:200'],
-            'scores.*' => ['required', 'array:source_kpi_item_id,score'],
+            'scores.*' => ['required', 'array:source_kpi_item_id,score,inputs'],
             'scores.*.source_kpi_item_id' => ['required', 'integer', 'min:1', 'distinct'],
-            'scores.*.score' => ['required', new Score],
+            'scores.*.score' => ['sometimes', new Score],
+            'scores.*.inputs' => ['sometimes', 'array', 'max:26'],
+            'scores.*.inputs.*' => ['numeric'],
             'positive_finding' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'negative_finding' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'status' => ['prohibited'], 'total_score_raw' => ['prohibited'], 'finalized_by' => ['prohibited'],

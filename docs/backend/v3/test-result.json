@@ -4,14 +4,17 @@
   "existingDatabaseTouched": false,
   "mysqlServerTimezone": "+07:00",
   "applicationTimezone": "UTC",
-  "phpunitExitCode": 0,
-  "phpunitFailures": [],
-  "browserExitCode": 0,
-  "junit": "C:\\Users\\Kinan\\AppData\\Local\\Temp\\kpi-domain-v2-7k7dcqb0\\junit.xml",
-  "serviceLogs": "C:\\Users\\Kinan\\AppData\\Local\\Temp\\kpi-domain-v2-7k7dcqb0",
+  "phpunitExitCode": 1,
+  "phpunitFailures": [
+    {
+      "test": "test_grouped_navigation_keeps_active_views_accessible_without_removed_coverage",
+      "message": "Tests\\Feature\\Frontend\\RevisionV4Test::test_grouped_navigation_keeps_active_views_accessible_without_removed_coverage\r\nFailed asserting that '<!doctype html>\\r\\n\n<html lang=\"id\">\\r\\n\n<head>\\r\\n\n    <meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><meta name=\"csrf-token\" content=\"eflG1IBp4ktzJfkwQCL2Y4QHW7aUKYMI59GiBZXI\">\\r\\n\n    <title>Dashboard divisi \u00b7 ABprove</title>\\r\\n\n    <link rel=\"icon\" href=\"http://[::1]:5173/resources/images/abprove-mark.svg\">\\r\\n\n    <link rel=\"preload\" href=\"http://[::1]:5173/resources/fonts/figtree-400.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\\r\\n\n    <link rel=\"preload\" href=\"http://[::1]:5173/resources/fonts/plus-jakarta-sans-600.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\\r\\n\n    <script>try{document.documentElement.dataset.theme=localStorage.getItem('abprove-theme')||'light'}catch{}</script>\\r\\n\n    <script type=\"module\" src=\"http://[::1]:5173/@vite/client\"></script><link rel=\"stylesheet\" href=\"http://[::1]:5173/resources/css/app.css\" /><script type=\"module\" src=\"http://[::1]:5173/resources/js/app.js\"></script></head>\\r\\n\n<body data-frontend-stack=\"blade-tailwind\"  data-app-shell=\"abprove\" data-page=\"dashboard\" data-role=\"kd\" >\\r\\n\n<script id=\"kpi-config\" type=\"application/json\">{\"mode\":\"live-v3\",\"role\":\"kd\",\"page\":\"dashboard\",\"month\":10,\"state\":\"\",\"review\":false,\"links\":{\"dashboard\":\"http:\\/\\/127.0.0.1:55337\\/division\\/dashboard?month=10\",\"persetujuan\":\"http:\\/\\/127.0.0.1:55337\\/division\\/approvals?month=10\",\"kpi\":\"http:\\/\\/127.0.0.1:55337\\/division\\/kpis?month=10\",\"nilai-kepala\":\"http:\\/\\/127.0.0.1:55337\\/division\\/heads?month=10\",\"tim\":\"http:\\/\\/127.0.0.1:55337\\/division\\/team?month=10\",\"panduan\":\"http:\\/\\/127.0.0.1:55337\\/division\\/help?month=10\",\"profil\":\"http:\\/\\/127.0.0.1:55337\\/d"
+    }
+  ],
+  "error": "Laravel feature tests failed",
   "engine": "C:\\laragon\\bin\\mysql\\mysql-8.4.3-winx64\\bin\\mysqld.exe  Ver 8.4.3 for Win64 on x86_64 (MySQL Community Server - GPL)",
   "isolated": true,
-  "tempDirectory": "C:\\Users\\Kinan\\AppData\\Local\\Temp\\kpi-domain-v2-7k7dcqb0",
+  "tempDirectory": "C:\\Users\\Kinan\\AppData\\Local\\Temp\\kpi-domain-v2-a3t14t1u",
   "instanceStopped": true,
-  "exitCode": 0
+  "exitCode": 1
 }

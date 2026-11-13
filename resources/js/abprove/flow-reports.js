@@ -339,8 +339,10 @@ export function initFlowReports(c, s, a, link) {
                     person: p.id,
                 });
                 action.append(a);
-                const assessmentStatus = node('td');
-                status(assessmentStatus, s.assessment(p.id).status);
+                const assessmentStatus = node('td'),
+                    assessmentBadge = node('span', '', '');
+                status(assessmentBadge, s.assessment(p.id).status);
+                assessmentStatus.append(assessmentBadge);
                 tr.append(name, node('td', p.job), assessmentStatus, action);
                 root.append(tr);
             }
@@ -428,15 +430,19 @@ export function initFlowReports(c, s, a, link) {
                 { size: 4, records: tasks, renderRow },
             );
         }
+        const unread = s.live
+            ? tasks.filter((t) => !t.read).length
+            : tasks.length;
+        const seen = s.data.read.includes(`${s.actor.id}|${s.cycleKey}`);
         $$('[data-notification-count]').forEach((e) => {
-            e.textContent = s.live
-                ? tasks.filter((t) => !t.read).length
-                : tasks.length;
-            e.hidden =
-                !(s.live
-                    ? tasks.filter((t) => !t.read).length
-                    : tasks.length) ||
-                s.data.read.includes(`${s.actor.id}|${s.cycleKey}`);
+            e.textContent = unread;
+            e.hidden = !unread || seen;
+            e.closest('button')?.setAttribute(
+                'aria-label',
+                e.hidden
+                    ? 'Buka notifikasi'
+                    : `Buka notifikasi, ${unread} belum dibaca`,
+            );
         });
     }
     function exportSummary() {

@@ -40,7 +40,7 @@ class KpiMasterService
             $scope = DB::table('kpi_scopes')->where('id', $sid)->lockForUpdate()->first();
         }
         $from = $data['effective_from'];
-        $last = KpiTemplate::where('scope_id', $scope->id)->orderByDesc('effective_from')->lockForUpdate()->first();
+        $last = KpiTemplate::where('scope_id', $scope->id)->whereNull('workspace_hash')->orderByDesc('effective_from')->lockForUpdate()->first();
         if ($last && $last->effective_from >= $from) {
             throw new BusinessRule('TEMPLATE_OVERLAP', 'Pilih bulan sesudah versi terakhir.');
         }
@@ -72,6 +72,9 @@ class KpiMasterService
     {
         abort_unless($ctx->role === 'super_hc', 403);
         $first = KpiTemplate::findOrFail($id);
+        if ($first->workspace_hash !== null) {
+            throw new BusinessRule('WORKSPACE_TEMPLATE', 'Kelola KPI ini melalui Master KPI / Goals.', 422);
+        }
         DB::table($first->scope_level === 'unit' ? 'units' : 'divisions')->where('id', $first->scope_key)->lockForUpdate()->firstOrFail();
         $t = KpiTemplate::whereKey($id)->lockForUpdate()->firstOrFail();
         $before = $t->load('items')->toArray();
@@ -80,7 +83,7 @@ class KpiMasterService
         }
         $t->items()->delete();
         $t->delete();
-        $versions = KpiTemplate::where('scope_id', $t->scope_id)->orderBy('effective_from')->lockForUpdate()->get();
+        $versions = KpiTemplate::where('scope_id', $t->scope_id)->whereNull('workspace_hash')->orderBy('effective_from')->lockForUpdate()->get();
         foreach ($versions as $i => $v) {
             $v->effective_until = isset($versions[$i + 1]) ? CarbonImmutable::parse($versions[$i + 1]->effective_from)->subMonth()->format('Y-m-d') : null;
             $v->save();
@@ -109,6 +112,20 @@ class KpiMasterService
 
     private function readyForCycle(string $month): void
     {
+        if (AssessmentCycle::where('assessment_month', $month)->where('workspace_managed', true)->exists()) {
+            $publications = DB::table('kpi_workspace_publications')->where('assessment_month', $month)->get();
+            if ($publications->isEmpty() || $publications->contains(fn ($p) => $p->template_id === null)) {
+                throw new BusinessRule('SETUP_INCOMPLETE', 'Lengkapi KPI penerima dengan total bobot 100% sebelum mengaktifkan periode.', 422);
+            }
+            foreach (KpiTemplate::whereIn('id', $publications->pluck('template_id'))->get() as $template) {
+                $division = $template->scope_level === 'unit' ? DB::table('units')->where('id', $template->scope_key)->value('division_id') : $template->scope_key;
+                $head = fn ($role, $field, $id) => DB::table('scope_assignments as s')->join('users as u', 'u.id', '=', 's.user_id')->where('s.role_key', $role)->where('s.'.$field, $id)->whereNull('s.revoked_at')->where('u.is_active', true)->whereColumn('u.role_key', 's.role_key')->exists();
+                if (! $head('kepala_divisi', 'division_id', $division) || ($template->scope_level === 'unit' && ! $head('kepala_unit', 'unit_id', $template->scope_key))) {
+                    throw new BusinessRule('SETUP_INCOMPLETE', 'Lengkapi Kepala Unit dan Kepala Divisi aktif untuk penerima KPI.', 422);
+                }
+            }
+            return;
+        }
         $units = DB::table('units')->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
         $divisions = DB::table('divisions')->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
         if ($units->isEmpty() || $divisions->isEmpty()) {
@@ -117,7 +134,7 @@ class KpiMasterService
         foreach (['unit' => $units, 'division' => $divisions] as $level => $areas) {
             foreach ($areas as $area) {
                 $head = DB::table('scope_assignments as s')->join('users as u', 'u.id', '=', 's.user_id')->where($level === 'unit' ? 's.unit_id' : 's.division_id', $area->id)->whereNull('s.revoked_at')->where('s.role_key', $level === 'unit' ? 'kepala_unit' : 'kepala_divisi')->where('u.is_active', true)->whereColumn('u.role_key', 's.role_key')->exists();
-                $count = KpiTemplate::where('scope_level', $level)->where('scope_key', $area->id)->whereNotNull('sealed_at')->where('effective_from', '<=', $month)->where(fn ($q) => $q->whereNull('effective_until')->orWhere('effective_until', '>=', $month))->count();
+                $count = KpiTemplate::where('scope_level', $level)->where('scope_key', $area->id)->whereNull('workspace_hash')->whereNotNull('sealed_at')->where('effective_from', '<=', $month)->where(fn ($q) => $q->whereNull('effective_until')->orWhere('effective_until', '>=', $month))->count();
                 if (! $head || $count !== 1) {
                     throw new BusinessRule('SETUP_INCOMPLETE', 'Lengkapi kepala aktif dan KPI untuk '.$area->name, 422);
                 }

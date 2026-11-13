@@ -254,10 +254,6 @@ test('all role pages render live scoped data at desktop, tablet and phone sizes'
                         .evaluate((e) => e.scrollWidth - e.clientWidth),
                     role + '/' + name,
                 ).toBeLessThanOrEqual(1);
-                if (name === 'beranda')
-                    await page.screenshot({
-                        path: `docs/backend/v3/screenshots/${role}-${width}.png`,
-                    });
             }
         }
         expect(page.errors).toEqual([]);

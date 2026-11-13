@@ -46,7 +46,9 @@ class WorkspaceController extends Controller
         $placementsByEmployee = $placements->groupBy('employee_id');
         $employees = DB::table('employees')->when($light || ! $needs('staff'), fn ($q) => $q->whereRaw('1=0'))->when($ctx->role !== 'super_hc', fn ($q) => $q->whereIn('id', $placements->pluck('employee_id')->merge($assessments->pluck('employee_id'))->filter()))->orderBy('id')->get();
         $positions = DB::table('positions')->when($ctx->role !== 'super_hc', fn ($q) => $q->whereIn('id', $employees->pluck('position_id')))->orderBy('id')->get();
-        $templates = DB::table('kpi_templates')->whereNotNull('sealed_at')->when(! $needs('kpis'), fn ($q) => $q->whereRaw('1=0'))->where(function ($q) use ($ctx, $kpiUnits, $divIds) {
+        $personKeys = $employees->pluck('id')->map(fn ($id) => 'staff-'.$id)->merge($assignments->where('role_key', 'kepala_unit')->whereIn('unit_id', $unitIds)->pluck('user_id')->map(fn ($id) => 'head-'.$id));
+        $publications = DB::table('kpi_workspace_publications')->whereIn('person_key', $personKeys)->get();
+        $templates = DB::table('kpi_templates')->whereNotNull('sealed_at')->where(fn ($q) => $q->whereNull('workspace_hash')->orWhereIn('id', $publications->pluck('template_id')->filter()))->when(! $needs('kpis'), fn ($q) => $q->whereRaw('1=0'))->where(function ($q) use ($ctx, $kpiUnits, $divIds) {
             $q->where(fn ($q) => $q->where('scope_level', 'unit')->whereIn('scope_key', $kpiUnits->pluck('id')));
             if ($ctx->role !== 'kepala_unit') {
                 $q->orWhere(fn ($q) => $q->where('scope_level', 'division')->whereIn('scope_key', $divIds));
@@ -96,12 +98,12 @@ class WorkspaceController extends Controller
             }
             $person = $a->assessment_kind === 'member' ? 'EMP-'.$a->employee_id : 'HEAD-'.$a->subject_user_id;
             $cycle = substr($cyclesById[$a->cycle_id]->assessment_month, 0, 7);
-            $mapped[$person.'|'.$cycle] = ['id' => $a->id, 'lockVersion' => $a->lock_version, 'status' => $status[$a->status], 'values' => $a->items->values()->mapWithKeys(fn ($i, $n) => [$n => $i->score])->all(),
+            $mapped[$person.'|'.$cycle] = ['id' => $a->id, 'lockVersion' => $a->lock_version, 'status' => $status[$a->status], 'values' => $a->items->values()->mapWithKeys(fn ($i, $n) => [$n => (float) ($i->computed_score ?? $i->score)])->all(), 'inputs' => $a->items->values()->mapWithKeys(fn ($i, $n) => [$n => is_string($i->measurement_inputs) ? json_decode($i->measurement_inputs, true) : $i->measurement_inputs])->all(),
                 'positive' => $a->positive_finding ?? '', 'negative' => $a->negative_finding ?? '', 'reason' => $a->return_reason ?? '', 'serverTotal' => $a->total_score_raw,
                 'identity' => ['name' => $a->employee_name_snapshot, 'nip' => $a->nip_snapshot, 'job' => $a->position_name_snapshot, 'unitName' => $a->unit_name_snapshot, 'divisionName' => $a->division_name_snapshot],
                 'scope' => ['unitId' => (string) $a->unit_id, 'divisionId' => (string) $a->division_id],
                 'snapshot' => ['id' => (string) $a->kpi_template_id, 'name' => $a->template_name_snapshot, 'version' => $a->template_version_snapshot,
-                    'items' => $a->items->map(fn ($i) => ['id' => (string) $i->source_kpi_item_id, 'pillar' => $i->pillar_snapshot, 'name' => $i->kpi_name_snapshot, 'target' => $i->target_snapshot, 'weight' => (float) $i->weight_percent_snapshot, 'numerator' => $i->numerator_snapshot ?? '', 'denominator' => $i->denominator_snapshot ?? '', 'formula' => $i->formula_snapshot ?? ''])->values()->all()],
+                    'items' => $a->items->map(fn ($i) => ['id' => (string) $i->source_kpi_item_id, 'pillar' => $i->pillar_snapshot, 'name' => $i->kpi_name_snapshot, 'target' => $i->target_snapshot, 'weight' => (float) $i->weight_percent_snapshot, 'numerator' => $i->numerator_snapshot ?? '', 'denominator' => $i->denominator_snapshot ?? '', 'formula' => $i->formula_snapshot ?? '', 'config' => is_string($i->definition_snapshot) ? json_decode($i->definition_snapshot, true) : $i->definition_snapshot])->values()->all()],
                 'category' => $a->status === 'final' ? ['label' => $a->category_label_snapshot, 'key' => $a->category_code_snapshot] : null,
                 'history' => ($auditByAssessment[$a->id] ?? collect())->map(fn ($e) => ['action' => $e->action, 'who' => $e->actor_name, 'at' => $e->recorded_at.'Z', 'reason' => $e->reason])->values()->all()];
             if ($compact) {
@@ -128,7 +130,7 @@ class WorkspaceController extends Controller
                 'placements' => ($placementsByEmployee[$e->id] ?? collect())->map(fn ($p) => ['id' => $p->id, 'unitId' => (string) $p->unit_id, 'from' => substr($p->effective_from, 0, 7), 'until' => $p->effective_until ? substr($p->effective_until, 0, 7) : null])->values()->all()])->all(),
             'heads' => $assignments->where('role_key', 'kepala_unit')->filter(fn ($h) => $unitIds->contains($h->unit_id))->map(fn ($h) => ['id' => 'HEAD-'.$h->user_id, 'dbId' => $h->user_id, 'accountId' => (string) $h->user_id, 'unitId' => (string) $h->unit_id, 'divisionId' => (string) $units->firstWhere('id', $h->unit_id)->division_id, 'from' => substr($h->assigned_at, 0, 7), 'until' => $h->revoked_at ? CarbonImmutable::parse($h->revoked_at)->subMonth()->format('Y-m') : null])->values()->all(),
             'kpis' => $templates->map(fn ($t) => ['id' => (string) $t->id, 'level' => $t->scope_level, 'areaId' => (string) $t->scope_key, 'name' => $t->name, 'version' => $t->version, 'from' => substr($t->effective_from, 0, 7), 'until' => $t->effective_until ? substr($t->effective_until, 0, 7) : null,
-                'items' => ($items[$t->id] ?? collect())->map(fn ($i) => ['id' => (string) $i->id, 'pillar' => $i->pillar, 'name' => $i->name, 'numerator' => $i->numerator ?? '', 'denominator' => $i->denominator ?? '', 'formula' => $i->measurement_formula ?? '', 'target' => $i->target_text, 'weight' => (float) $i->weight_percent])->all()])->all(),
+                'items' => ($items[$t->id] ?? collect())->map(fn ($i) => ['id' => (string) $i->id, 'pillar' => $i->pillar, 'name' => $i->name, 'numerator' => $i->numerator ?? '', 'denominator' => $i->denominator ?? '', 'formula' => $i->measurement_formula ?? '', 'target' => $i->target_text, 'weight' => (float) $i->weight_percent, 'config' => $i->workspace_definition ? json_decode($i->workspace_definition, true) : null])->all()])->all(),
             'cycles' => $cycles->map(function ($x) use ($categories) {
                 $ranges = ($categories[$x->id] ?? collect())->map(fn ($c) => ['code' => $c->code, 'label' => $c->label, 'lower' => (float) $c->lower_bound, 'upper' => $c->upper_bound === null ? null : (float) $c->upper_bound])->all();
                 $date = fn ($s) => CarbonImmutable::parse($s, 'UTC')->setTimezone('Asia/Jakarta')->format('Y-m-d\TH:i');
@@ -137,6 +139,16 @@ class WorkspaceController extends Controller
             })->all(),
             'assessments' => $mapped,
             'profiles' => [(string) $ctx->userId => ['name' => $r->user()->name, 'email' => $r->user()->email, 'phone' => $r->user()->phone, 'notification' => $r->user()->email_notifications, 'hasPhoto' => (bool) $r->user()->photo_path]], 'read' => []];
+        $clientPerson = fn ($key) => str_replace(['staff-', 'head-'], ['EMP-', 'HEAD-'], $key);
+        foreach ($data['kpis'] as &$template) {
+            $template['forPeople'] = $publications->where('template_id', $template['id'])->map(fn ($p) => $clientPerson($p->person_key))->values()->all();
+        }
+        unset($template);
+        foreach ($publications->whereNull('template_id') as $publication) {
+            $data['kpis'][] = ['id' => 'pending-'.$publication->id, 'forPeople' => [$clientPerson($publication->person_key)], 'from' => substr($publication->assessment_month, 0, 7), 'until' => substr($publication->assessment_month, 0, 7), 'level' => '', 'areaId' => '', 'name' => 'KPI belum lengkap', 'version' => 0, 'items' => []];
+        }
+        foreach ($data['cycles'] as &$cycle) $cycle['managed'] = (bool) $cyclesById[$cycle['dbId']]->workspace_managed;
+        unset($cycle);
         $selected = $cycles->firstWhere('assessment_month', $r->query('cycle', now('Asia/Jakarta')->format('Y-m')).'-01') ?? $cycles->last();
         $data['notifications'] = $selected && $needs('notifications') ? app(NotificationController::class)->tasks($ctx, $selected->id)->all() : [];
 

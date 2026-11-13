@@ -314,13 +314,18 @@ export function createFlowStore(c) {
     function template(p, key = cycleKey) {
         const a = assessment(p.id, key);
         if (a.snapshot) return a.snapshot;
+        const assigned = data.kpis.findLast(
+            (k) => k.forPeople?.includes(p.id) && k.from <= key && (!k.until || k.until >= key),
+        );
+        if (assigned) return assigned.items.length ? assigned : null;
+        if (data.cycles.find((cycle) => cycle.id === key)?.managed) return null;
         const level = p.type === 'member' ? 'unit' : 'division',
             areaId = p.type === 'member' ? p.unitId : p.divisionId;
         return (
             data.kpis
                 .filter(
                     (k) =>
-                        k.level === level &&
+                        !k.forPeople?.length && k.level === level &&
                         k.areaId === areaId &&
                         k.from <= key &&
                         (!k.until || k.until >= key),
@@ -480,10 +485,9 @@ export function createFlowStore(c) {
 export function totalValues(values, rows) {
     return rows.length &&
         rows.every(
-            (_, i) =>
-                /^\d+$/.test(String(values[i])) &&
-                +values[i] >= 10 &&
-                +values[i] <= 100,
+            (row, i) => row.config?.method === 'formula'
+                ? values[i] !== '' && values[i] != null && Number.isFinite(+values[i]) && +values[i] >= 0 && +values[i] <= 100
+                : /^\d+$/.test(String(values[i])) && +values[i] >= 10 && +values[i] <= 100,
         )
         ? rows.reduce((sum, r, i) => sum + (+values[i] * +r.weight) / 100, 0)
         : null;

@@ -1,12 +1,22 @@
 @extends('layouts.app')
 @section('content')
 <div class="page-content page-stack reference-settings compact-workspace" data-flow-cycles data-panel-group data-default-panel="schedule">
-@include('v4.section-tabs')
-<div class="toolbar"><x-abprove.tabs :items="['schedule'=>'Jadwal','categories'=>'Kategori nilai','periods'=>'Daftar periode']" active="schedule" label="Bagian pengaturan"/><div class="flex flex-wrap gap-2"><button class="btn" type="button" data-reference-cycle-edit>Ubah jadwal & kategori</button><button class="btn btn-primary" type="button" data-flow-action="new-cycle">Buat periode</button></div></div>
-<p class="text-xs text-muted" data-reference-cycle-help></p>
+@include('v4.kpi-tabs')
+<div class="section-heading period-page-heading">
+    <div class="min-w-0">
+        <h2 class="lead">Pengaturan Periode</h2>
+        <p class="mt-1 text-sm text-muted">Kelola siklus bulanan, jadwal penilaian dan kategori nilai pada periode terpilih.</p>
+        <p class="mt-1 text-xs text-muted" data-reference-cycle-help></p>
+    </div>
+    <div class="flex flex-wrap justify-end gap-2">
+        <button class="btn" type="button" data-reference-cycle-edit>Ubah jadwal &amp; kategori</button>
+        <button class="btn btn-primary" type="button" data-flow-action="new-cycle">Buat periode</button>
+    </div>
+</div>
+<div class="toolbar period-tabs-row"><x-abprove.tabs :items="['schedule'=>'Jadwal','categories'=>'Kategori nilai','periods'=>'Daftar periode']" active="schedule" label="Bagian pengaturan"/></div>
 <section data-panel="schedule"><h2 class="section-title">Jadwal siklus bulanan</h2><p class="text-muted mt-1 mb-4" data-reference-cycle-label></p><div class="card reference-setting-rows" data-reference-schedule></div></section>
 <section data-panel="categories" hidden><h2 class="section-title">Kategori nilai</h2><p class="text-muted mt-1 mb-4">Total nilai = jumlah (nilai 10–100 × bobot KPI / 100). Batas mengikuti periode yang dipilih.</p><div class="card reference-setting-rows" data-cycle-categories></div></section>
-<section id="daftar-periode" data-panel="periods" hidden><h2 class="section-title mb-3">Daftar periode</h2><div class="table-wrap"><table class="data-table"><thead><tr><th>Bulan yang dinilai</th><th>Status</th><th>Mulai / batas KU</th><th>Batas KD / tutup</th><th>Tindakan</th></tr></thead><tbody data-cycle-body></tbody></table></div></section>
+<section id="daftar-periode" data-panel="periods" hidden><h2 class="section-title mb-3">Daftar periode</h2><div class="card table-card"><div class="table-wrap"><table class="data-table"><thead><tr><th>Bulan yang dinilai</th><th>Status</th><th>Mulai / batas KU</th><th>Batas KD / tutup</th><th>Tindakan</th></tr></thead><tbody data-cycle-body></tbody></table></div></div></section>
 @if($vm->review)<div class="flex flex-wrap gap-3"><button class="btn" type="button" data-flow-action="empty-preview">Mulai persiapan dari kosong</button><button class="btn btn-ghost" type="button" data-flow-action="reset-preview">Kembalikan data contoh alur</button></div>@endif
 </div>
 @push('dialogs')<x-abprove.dialog id="cycle-dialog" title="Atur periode" :drawer="true"><form id="cycle-form" data-flow-form="cycle" method="post" action="{{ url('/design-review/local-only') }}" class="space-y-4"><input type="hidden" name="id"><x-abprove.flow-input name="month" label="Bulan yang dinilai" type="month" :required="true"/><x-abprove.flow-input name="status" label="Status periode" type="select" :required="true"><option value="planned">Direncanakan</option><option value="open">Terbuka</option></x-abprove.flow-input>@foreach(['opens'=>'Mulai pengisian (WIB)','submission'=>'Batas pengajuan Kepala Unit (WIB)','approval'=>'Batas keputusan Kepala Divisi (WIB)','closes'=>'Tutup siklus (WIB)'] as $key=>$label)<x-abprove.flow-input :name="$key" :label="$label" type="datetime-local" :required="true"/>@endforeach<fieldset class="grid grid-cols-3 gap-3"><legend class="label">Batas bawah kategori</legend><x-abprove.flow-input name="sb" label="Sangat Baik" type="number" min="1" max="100" :required="true"/><x-abprove.flow-input name="b" label="Baik" type="number" min="1" max="99" :required="true"/><x-abprove.flow-input name="c" label="Cukup" type="number" min="1" max="98" :required="true"/></fieldset><p class="text-xs text-muted">Kurang berada di bawah batas Cukup. Periode terpakai tidak diubah; buat periode baru untuk batas berikutnya.</p><p class="notice notice-error" data-form-error hidden role="alert"></p></form><x-slot:footer><button class="btn" data-dialog-close type="button">Batal</button><button class="btn btn-primary" type="submit" form="cycle-form">Tinjau dan simpan</button></x-slot:footer></x-abprove.dialog>@endpush

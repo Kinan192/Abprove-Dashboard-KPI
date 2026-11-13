@@ -9,12 +9,17 @@ class AssessmentItem extends DomainModel
     protected $fillable = [
         'assessment_id', 'source_kpi_item_id', 'source_template_id', 'sort_order', 'pillar_snapshot',
         'kpi_name_snapshot', 'numerator_snapshot', 'denominator_snapshot', 'formula_snapshot',
-        'target_snapshot', 'weight_percent_snapshot', 'score',
+        'target_snapshot', 'weight_percent_snapshot', 'score', 'computed_score', 'definition_snapshot', 'measurement_inputs',
     ];
 
     protected function casts(): array
     {
-        return ['score' => 'integer', 'weight_percent_snapshot' => 'decimal:4', 'weighted_result_raw' => 'decimal:6'];
+        return ['definition_snapshot' => 'array', 'measurement_inputs' => 'array', 'weight_percent_snapshot' => 'decimal:4', 'weighted_result_raw' => 'decimal:6'];
+    }
+
+    public function getScoreAttribute($value)
+    {
+        return ($this->attributes['computed_score'] ?? null) !== null ? (float) $this->attributes['computed_score'] : (int) $value;
     }
 
     protected static function booted(): void

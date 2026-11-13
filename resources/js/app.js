@@ -1,4 +1,5 @@
 import { initPanels } from './abprove/pagination';
+import { initTableTools } from './abprove/table-tools';
 import markUrl from '../images/abprove-mark.svg';
 import { $, initUI, toast } from './abprove/ui';
 import { createFlowStore } from './abprove/flow-store';
@@ -7,6 +8,15 @@ import { initFlowAssessments } from './abprove/flow-assessments';
 
 import { initFlowReports } from './abprove/flow-reports';
 import { createApi } from './abprove/api';
+
+if (document.body.hasAttribute('data-app-shell'))
+    window.addEventListener(
+        'scroll',
+        () => {
+            if (window.scrollY !== 0) window.scrollTo(0, 0);
+        },
+        { passive: true },
+    );
 
 document.documentElement.dataset.brandAsset = markUrl;
 const element = $('#kpi-config'),
@@ -44,6 +54,7 @@ if (config && !config.review) {
 }
 initUI(config);
 initPanels();
+initTableTools();
 if ($('#audit-screens'))
     import('./abprove/audit').then(({ initAudit }) => initAudit());
 async function start() {
@@ -56,6 +67,9 @@ async function start() {
                 ? import('./abprove/flow-kpi')
                 : null,
             $('[data-insights-root]') ? import('./abprove/insights') : null,
+            $('[data-goal-prototype]')
+                ? import('./design-review/kpi-periode/index.js')
+                : null,
         ]);
         if (!config.review) {
             config.api = createApi(config);
@@ -68,13 +82,18 @@ async function start() {
                     page: config.page,
                 });
                 if (cycle) query.set('cycle', cycle);
+                if (config.kpiWorkspace)
+                    for (const key of ['accounts', 'positions', 'divisions', 'units', 'staff', 'heads', 'cycles', 'profiles', 'notifications'])
+                        query.append('only[]', key);
                 if (config.api.reportRequested())
                     query.set('include_insights', '1');
                 const [result] = await Promise.all([
                     config.api.request('/data/workspace?' + query),
                     features,
                 ]);
-                config.workspace = result.data;
+                config.workspace = config.kpiWorkspace
+                    ? { kpis: [], assessments: {}, activities: [], ...result.data }
+                    : result.data;
                 config.selectedCycle = result.cycle;
                 config.actor.key = result.actorId;
                 config.initialInsights = result.insights;
@@ -100,8 +119,27 @@ async function start() {
         }
         const store = createFlowStore(config);
         activeStore = store;
-        const [organization, kpi, insights] = await features;
+        const [organization, kpi, insights, goalPrototype] = await features;
+        try {
+            await goalPrototype?.prepareGoalShell(config, store);
+        } catch (e) {
+            const host = document.querySelector('[data-skp-content]');
+            if (host) {
+                host.replaceChildren();
+                const message = document.createElement('p');
+                message.className = 'notice notice-error';
+                message.setAttribute('role', 'alert');
+                message.textContent = e.message || 'KPI workspace gagal dimuat.';
+                host.append(message);
+            }
+            return;
+        }
         const link = initFlowRuntime(config, store);
+        if (goalPrototype) {
+            goalPrototype.initGoalPrototype(config, store);
+            document.documentElement.dataset.frontendReady = 'true';
+            return;
+        }
         const assessments = initFlowAssessments(config, store, link);
         organization?.initOrganization(config, store, link);
         kpi?.initKpi(config, store);
@@ -141,7 +179,7 @@ async function start() {
             button.disabled = true;
             button.textContent = 'Membuka dashboard…';
             location.assign(
-                `/design-review/${account.role}/beranda?account=${encodeURIComponent(account.key)}`,
+                `/design-review/${account.role}/dashboard?account=${encodeURIComponent(account.key)}`,
             );
         });
         $('form[action$="/login"]:not([data-review-login])')?.addEventListener(
@@ -155,4 +193,19 @@ async function start() {
         document.documentElement.dataset.frontendReady = 'true';
     }
 }
-start().catch((e) => toast(e.message, true));
+start().catch((e) => {
+    const prototype = $('[data-goal-prototype] [data-gp-content]');
+    if (!prototype) return toast(e.message, true);
+    prototype.setAttribute('aria-busy', 'false');
+    const message = document.createElement('p');
+    message.className = 'notice notice-error';
+    message.setAttribute('role', 'alert');
+    message.textContent =
+        'Rancangan belum dapat dimuat. Periksa koneksi atau muat ulang halaman.';
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.className = 'btn';
+    retry.textContent = 'Muat ulang';
+    retry.onclick = () => location.reload();
+    prototype.replaceChildren(message, retry);
+});

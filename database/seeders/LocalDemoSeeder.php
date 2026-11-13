@@ -88,11 +88,15 @@ class LocalDemoSeeder extends Seeder
             }
             $units = [];
             $month = now('Asia/Jakarta')->startOfMonth()->format('Y-m-d');
+            // 16 akun contoh + 84 staf = 100 orang pada database baru.
+            $staffPerUnit = [11, 11, 11, 11, 10, 10, 10, 10];
+            $unitIndex = 0;
             foreach (['IT' => 'UMUM', 'SDM' => 'UMUM', 'LOGISTIK' => 'UMUM', 'UGD' => 'MEDIS', 'RAWATINAP' => 'MEDIS', 'RAWATJALAN' => 'KEPERAWATAN', 'ICU' => 'KEPERAWATAN', 'TATAUSAHA' => 'KEUANGAN'] as $code => $div) {
                 $u = DB::table('units')->where('code', 'DEMO-'.$code)->first();
                 $unit = $u ? $u->id : $org->save($ctx, 'units', null, ['code' => 'DEMO-'.$code, 'name' => $code.' Contoh', 'division_id' => $divisions[$div], 'head_user_id' => $users['ku.'.strtolower($code).'@kpi.test']->id])['id'];
                 $units[] = $unit;
-                foreach (range(1, 12) as $n) {
+                $staffCount = $staffPerUnit[$unitIndex++] ?? 10;
+                foreach (range(1, $staffCount) as $n) {
                     if (! DB::table('employees')->where('nip', 'DEMO-'.$code.'-0'.$n)->exists()) {
                         $org->save($ctx, 'employees', null, ['nip' => 'DEMO-'.$code.'-0'.$n, 'full_name' => 'Anggota '.$code.' Contoh 0'.$n, 'position_id' => $positionId, 'unit_id' => $unit, 'effective_from' => $month]);
                     }

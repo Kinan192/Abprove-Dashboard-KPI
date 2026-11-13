@@ -7,6 +7,7 @@ import {
     dateTime,
     status,
     empty,
+    initials,
 } from './flow-dom';
 import { paginate } from './pagination';
 import { activityLabel, activitySubject } from './activity-labels';
@@ -34,14 +35,6 @@ const format = (value, digits = 1) =>
               minimumFractionDigits: digits,
               maximumFractionDigits: digits,
           }).format(value);
-const initials = (name) =>
-    name
-        .replace(/^(dr\.|apt\.|ns\.)\s*/i, '')
-        .split(/[ ,]+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((s) => s[0])
-        .join('');
 const text = (selector, value) =>
     $$(selector).forEach((el) => (el.textContent = value ?? '-'));
 const cell = (value, cls = '') => node('td', value, cls);
@@ -73,7 +66,15 @@ function person(p, subtitle) {
     el.append(copy);
     return el;
 }
-function table(root, headings, rows, key, size = 10, cls = '') {
+function table(
+    root,
+    headings,
+    rows,
+    key,
+    size = 10,
+    cls = '',
+    { renderRow, token = '' } = {},
+) {
     if (!root) return;
     root.replaceChildren();
     const wrap = node('div', null, 'table-wrap'),
@@ -100,7 +101,7 @@ function table(root, headings, rows, key, size = 10, cls = '') {
     }
     wrap.append(t);
     root.append(wrap);
-    rows.forEach((r) => body.append(r));
+    if (!renderRow) rows.forEach((r) => body.append(r));
     if (!rows.length) {
         const tr = node('tr'),
             td = cell('Belum ada data pada periode atau filter ini.', 'empty');
@@ -108,7 +109,12 @@ function table(root, headings, rows, key, size = 10, cls = '') {
         tr.append(td);
         body.append(tr);
     }
-    paginate(body, key, { size });
+    paginate(body, key, {
+        size,
+        token,
+        records: renderRow ? rows : undefined,
+        renderRow,
+    });
     return body;
 }
 function figures(root, rows) {
@@ -440,26 +446,43 @@ function home(c, s, d, link) {
                   ],
                   ['Belum diajukan', m.not_started, 'belum diisi'],
               ]
-            : [
-                  [
-                      'Rata-rata nilai divisi',
-                      number(m.average),
-                      'hasil Final',
-                      'text-info',
-                  ],
-                  ['Menunggu Anda', m.submitted, 'penilaian untuk ditinjau'],
-                  [
-                      'Dikembalikan',
-                      m.returned,
-                      'sedang diperbaiki unit',
-                      'text-warning',
-                  ],
-                  [
-                      'Belum diajukan unit',
-                      m.not_started,
-                      'staf dan Kepala Unit',
-                  ],
-              ],
+            : c.role === 'hc'
+              ? [
+                    ['Total penilaian', m.total, 'seluruh cakupan rumah sakit'],
+                    ['Menunggu ACC', m.submitted, 'ditinjau Kepala Divisi'],
+                    [
+                        'Perlu diperbaiki',
+                        m.returned,
+                        'dikembalikan kepada penilai',
+                        'text-warning',
+                    ],
+                    [
+                        'Sudah Final',
+                        m.final,
+                        'dikunci Kepala Divisi',
+                        'text-success',
+                    ],
+                ]
+              : [
+                    [
+                        'Rata-rata nilai divisi',
+                        number(m.average),
+                        'hasil Final',
+                        'text-info',
+                    ],
+                    ['Menunggu Anda', m.submitted, 'penilaian untuk ditinjau'],
+                    [
+                        'Dikembalikan',
+                        m.returned,
+                        'sedang diperbaiki unit',
+                        'text-warning',
+                    ],
+                    [
+                        'Belum diajukan unit',
+                        m.not_started,
+                        'staf dan Kepala Unit',
+                    ],
+                ],
     );
     const ring = $('[data-reference-ring]');
     if (ring) {
@@ -707,29 +730,84 @@ function home(c, s, d, link) {
             kpis.append(el);
         }
         if (!templates.length) empty(kpis, 'KPI belum disusun oleh Super HC.');
-        const keys = yearKeys(month);
-        lineChart(
-            $('[data-home-trend]'),
-            keys,
-            keys.map((key) =>
-                mean(
-                    s
-                        .people('member', key)
-                        .filter(
-                            (p) => s.assessment(p.id, key).status === 'Final',
-                        )
-                        .map((p) => s.total(p.id, key)),
-                ),
-            ),
-        );
     }
+    const keys = yearKeys(month);
+    lineChart(
+        $('[data-home-trend]'),
+        keys,
+        keys.map((key) =>
+            mean(
+                s
+                    .people(c.role === 'ku' ? 'member' : 'all', key)
+                    .filter((p) => s.assessment(p.id, key).status === 'Final')
+                    .map((p) => s.total(p.id, key)),
+            ),
+        ),
+    );
+}
+function dashboardComparison(root, c, d, month, filters) {
+    if (!root) return;
+    root.replaceChildren();
+    const rows =
+        c.role === 'ku'
+            ? d.item_averages
+                  .filter((r) => r.kind === 'member' && r.average != null)
+                  .map((r) => ({
+                      name: r.name,
+                      average: +r.average,
+                      count: r.count,
+                  }))
+            : [
+                  ...Map.groupBy(d.scores, (r) =>
+                      c.role === 'hc' ? r.division_name : r.unit_name,
+                  ),
+              ].map(([name, scores]) => ({
+                  name,
+                  average: mean(scores.map((r) => +r.total)),
+                  count: scores.length,
+              }));
+    rows.sort((a, b) => a.average - b.average || a.name.localeCompare(b.name));
+    if (!rows.length)
+        empty(root, 'Belum ada nilai Final untuk perbandingan ini.');
+    paginate(root, 'dashboard-comparison', {
+        size: 5,
+        token: JSON.stringify([month, filters]),
+        records: rows,
+        renderRow: (r) => {
+            const row = node('div', null, 'dashboard-comparison-row'),
+                heading = node('div', null, 'dashboard-comparison-label'),
+                track = node('div', null, 'dashboard-comparison-track'),
+                fill = node('span');
+            row.setAttribute('role', 'img');
+            row.setAttribute(
+                'aria-label',
+                `${r.name}: rata-rata ${format(r.average)}, dari ${r.count} hasil Final`,
+            );
+            row.dataset.chartLabel = r.name;
+            row.dataset.chartValue = r.average;
+            heading.append(
+                node('span', r.name),
+                node('strong', format(r.average)),
+            );
+            fill.style.width = `${Math.max(0, Math.min(100, r.average))}%`;
+            track.append(fill);
+            row.append(
+                heading,
+                track,
+                node('small', `${r.count} hasil Final`, 'text-muted'),
+            );
+            return row;
+        },
+    });
 }
 function report(c, s, d, link, filters, panel) {
     const month = s.cycleKey,
         keys = yearKeys(month),
         visible = rangedKeys(s),
         people = (key) =>
-            s.people('all', key).filter((p) => matches(p, filters, s, key)),
+            s
+                .people(c.role === 'ku' ? 'member' : 'all', key)
+                .filter((p) => matches(p, filters, s, key)),
         finals = (key) =>
             people(key).filter(
                 (p) => s.assessment(p.id, key).status === 'Final',
@@ -737,60 +815,28 @@ function report(c, s, d, link, filters, panel) {
         m = d.metrics;
     text('[data-reference-year]', month.slice(0, 4));
     if (panel === 'summary') {
-        const catCounts = Map.groupBy(d.scores, (r) => r.category),
-            distribution = [...catCounts]
-                .map(([label, rows]) => `${rows.length} ${label.toLowerCase()}`)
-                .join(', ');
         figures($('[data-reference-report-figures]'), [
             [
                 'Rata-rata nilai Final',
                 format(m.average),
-                'periode terpilih',
+                `${m.final} hasil Final periode terpilih`,
                 'text-info',
             ],
             [
-                'Sudah dinilai',
-                `${m.final + m.submitted + m.returned} / ${m.total}`,
-                'staf dan Kepala Unit',
+                c.role === 'hc' ? 'Sudah Final' : 'Belum dinilai',
+                c.role === 'hc' ? m.final : m.not_started,
+                c.role === 'ku' ? 'staf unit Anda' : 'staf dan Kepala Unit',
             ],
-            [
-                'Sudah Final',
-                `${Math.round((m.final / Math.max(1, m.total)) * 100)}%`,
-                `${m.final} penilaian`,
-            ],
-            [
-                'Sebaran kategori',
-                `${catCounts.size} kategori`,
-                distribution || 'Belum ada hasil Final',
-            ],
+            ['Menunggu ACC', m.submitted, 'ditinjau Kepala Divisi'],
+            ['Dikembalikan', m.returned, 'perlu diperbaiki penilai'],
         ]);
-        const categoryVisual = $(
-            '[data-reference-report-figures] > div:last-child .figure-value',
+        dashboardComparison(
+            $('[data-dashboard-comparison]'),
+            c,
+            d,
+            month,
+            filters,
         );
-        if (categoryVisual) {
-            categoryVisual.replaceChildren();
-            categoryVisual.classList.add('reference-category-visual');
-            const distributionBar = node('div', null, 'reference-bar');
-            distributionBar.setAttribute('role', 'img');
-            distributionBar.setAttribute(
-                'aria-label',
-                distribution || 'Belum ada kategori Final',
-            );
-            for (const [label, rows] of catCounts) {
-                const part = node('span');
-                part.style.width = `${(rows.length / Math.max(1, m.final)) * 100}%`;
-                part.style.background =
-                    label === 'Sangat Baik'
-                        ? 'var(--color-success)'
-                        : label === 'Baik'
-                          ? 'var(--color-info)'
-                          : label === 'Cukup'
-                            ? 'var(--color-warning)'
-                            : 'var(--color-primary)';
-                distributionBar.append(part);
-            }
-            categoryVisual.append(distributionBar);
-        }
         lineChart(
             $('[data-reference-trend]'),
             keys,
@@ -799,23 +845,39 @@ function report(c, s, d, link, filters, panel) {
         const avgs = $('[data-reference-unit-averages]');
         if (avgs) {
             avgs.replaceChildren();
-            for (const [name, rows] of Map.groupBy(
-                d.scores,
-                (r) => r.unit_name,
-            )) {
+            const groups = [
+                ...Map.groupBy(
+                    d.scores,
+                    (r) =>
+                        s.assessment(r.personId, month).scope?.unitId ||
+                        r.unit_name,
+                ).values(),
+            ];
+            const renderAverage = (rows) => {
                 const avg = mean(rows.map((r) => +r.total)),
                     el = node('div', null, 'reference-unit-average'),
                     caption = node('div'),
                     bar = node('div', null, 'reference-bar'),
                     fill = node('span');
-                caption.append(node('span', name), node('b', format(avg)));
+                caption.append(
+                    node('span', rows[0].unit_name),
+                    node('b', format(avg)),
+                );
                 fill.style.width = `${avg}%`;
                 bar.append(fill);
                 el.append(caption, bar);
-                avgs.append(el);
-            }
-            if (!avgs.childElementCount)
+                return el;
+            };
+            if (!groups.length)
                 empty(avgs, 'Belum ada rata-rata Final per unit.');
+            if (c.role === 'hc')
+                paginate(avgs, 'unit-averages', {
+                    size: 5,
+                    token: JSON.stringify([month, filters]),
+                    records: groups,
+                    renderRow: renderAverage,
+                });
+            else groups.forEach((rows) => avgs.append(renderAverage(rows)));
         }
     }
     const kpiBody = $('[data-item-averages]');
@@ -891,39 +953,58 @@ function report(c, s, d, link, filters, panel) {
     const rank = $('[data-ranking-v4]'),
         select = $('[data-reference-rank-group]');
     if (panel === 'results' && rank) {
-        const previous = select.value;
-        select.replaceChildren(
-            ...d.rankings.map(
-                (g, i) =>
-                    new Option(
-                        `${g.area} · ${g.kind === 'member' ? 'Staf' : 'Kepala Unit'}`,
-                        String(i),
-                    ),
-            ),
+        let groups = d.rankings;
+        if (select) {
+            const previous = select.value;
+            select.replaceChildren(
+                ...d.rankings.map(
+                    (g, i) =>
+                        new Option(
+                            `${g.area} · ${g.kind === 'member' ? 'Staf' : 'Kepala Unit'}`,
+                            String(i),
+                        ),
+                ),
+            );
+            if ([...select.options].some((o) => o.value === previous))
+                select.value = previous;
+            groups = d.rankings.slice(
+                +select.value || 0,
+                (+select.value || 0) + 1,
+            );
+        }
+        const rows = groups.flatMap((group) =>
+            group.rows.map((row, index) => ({
+                ...row,
+                position: index + 1,
+                groupLabel: `${group.area} · ${group.kind === 'member' ? 'Staf' : 'Kepala Unit'}`,
+            })),
         );
-        if ([...select.options].some((o) => o.value === previous))
-            select.value = previous;
-        const group = d.rankings[+select.value || 0];
         table(
             rank,
             ['Peringkat', 'Nama', 'Nilai', 'Kategori'],
-            (group?.rows || []).map((r, i) => {
-                const tr = node('tr'),
-                    name = cell(null),
-                    b = review(r, month);
-                b.replaceChildren(person(r, r.unit_name));
-                name.append(b);
-                tr.append(
-                    cell(i + 1, 'text-muted'),
-                    name,
-                    cell(number(r.total), 'numeric font-semibold'),
-                    cell(r.category, 'text-success font-semibold'),
-                );
-                return tr;
-            }),
+            rows,
             'ranking',
             10,
             'reference-ranking-table',
+            {
+                token: JSON.stringify([month, filters, select?.value]),
+                renderRow: (r) => {
+                    const tr = node('tr'),
+                        name = cell(null),
+                        b = review(r, month);
+                    b.replaceChildren(
+                        person(r, c.role === 'hc' ? r.groupLabel : r.unit_name),
+                    );
+                    name.append(b);
+                    tr.append(
+                        cell(r.position, 'text-muted'),
+                        name,
+                        cell(number(r.total), 'numeric font-semibold'),
+                        cell(r.category, 'text-success font-semibold'),
+                    );
+                    return tr;
+                },
+            },
         );
     }
     if (panel === 'results' || panel === 'findings')

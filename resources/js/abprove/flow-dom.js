@@ -39,10 +39,19 @@ export const labelCycle = (key) =>
         year: 'numeric',
         timeZone: 'Asia/Jakarta',
     });
+export const initials = (name = '') =>
+    String(name)
+        .replace(/^(drg?\.|apt\.|ns\.|prof\.|drs\.|dra\.)\s*/i, '')
+        .split(',')[0]
+        .split(/[ ,]+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0].toUpperCase())
+        .join('');
 export function status(el, value, label = null) {
     if (!el) return;
     el.dataset.status = value;
-    el.classList.add('assessment-status');
+    el.classList.add('status', 'assessment-status');
     el.textContent = label ?? (value === 'Belum' ? 'Belum diisi' : value);
 }
 export const dateTime = (value) =>

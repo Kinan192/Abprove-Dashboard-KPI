@@ -16,7 +16,8 @@ export default defineConfig({
             executablePath:
                 'C:/Program Files/Google/Chrome/Application/chrome.exe',
         },
-        screenshot: 'only-on-failure',
-        trace: 'retain-on-failure',
+        screenshot: 'off',
+        trace: 'off',
+        video: 'off',
     },
 });

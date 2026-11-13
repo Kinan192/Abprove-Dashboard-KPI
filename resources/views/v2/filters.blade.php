@@ -1,4 +1,11 @@
-<div class="filter-toolbar"><button type="button" class="btn mobile-filter-toggle" data-dialog-open="filter-dialog"><x-abprove.icon name="search"/>Filter dan pencarian</button><dialog id="filter-dialog" class="filter-dialog" aria-label="Filter penilaian" data-responsive-dialog><div class="filter-dialog-heading"><h2 class="text-base font-semibold">Filter penilaian</h2><button class="icon-button" type="button" data-dialog-close aria-label="Tutup filter"><x-abprove.icon name="close"/></button></div><div class="filter-fields">
-@if($vm->role==='hc')<select class="field w-auto!" data-filter="division" aria-label="Filter divisi"><option value="">Semua divisi</option></select>@endif
-@if($vm->role!=='ku')<select class="field w-auto!" data-filter="unit" aria-label="Filter unit"><option value="">Semua unit</option></select><select class="field w-auto!" data-filter="type" aria-label="Jenis penilaian"><option value="">Staf & Kepala Unit</option><option value="member">Staf</option><option value="unit_head">Kepala Unit</option></select>@endif
-<input class="field max-w-72" data-filter="search" type="search" placeholder="Cari nama atau NIP" aria-label="Cari nama atau NIP"></div><div class="filter-dialog-footer"><button class="btn btn-primary" type="button" data-dialog-close>Tampilkan hasil</button></div></dialog></div>
+<div class="table-tools">
+<x-abprove.table-filters id="filter-dialog" title="Filter penilaian">
+@if($vm->role==='hc')<label>Divisi<select class="field" data-filter="division" aria-label="Filter divisi"><option value="">Semua divisi</option></select></label>@endif
+@if($vm->role!=='ku')<label>Unit<select class="field" data-filter="unit" aria-label="Filter unit"><option value="">Semua unit</option></select></label><label>Jenis penilaian<select class="field" data-filter="type" data-filter-default="{{ $vm->page==='persetujuan'?'member':'' }}" aria-label="Jenis penilaian"><option value="">Staf & Kepala Unit</option><option value="member" @selected($vm->page==='persetujuan')>Staf</option><option value="unit_head">Kepala Unit</option></select></label>@endif
+@if(in_array($vm->page,['rekap','persetujuan','pengajuan']))
+<label>Status penilaian<select class="field" data-flow-status-select data-filter-default="{{ $vm->role==='kd'?'Diajukan':'all' }}" aria-label="Status penilaian">@foreach(['all'=>'Semua status','Belum'=>'Belum diisi','Diajukan'=>'Diajukan','Dikembalikan'=>'Dikembalikan','Final'=>'Final'] as $key=>$label)<option value="{{ $key }}" @selected(($vm->role==='kd'&&$key==='Diajukan')||($vm->role!=='kd'&&$key==='all'))>{{ $label }}</option>@endforeach</select></label>
+@endif
+@if($vm->role==='ku'&&$vm->page==='riwayat')<label>Kelompok KPI<select class="field" data-filter="template" aria-label="Filter kelompok KPI"><option value="">Semua kelompok KPI</option></select></label>@endif
+</x-abprove.table-filters>
+<input class="field" data-filter="search" type="search" placeholder="Cari nama atau NIP" aria-label="Cari nama atau NIP">
+</div>

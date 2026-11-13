@@ -1,0 +1,777 @@
+/* App shell and component density for the ABprove KPI workspace. */
+:root {
+    --dashboard-accent: #0b6b57;
+    --dashboard-accent-soft: #e8f3ee;
+    --dashboard-chart: #0e8a63;
+    --dashboard-unfilled: #d9e2de;
+    --dashboard-returned: #b42318;
+}
+html:not([data-theme='dark']) {
+    --color-canvas: #f6f8f7;
+    --color-paper: #ffffff;
+    --color-ink: #14211f;
+    --color-muted: #5e6b68;
+    --color-line: #e3e8e6;
+    --color-subtle: #f1f5f3;
+}
+html:has(body[data-app-shell]) {
+    height: 100dvh;
+    overflow: clip;
+}
+body[data-app-shell] {
+    overflow: clip;
+}
+body[data-app-shell] .sidebar {
+    width: 232px;
+    background: var(--color-brand);
+    color: #ffffff;
+    border-right: 0;
+    padding-bottom: 12px;
+}
+body[data-app-shell] .sidebar > a {
+    padding: 18px 22px 20px;
+    border-bottom: 1px solid rgb(255 255 255/0.08);
+}
+body[data-app-shell] .sidebar .brand-copy > span:first-child {
+    font-size: 22px;
+}
+body[data-app-shell] .sidebar .brand img {
+    width: 30px;
+    height: 30px;
+}
+body[data-app-shell] .sidebar-group-label {
+    padding: 18px 24px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #9fc4b6;
+}
+body[data-app-shell] .sidebar .sidebar-support {
+    margin-top: auto;
+}
+body[data-app-shell] .sidebar .nav-link {
+    position: relative;
+    color: #d7e8e1;
+    font-size: 13.5px;
+    font-weight: 500;
+    min-height: 40px;
+    border-radius: 8px;
+    padding: 9px 12px;
+}
+body[data-app-shell] .sidebar .nav-link:hover {
+    color: #ffffff;
+    background: rgb(255 255 255/0.07);
+}
+body[data-app-shell] .sidebar .nav-link.active {
+    color: #ffffff;
+    background: #14705a;
+    box-shadow: inset 3px 0 0 #8fe3c8;
+    font-weight: 600;
+}
+body[data-app-shell] .sidebar .nav-link svg {
+    width: 18px;
+    height: 18px;
+    color: #c8ded4;
+}
+body[data-app-shell] .sidebar .nav-link.active svg {
+    color: #ffffff;
+}
+body[data-app-shell] .sidebar nav {
+    gap: 2px;
+}
+body[data-app-shell] .sidebar nav[aria-label='Dukungan'] {
+    margin-top: 0;
+    padding-top: 8px;
+    border-color: rgb(255 255 255/0.12);
+}
+body[data-app-shell] .sidebar-note {
+    color: #a9c7bb;
+    font-size: 10px;
+    padding: 12px 24px;
+}
+body[data-app-shell] .app-main {
+    margin-left: 232px;
+}
+body[data-app-shell] .topbar {
+    height: 64px;
+    padding: 0 28px;
+    gap: 12px;
+    background: var(--color-paper);
+    border-bottom: 1px solid var(--color-line);
+    backdrop-filter: none;
+}
+body[data-app-shell] .top-title {
+    font-size: 15px;
+    line-height: 21px;
+    letter-spacing: -0.01em;
+}
+body[data-app-shell] .top-scope {
+    font-size: 11.5px;
+    line-height: 16px;
+}
+body[data-app-shell] .topbar .quick-search {
+    flex: 1;
+    min-width: 120px;
+    max-width: 360px;
+    margin-left: auto;
+    background: var(--color-subtle);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-size: 12px;
+    min-height: 36px;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+body[data-app-shell] .topbar .quick-search:hover {
+    background: color-mix(in srgb, var(--color-subtle) 60%, var(--color-paper));
+    border-color: var(--color-line);
+}
+body[data-app-shell] .topbar .quick-search kbd {
+    border-radius: 4px;
+    background: var(--color-paper);
+    font-size: 10px;
+}
+body[data-app-shell] .topbar .profile-copy,
+body[data-app-shell] .topbar .top-help,
+body[data-app-shell] .topbar .period-long:first-child {
+    display: none;
+}
+body[data-app-shell] .topbar .icon-button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: var(--color-paper);
+}
+body[data-app-shell] .topbar .icon-button:hover {
+    background: var(--color-subtle);
+}
+body[data-app-shell] .topbar > button:last-of-type {
+    border: 1px solid var(--color-line);
+    padding: 3px;
+    padding-right: 4px;
+    border-radius: 999px;
+}
+body[data-app-shell] .topbar .avatar {
+    background: var(--color-accent-soft) !important;
+    color: var(--color-brand) !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 10px !important;
+}
+body[data-app-shell] .topbar .btn {
+    min-height: 36px;
+    margin-left: 0;
+    border-radius: 8px;
+    box-shadow: none;
+}
+body[data-app-shell] #main-content {
+    height: calc(100dvh - 64px);
+    overflow-y: auto;
+    overflow-x: clip;
+}
+body[data-app-shell] .page-content,
+body[data-app-shell] .compact-workspace.page-content {
+    padding: 24px 28px 32px;
+}
+body[data-app-shell] .page-stack,
+body[data-app-shell] .compact-workspace,
+body[data-app-shell] .compact-workspace .page-stack {
+    gap: 18px;
+}
+body[data-app-shell] .lead,
+body[data-app-shell] .gp-heading h1 {
+    font-size: 22px;
+    line-height: 30px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+}
+body[data-app-shell] .section-title {
+    font-size: 14px;
+    line-height: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+body[data-app-shell] .card {
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgb(12 32 26/0.03);
+    border-color: var(--color-line);
+}
+body[data-app-shell] .card-pad,
+body[data-app-shell] .widget {
+    padding: 20px;
+}
+body[data-app-shell] .btn {
+    border-radius: 8px;
+    font-size: 12.5px;
+    min-height: 36px;
+    padding: 8px 12px;
+    box-shadow: none;
+}
+body[data-app-shell] .btn-primary {
+    background: var(--dashboard-accent);
+    border-color: var(--dashboard-accent);
+    color: #ffffff;
+}
+body[data-app-shell] .btn-primary:hover {
+    background: #075546;
+    border-color: #075546;
+}
+body[data-app-shell] .btn-ghost {
+    color: var(--color-ink);
+}
+body[data-app-shell] .field {
+    min-height: 38px;
+    font-size: 12.5px;
+    border-radius: 8px;
+}
+body[data-app-shell] .field:hover {
+    border-color: var(--color-muted);
+}
+body[data-app-shell] .seg {
+    background: var(--color-subtle);
+    border: 1px solid var(--color-line);
+    border-radius: 9px;
+    padding: 3px;
+}
+body[data-app-shell] .seg button,
+body[data-app-shell] .seg a {
+    min-height: 30px;
+    border-radius: 6px;
+    font-size: 12.5px;
+}
+body[data-app-shell] .seg .active,
+body[data-app-shell] .seg [aria-selected='true'] {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: 0 1px 2px rgb(12 32 26/0.08);
+}
+body[data-app-shell] .data-table:not(.gp-table):not(.score-table) th {
+    background: #f8faf9;
+    color: var(--color-muted);
+    font-size: 11.5px;
+    padding: 11px 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+body[data-app-shell] .data-table:not(.gp-table):not(.score-table) td {
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 20px;
+}
+body[data-app-shell]
+    .data-table:not(.gp-table):not(.score-table)
+    tbody
+    tr:hover {
+    background: #f6faf8;
+}
+body[data-app-shell] .link {
+    color: var(--color-accent);
+}
+body[data-app-shell] .table-tools {
+    align-items: center;
+    gap: 10px;
+}
+body[data-app-shell] .card-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-line);
+}
+body[data-app-shell] .card-toolbar .table-tools {
+    margin-left: auto;
+}
+body[data-app-shell] .card-toolbar + .table-wrap,
+body[data-app-shell] .table-card > .table-wrap {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+body[data-app-shell] .table-tools > input[type='search'] {
+    margin-left: auto;
+    max-width: 320px;
+}
+body[data-app-shell] .table-card {
+    overflow: hidden;
+}
+body[data-app-shell] .table-wrap {
+    overflow: auto;
+}
+body[data-app-shell] .table-card > .table-wrap {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+[data-theme='dark']
+    body[data-app-shell]
+    .data-table:not(.gp-table):not(.score-table)
+    th {
+    background: #16261f;
+}
+[data-theme='dark']
+    body[data-app-shell]
+    .data-table:not(.gp-table):not(.score-table)
+    tbody
+    tr:hover {
+    background: #14231d;
+}
+body[data-app-shell] .table-card > .list-pagination {
+    padding: 10px 16px;
+    border-top: 1px solid var(--color-line);
+}
+body[data-app-shell] .list-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 24px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-line);
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 18px;
+}
+body[data-app-shell] [data-flow-list] .list-footer .notice {
+    max-width: 60ch;
+    padding: 0;
+    background: transparent;
+    color: var(--color-muted);
+    font-size: 12px;
+    line-height: 18px;
+}
+body[data-app-shell] [data-org-body] .v2-row-action,
+body[data-app-shell] .data-table .v2-row-action {
+    min-height: 30px;
+    margin-left: 2px;
+    padding: 0 8px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+body[data-app-shell] .data-table .v2-row-action:hover {
+    background: var(--color-accent-soft);
+    text-decoration: none;
+}
+body[data-app-shell] .status {
+    font-size: 11px;
+}
+body[data-app-shell] .row-actions .icon-button {
+    width: 30px;
+    height: 30px;
+}
+body[data-app-shell] .pagination-button,
+body[data-app-shell] .list-pagination button {
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 8px;
+}
+body[data-app-shell] progress {
+    accent-color: var(--dashboard-chart);
+}
+body[data-app-shell] progress::-webkit-progress-value {
+    background: var(--dashboard-chart);
+}
+body[data-app-shell] .notification-badge {
+    min-width: 18px;
+    width: auto;
+    height: 18px;
+    padding: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    background: var(--color-accent);
+    color: #ffffff;
+}
+body[data-app-shell] .notification-badge[hidden] {
+    display: none;
+}
+body[data-app-shell] .notice:empty {
+    display: none;
+}
+.simple-dashboard .dashboard-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.simple-dashboard .dashboard-heading p {
+    margin: 0 0 3px;
+    font-size: 12px;
+    color: var(--color-muted);
+}
+.simple-dashboard .reference-figures {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    background: transparent;
+    border: 0;
+    gap: 14px;
+}
+body[data-app-shell] .simple-dashboard .reference-figures > div {
+    padding: 14px 16px;
+    background: var(--color-paper);
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+}
+.simple-dashboard .reference-figures > div::after {
+    content: '';
+    display: block;
+    width: 22px;
+    height: 3px;
+    background: var(--dashboard-accent);
+    margin-top: 10px;
+}
+.simple-dashboard .reference-figures .figure-value {
+    font-size: 28px;
+    line-height: 36px;
+    color: var(--color-ink);
+    margin: 2px 0;
+    font-weight: 500;
+}
+.simple-dashboard .reference-figures .figure-label {
+    font-size: 12px;
+}
+.simple-dashboard .reference-figures .figure-caption {
+    font-size: 11px;
+}
+.dashboard-charts {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+.dashboard-charts > section {
+    min-width: 0;
+}
+.dashboard-trend svg {
+    width: 100%;
+    height: auto;
+    min-height: 220px;
+}
+.dashboard-trend svg polyline {
+    stroke: var(--dashboard-chart);
+}
+.dashboard-trend svg polygon {
+    fill: var(--dashboard-chart);
+}
+.dashboard-trend svg circle {
+    stroke: var(--dashboard-chart);
+}
+.dashboard-trend svg text {
+    fill: var(--color-muted);
+    font-size: 11px;
+}
+.dashboard-comparison-row {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-line);
+}
+.dashboard-comparison-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+}
+.dashboard-comparison-label > span {
+    overflow-wrap: anywhere;
+}
+.dashboard-comparison-label strong {
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+}
+.dashboard-comparison-track {
+    height: 9px;
+    border-radius: 4px;
+    background: var(--color-subtle);
+    overflow: hidden;
+    margin: 7px 0 4px;
+}
+.dashboard-comparison-track > span {
+    display: block;
+    height: 100%;
+    background: var(--dashboard-chart);
+    border-radius: 4px;
+}
+.dashboard-comparison-row small {
+    font-size: 10px;
+}
+@media (max-width: 1100px) {
+    .dashboard-charts {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+.simple-dashboard .dashboard-upper,
+.simple-dashboard .dashboard-lower {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(280px, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+.simple-dashboard .dashboard-upper {
+    align-items: stretch;
+}
+.simple-dashboard .dashboard-chart {
+    display: flex;
+    flex-direction: column;
+}
+.simple-dashboard .dashboard-chart [data-home-trend] {
+    flex: 1;
+}
+.simple-dashboard .dashboard-upper > *,
+.simple-dashboard .dashboard-lower > * {
+    min-width: 0;
+}
+.simple-dashboard .dashboard-chart {
+    min-height: 244px;
+}
+.simple-dashboard .dashboard-chart [data-home-trend] {
+    padding: 6px 0;
+    min-height: 156px;
+}
+.simple-dashboard .dashboard-chart svg {
+    width: 100%;
+    height: 154px;
+}
+.simple-dashboard .dashboard-chart svg polyline {
+    stroke: var(--dashboard-chart) !important;
+    stroke-width: 2px;
+}
+.simple-dashboard .dashboard-chart svg circle {
+    fill: var(--dashboard-chart);
+    stroke: var(--dashboard-chart);
+}
+.simple-dashboard .dashboard-chart svg polygon {
+    fill: var(--dashboard-chart);
+}
+.simple-dashboard .dashboard-cycle {
+    min-height: 244px;
+}
+.simple-dashboard .dashboard-cycle .reference-ring {
+    width: 88px;
+    height: 88px;
+    margin: 12px auto;
+    background: conic-gradient(
+        var(--dashboard-accent) var(--completion, 0%),
+        var(--color-subtle) 0
+    );
+}
+.simple-dashboard .dashboard-cycle [data-home-cycle-progress] {
+    margin-top: 12px;
+}
+.simple-dashboard .dashboard-cycle [data-home-cycle-progress] > div {
+    padding: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+    border-bottom: 1px solid var(--color-line);
+}
+.simple-dashboard .dashboard-cycle [data-home-cycle-progress] > div span {
+    color: var(--color-muted);
+}
+.simple-dashboard .dashboard-cycle [data-home-cycle-progress] p {
+    font-size: 12px;
+}
+.simple-dashboard .dashboard-cycle .dashboard-due {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11px;
+    margin-top: 12px;
+}
+.simple-dashboard .dashboard-cycle .dashboard-due strong {
+    font-weight: 500;
+}
+.simple-dashboard .dashboard-cycle .btn {
+    margin-top: 12px;
+}
+.simple-dashboard .dashboard-progress > .section-heading {
+    margin-bottom: 10px;
+}
+.simple-dashboard .reference-progress-group {
+    padding: 0;
+    border: 0;
+}
+.simple-dashboard .reference-progress-group .section-heading {
+    margin-bottom: 8px;
+}
+.simple-dashboard .reference-progress-group h3 {
+    font-size: 12px;
+}
+.simple-dashboard .reference-progress-group .table-wrap {
+    border-radius: 6px;
+}
+.simple-dashboard .reference-feed {
+    border: 0;
+}
+.simple-dashboard .reference-feed-item {
+    padding: 10px 0;
+}
+.simple-dashboard .reference-feed-item .avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 10px;
+}
+.simple-dashboard .reference-feed-item .reference-feed-body {
+    font-size: 12px;
+}
+.simple-dashboard .reference-feed-item .feed-meta {
+    font-size: 10px;
+}
+.simple-dashboard .reference-feed-item:last-child {
+    border-bottom: 0;
+}
+.simple-dashboard .dashboard-detail-card .seg {
+    margin-bottom: 10px;
+}
+.simple-dashboard .reference-return-card {
+    border: 1px solid var(--color-line);
+    padding: 12px;
+}
+.simple-dashboard .reference-followups {
+    margin: 10px 0;
+}
+body[data-auth-page] .login-card-section {
+    background: var(--color-canvas);
+}
+[data-theme='dark'] {
+    --dashboard-accent-soft: #173f32;
+    --dashboard-chart: #6fd8ab;
+    --dashboard-unfilled: #4d5e59;
+    --dashboard-returned: #f38e98;
+}
+[data-theme='dark'] body[data-app-shell] .sidebar .nav-link.active {
+    color: #ffffff;
+}
+[data-theme='dark'] body[data-app-shell] .link {
+    color: #a7d8c4;
+}
+[data-theme='dark'] body[data-app-shell] .sidebar .brand-copy span {
+    color: var(--color-ink);
+}
+@media (min-width: 601px) {
+    body[data-app-shell].nav-collapsed .sidebar {
+        width: 76px;
+    }
+    body[data-app-shell].nav-collapsed .app-main {
+        margin-left: 76px;
+    }
+}
+@media (min-width: 601px) and (max-width: 1100px) {
+    body[data-app-shell] .sidebar {
+        width: 200px;
+    }
+    body[data-app-shell] .app-main {
+        margin-left: 200px;
+    }
+    body[data-app-shell] .topbar {
+        padding: 0 18px;
+        gap: 10px;
+    }
+    body[data-app-shell] .topbar .quick-search {
+        display: none;
+    }
+    body[data-app-shell] .page-content {
+        padding: 20px 18px;
+    }
+    .simple-dashboard .dashboard-upper,
+    .simple-dashboard .dashboard-lower {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .simple-dashboard .reference-figures {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .simple-dashboard .dashboard-cycle {
+        min-height: auto;
+    }
+}
+@media (max-width: 600px) {
+    body[data-app-shell] .sidebar {
+        width: 232px;
+    }
+    body[data-app-shell] .app-main,
+    body[data-app-shell].nav-collapsed .app-main {
+        margin-left: 0;
+    }
+    body[data-app-shell] .topbar {
+        height: 64px;
+        padding: 0 12px;
+        gap: 8px;
+    }
+    body[data-app-shell] .topbar .quick-search {
+        display: none;
+    }
+    body[data-app-shell] .top-title {
+        font-size: 13px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    body[data-app-shell] .top-scope {
+        max-width: 115px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    body[data-app-shell] #main-content {
+        height: calc(100dvh - 128px);
+    }
+    body[data-app-shell] .page-content,
+    body[data-app-shell] .compact-workspace.page-content {
+        padding: 16px 12px 28px;
+    }
+    body[data-app-shell] .lead {
+        font-size: 19px;
+        line-height: 27px;
+    }
+    .simple-dashboard .reference-figures {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    body[data-app-shell] .simple-dashboard .reference-figures > div {
+        padding: 12px;
+    }
+    .simple-dashboard .reference-figures .figure-value {
+        font-size: 25px;
+    }
+    .simple-dashboard .dashboard-upper,
+    .simple-dashboard .dashboard-lower {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+    }
+    .simple-dashboard .dashboard-heading .btn {
+        width: auto;
+    }
+    .simple-dashboard .dashboard-chart {
+        min-height: 200px;
+    }
+    .simple-dashboard .dashboard-cycle {
+        min-height: auto;
+    }
+    .simple-dashboard .dashboard-chart svg {
+        height: 130px;
+    }
+    body[data-app-shell] .data-table:not(.gp-table) td {
+        font-size: 12px;
+    }
+    body[data-app-shell] .btn,
+    body[data-app-shell] .field,
+    body[data-app-shell] .seg button,
+    body[data-app-shell] .seg a,
+    body[data-app-shell] .topbar .btn,
+    body[data-app-shell] .topbar > button {
+        min-height: 44px;
+    }
+    body[data-app-shell] .topbar .icon-button {
+        min-width: 44px;
+        width: 44px;
+        height: 44px;
+    }
+}

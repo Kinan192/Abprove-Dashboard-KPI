@@ -35,7 +35,7 @@ class FrontendController extends Controller
             app(ScopedRecords::class)->assessments($ctx)->whereKey((int) $r->route('assessment'))->firstOrFail();
         }
         $view = match ($page) {
-            'dashboard' => 'beranda','score' => 'nilai','heads' => 'nilai-kepala','approvals' => 'persetujuan','submissions','detail' => 'pengajuan',
+            'dashboard' => 'dashboard','score' => 'nilai','heads' => 'nilai-kepala','approvals' => 'persetujuan','submissions','detail' => 'pengajuan',
             'history' => 'riwayat','analytics' => 'dashboard','kpis','templates','template-editor' => 'kpi','members','team' => 'tim','recap' => 'rekap',
             'settings' => 'pengaturan','organization','divisions','units' => 'struktur','users' => 'akun','employees' => 'karyawan','positions' => 'jabatan',
             'audit' => 'aktivitas','help' => 'panduan','notifications' => 'notifikasi','import' => 'impor','profile' => 'profil','placement' => 'penempatan',
@@ -46,7 +46,7 @@ class FrontendController extends Controller
         $role = ['kepala_unit' => 'ku', 'kepala_divisi' => 'kd', 'super_hc' => 'hc'][$ctx->role];
         $vm = new AbproveDesign($role, $view, false, $r);
         $homeHeadline = null;
-        if ($view === 'beranda' && in_array($ctx->role, ['super_hc', 'kepala_divisi'], true) && DomainSchema::ready()) {
+        if ($view === 'dashboard' && in_array($ctx->role, ['super_hc', 'kepala_divisi'], true) && DomainSchema::ready()) {
             $cycles = DB::table('assessment_cycles')->select('id', 'assessment_month')->orderBy('assessment_month')->get();
             $month = $r->query('cycle', now('Asia/Jakarta')->format('Y-m'));
             $cycle = $cycles->firstWhere('assessment_month', $month.'-01') ?? $cycles->last();

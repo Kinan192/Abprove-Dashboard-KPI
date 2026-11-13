@@ -1,0 +1,2106 @@
+﻿{
+  "file": "design/prototypes/KPI-Kinerja-UIUX-Simple-Dashboard.figcraft",
+  "images": 0,
+  "missingFonts": [],
+  "name": "ABprove / Simple Dashboard / Redesign dari 8 November",
+  "nodes": 14658,
+  "notes": [],
+  "pages": [
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 16167,
+          "name": "Kepala Unit / Dashboard",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16168,
+          "name": "Kepala Unit / Isi nilai",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16169,
+          "name": "Kepala Unit / Pengajuan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16170,
+          "name": "Kepala Unit / Riwayat",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16171,
+          "name": "Kepala Unit / KPI Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16172,
+          "name": "Kepala Unit / Anggota Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16173,
+          "name": "Kepala Unit / Profil",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16174,
+          "name": "Kepala Unit / Panduan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16175,
+          "name": "Kepala Unit / Notifikasi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16176,
+          "name": "Kepala Unit / Lembar penilaian staf",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16177,
+          "name": "Kepala Unit / Rincian pengajuan / hanya baca",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16178,
+          "name": "Kepala Unit / Pilih periode",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16179,
+          "name": "Kepala Unit / Masuk",
+          "type": "FRAME",
+          "width": 1440.0
+        }
+      ],
+      "id": 16166,
+      "name": "01 / Kepala Unit / Simple Dashboard",
+      "nodes": 707,
+      "topLevel": 13
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 16181,
+          "name": "Kepala Divisi / Dashboard divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16182,
+          "name": "Kepala Divisi / Persetujuan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16183,
+          "name": "Kepala Divisi / KPI Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16184,
+          "name": "Kepala Divisi / Nilai Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16185,
+          "name": "Kepala Divisi / Tim Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16186,
+          "name": "Kepala Divisi / Profil",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16187,
+          "name": "Kepala Divisi / Panduan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16188,
+          "name": "Kepala Divisi / Notifikasi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16189,
+          "name": "Kepala Divisi / Tinjau penilaian staf",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16190,
+          "name": "Kepala Divisi / Nilai Kepala Unit langsung",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16191,
+          "name": "Kepala Divisi / Kembalikan untuk revisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16192,
+          "name": "Kepala Divisi / Pilih periode",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16193,
+          "name": "Kepala Divisi / Masuk",
+          "type": "FRAME",
+          "width": 1440.0
+        }
+      ],
+      "id": 16180,
+      "name": "02 / Kepala Divisi / Simple Dashboard",
+      "nodes": 660,
+      "topLevel": 13
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 16195,
+          "name": "Super HC / Dashboard",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16196,
+          "name": "Super HC / Rekap Penilaian",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16197,
+          "name": "Super HC / Struktur & Staf",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16198,
+          "name": "Super HC / Akun Kepala",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16199,
+          "name": "Super HC / KPI & Periode",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16200,
+          "name": "Super HC / Riwayat Aktivitas",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16201,
+          "name": "Super HC / Profil",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16202,
+          "name": "Super HC / Panduan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16203,
+          "name": "Super HC / Notifikasi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16204,
+          "name": "Super HC / Tambah / ubah unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16205,
+          "name": "Super HC / Tambah / ubah divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16206,
+          "name": "Super HC / Tambah / ubah staf",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16207,
+          "name": "Super HC / Tambah / ubah akun kepala",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16208,
+          "name": "Super HC / Buat / edit KPI / Goal",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16209,
+          "name": "Super HC / Periode & kategori",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16210,
+          "name": "Super HC / Buat / edit periode",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16211,
+          "name": "Super HC / Rincian penilaian Final",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16212,
+          "name": "Super HC / Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16213,
+          "name": "Super HC / Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16214,
+          "name": "Super HC / Jabatan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16215,
+          "name": "Super HC / Staf",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16216,
+          "name": "Super HC / Tambah / ubah jabatan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16217,
+          "name": "Super HC / Pilih periode",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 16218,
+          "name": "Super HC / Masuk",
+          "type": "FRAME",
+          "width": 1440.0
+        }
+      ],
+      "id": 16194,
+      "name": "03 / Super HC / Simple Dashboard",
+      "nodes": 1360,
+      "topLevel": 24
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 3,
+          "name": "KPI Kinerja • Peta desain",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 37,
+          "name": "Fondasi & komponen",
+          "type": "FRAME",
+          "width": 1440.0
+        }
+      ],
+      "id": 4989,
+      "name": "Arsip 8 November / 00 • Panduan & Design System",
+      "nodes": 109,
+      "topLevel": 4
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 103,
+          "name": "Login • U-1",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 133,
+          "name": "Beranda • Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 11089,
+          "name": "Anggota Unit • UGD / Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 208,
+          "name": "Isi Nilai • Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 336,
+          "name": "Pengajuan • Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 414,
+          "name": "Riwayat • Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 566,
+          "name": "KPI Unit • Kepala Unit",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1843,
+          "name": "Lembar Final & Riwayat",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1938,
+          "name": "Detail Pengajuan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 650.0,
+          "id": 2131,
+          "name": "KPI Kinerja",
+          "type": "FRAME",
+          "width": 352.0
+        },
+        {
+          "height": 250.0,
+          "id": 2192,
+          "name": "Akun • Kepala Unit",
+          "type": "FRAME",
+          "width": 380.0
+        },
+        {
+          "height": 400.0,
+          "id": 2201,
+          "name": "Akun • Kepala Unit",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 430.0,
+          "id": 2217,
+          "name": "Periode penilaian",
+          "type": "FRAME",
+          "width": 440.0
+        },
+        {
+          "height": 400.0,
+          "id": 2227,
+          "name": "Ajukan penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 360.0,
+          "id": 2280,
+          "name": "Tarik kembali pengajuan?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 280.0,
+          "id": 2296,
+          "name": "Keluar dari akun?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2303,
+          "name": "Draft tersimpan",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2308,
+          "name": "Penilaian diajukan",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 260.0,
+          "id": 2456,
+          "name": "Notifikasi • P1",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 610.0,
+          "id": 2469,
+          "name": "Cara pengisian nilai • P1",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 350.0,
+          "id": 2824,
+          "name": "Perubahan belum disimpan",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 844.0,
+          "id": 2834,
+          "name": "Penilaian bulan ini • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 11300,
+          "name": "Anggota Unit • Ponsel",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 2874,
+          "name": "Isi nilai • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 2949,
+          "name": "Pengajuan • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 2989,
+          "name": "Riwayat • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3021,
+          "name": "KPI unit • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 720.0,
+          "id": 3666,
+          "name": "KPI Kinerja • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 380.0,
+          "id": 3736,
+          "name": "Periode penilaian • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 430.0,
+          "id": 3744,
+          "name": "Ajukan penilaian? • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3782,
+          "name": "Draft tersimpan • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3787,
+          "name": "Penilaian diajukan • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 460.0,
+          "id": 3817,
+          "name": "Cara pengisian • P1 • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 844.0,
+          "id": 3824,
+          "name": "Login • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 420.0,
+          "id": 4231,
+          "name": "Salin nilai bulan lalu?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 844.0,
+          "id": 5105,
+          "name": "Lembar penilaian • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 900.0,
+          "id": 5529,
+          "name": "Pengajuan • Menunggu",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 5637,
+          "name": "Pengajuan • Disetujui",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 5725,
+          "name": "Pengajuan • Final",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 5813,
+          "name": "Pengajuan • Belum diajukan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6939,
+          "name": "Isi Nilai • Perlu diisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 400.0,
+          "id": 7931,
+          "name": "Navigasi cepat • Kepala Unit",
+          "type": "FRAME",
+          "width": 560.0
+        }
+      ],
+      "id": 4990,
+      "name": "Arsip 8 November / 01 • Kepala Unit",
+      "nodes": 2125,
+      "topLevel": 46
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 648,
+          "name": "Beranda • Kepala Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 10937,
+          "name": "Anggota Unit • UGD / Kepala Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 10785,
+          "name": "Tim Divisi • Pelayanan Medis",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 731,
+          "name": "Persetujuan • Kepala Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 860,
+          "name": "Dashboard Divisi • Kepala Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 650.0,
+          "id": 2152,
+          "name": "KPI Kinerja",
+          "type": "FRAME",
+          "width": 352.0
+        },
+        {
+          "height": 380.0,
+          "id": 2237,
+          "name": "Setujui penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 470.0,
+          "id": 2247,
+          "name": "Kembalikan penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2313,
+          "name": "Penilaian disetujui",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2318,
+          "name": "Penilaian dikembalikan",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 844.0,
+          "id": 3054,
+          "name": "Persetujuan divisi • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 11268,
+          "name": "Tim Divisi • Ponsel",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3086,
+          "name": "Tinjau penilaian • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3140,
+          "name": "Dashboard divisi • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3454,
+          "name": "Lembar penilaian • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3638,
+          "name": "Data unit divisi • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 720.0,
+          "id": 3687,
+          "name": "KPI Kinerja • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 350.0,
+          "id": 3754,
+          "name": "Setujui penilaian? • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 480.0,
+          "id": 3761,
+          "name": "Kembalikan penilaian? • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3792,
+          "name": "Penilaian disetujui • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3797,
+          "name": "Penilaian dikembalikan • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 900.0,
+          "id": 3840,
+          "name": "Persetujuan • Tablet 1024 × 900",
+          "type": "FRAME",
+          "width": 1024.0
+        },
+        {
+          "height": 900.0,
+          "id": 4155,
+          "name": "Setujui Sekaligus • Kepala Divisi",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 410.0,
+          "id": 4219,
+          "name": "Setujui 2 penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 4226,
+          "name": "2 penilaian disetujui",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 900.0,
+          "id": 4994,
+          "name": "Login • U-1",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 844.0,
+          "id": 5022,
+          "name": "Login • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 250.0,
+          "id": 5038,
+          "name": "Akun • Kepala Divisi",
+          "type": "FRAME",
+          "width": 380.0
+        },
+        {
+          "height": 400.0,
+          "id": 5045,
+          "name": "Akun • Kepala Divisi",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 430.0,
+          "id": 5051,
+          "name": "Periode penilaian",
+          "type": "FRAME",
+          "width": 440.0
+        },
+        {
+          "height": 380.0,
+          "id": 5061,
+          "name": "Periode penilaian • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 260.0,
+          "id": 5069,
+          "name": "Notifikasi • P1",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 610.0,
+          "id": 5082,
+          "name": "Cara pengisian nilai • P1",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 460.0,
+          "id": 5092,
+          "name": "Cara pengisian • P1 • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 280.0,
+          "id": 5098,
+          "name": "Keluar dari akun?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 900.0,
+          "id": 5150,
+          "name": "Detail Pengajuan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6501,
+          "name": "Persetujuan • Dikembalikan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6647,
+          "name": "Persetujuan • Disetujui",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6793,
+          "name": "Persetujuan • Semua",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 304.0,
+          "id": 7946,
+          "name": "Navigasi cepat • Kepala Divisi",
+          "type": "FRAME",
+          "width": 560.0
+        }
+      ],
+      "id": 4991,
+      "name": "Arsip 8 November / 02 • Kepala Divisi",
+      "nodes": 1851,
+      "topLevel": 45
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 975,
+          "name": "Beranda • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 15899,
+          "name": "Unit Pengadaan • Penunjang Medis / 1 anggota",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 15734,
+          "name": "Unit Pengadaan • Penunjang Medis",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 15467,
+          "name": "Unit Pengadaan • Keperawatan / 1 anggota",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 15302,
+          "name": "Unit Pengadaan • Keperawatan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 15035,
+          "name": "Unit Pengadaan • Pelayanan Medis / 1 anggota",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 14870,
+          "name": "Unit Pengadaan • Pelayanan Medis",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 14643,
+          "name": "Unit Logistik • Anggota ditambahkan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 14416,
+          "name": "Unit SDM • Anggota ditambahkan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 13901,
+          "name": "Divisi Umum & SDM • Kepala Divisi diperbarui",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 12004,
+          "name": "Divisi Umum & SDM • Unit baru",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 11840,
+          "name": "Unit Pengadaan • Anggota ditambahkan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 11676,
+          "name": "Unit Pengadaan • Divisi Pengembangan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 11512,
+          "name": "Unit Pengadaan • 1 anggota",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 11348,
+          "name": "Tim Unit UGD",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 10621,
+          "name": "Unit IT • Kepala Unit diperbarui",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 10457,
+          "name": "Unit IT • Anggota dipindahkan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 10293,
+          "name": "Unit IT • Anggota ditambahkan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 10129,
+          "name": "Unit baru • Pengadaan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 9965,
+          "name": "Tim Unit Logistik",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 9801,
+          "name": "Tim Unit SDM",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 9637,
+          "name": "Tim Unit IT",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 9473,
+          "name": "Divisi & Tim • Divisi baru",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 9309,
+          "name": "Divisi & Tim • Penunjang",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 9145,
+          "name": "Divisi & Tim • Keperawatan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 8981,
+          "name": "Divisi & Tim • Pelayanan Medis",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1068,
+          "name": "Rekap & Finalisasi • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1159,
+          "name": "Master KPI • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1239,
+          "name": "Editor Template KPI • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1347,
+          "name": "Pengaturan Siklus & Kategori • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1406,
+          "name": "Pengguna • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1477,
+          "name": "Karyawan • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1542,
+          "name": "Divisi & Tim • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1610,
+          "name": "Dashboard Analitik • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 1728,
+          "name": "Analitik Rinci • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2033,
+          "name": "Detail Siap Final",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 650.0,
+          "id": 2169,
+          "name": "KPI Kinerja",
+          "type": "FRAME",
+          "width": 352.0
+        },
+        {
+          "height": 470.0,
+          "id": 2258,
+          "name": "Kembalikan penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 440.0,
+          "id": 2270,
+          "name": "Finalkan 3 penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 360.0,
+          "id": 2288,
+          "name": "Simpan perubahan pengaturan?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2323,
+          "name": "3 penilaian menjadi Final",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2328,
+          "name": "Pengaturan tersimpan",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2333,
+          "name": "3 baris berhasil disalin",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 340.0,
+          "id": 2338,
+          "name": "Konsep pengingat unit",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 730.0,
+          "id": 2347,
+          "name": "Atur pengguna & cakupan",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 2371,
+          "name": "Edit karyawan",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 650.0,
+          "id": 2396,
+          "name": "Edit struktur organisasi",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 2418,
+          "name": "Edit baris KPI",
+          "type": "FRAME",
+          "width": 1000.0
+        },
+        {
+          "height": 300.0,
+          "id": 2449,
+          "name": "Hapus baris KPI?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 420.0,
+          "id": 2479,
+          "name": "Finalkan penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2489,
+          "name": "Penilaian menjadi Final",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 2494,
+          "name": "Penilaian dikembalikan",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 900.0,
+          "id": 2758,
+          "name": "Impor Master KPI • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 844.0,
+          "id": 3171,
+          "name": "Rekap siklus • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3209,
+          "name": "Rekap & finalisasi • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3253,
+          "name": "Master KPI • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3290,
+          "name": "Pengaturan • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3325,
+          "name": "Pengguna & struktur • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3359,
+          "name": "Data karyawan • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3389,
+          "name": "Struktur organisasi • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 11238,
+          "name": "Tim IT • Ponsel",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3419,
+          "name": "Analitik rumah sakit • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3499,
+          "name": "Template KPI • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3542,
+          "name": "Atur pengguna • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3575,
+          "name": "Edit karyawan • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 844.0,
+          "id": 3608,
+          "name": "Edit struktur • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 720.0,
+          "id": 3704,
+          "name": "KPI Kinerja • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 460.0,
+          "id": 3772,
+          "name": "Finalkan 3 penilaian? • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3802,
+          "name": "3 penilaian Final • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3807,
+          "name": "3 baris disalin • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 330.0,
+          "id": 3812,
+          "name": "Simpan pengaturan? • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 900.0,
+          "id": 3917,
+          "name": "Rekap Siklus • Tablet 1024 × 900",
+          "type": "FRAME",
+          "width": 1024.0
+        },
+        {
+          "height": 900.0,
+          "id": 3981,
+          "name": "Template KPI • Valid 100%",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 4065,
+          "name": "Lembar Final • Super HC",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 540.0,
+          "id": 4143,
+          "name": "Buka kunci Final • OPEN",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 900.0,
+          "id": 5265,
+          "name": "Login • U-1",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 844.0,
+          "id": 5293,
+          "name": "Login • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 250.0,
+          "id": 5309,
+          "name": "Akun • Super HC",
+          "type": "FRAME",
+          "width": 380.0
+        },
+        {
+          "height": 400.0,
+          "id": 5316,
+          "name": "Akun • Super HC",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 430.0,
+          "id": 5322,
+          "name": "Periode penilaian",
+          "type": "FRAME",
+          "width": 440.0
+        },
+        {
+          "height": 380.0,
+          "id": 5332,
+          "name": "Periode penilaian • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 260.0,
+          "id": 5340,
+          "name": "Notifikasi • P1",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 610.0,
+          "id": 5353,
+          "name": "Cara pengisian nilai • P1",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 460.0,
+          "id": 5363,
+          "name": "Cara pengisian • P1 • mobile",
+          "type": "FRAME",
+          "width": 358.0
+        },
+        {
+          "height": 280.0,
+          "id": 5369,
+          "name": "Keluar dari akun?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 844.0,
+          "id": 5376,
+          "name": "Lembar penilaian • 390",
+          "type": "FRAME",
+          "width": 390.0
+        },
+        {
+          "height": 900.0,
+          "id": 5921,
+          "name": "Rekap • Diajukan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6066,
+          "name": "Rekap • Final",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6211,
+          "name": "Rekap • Dikembalikan",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 6345,
+          "name": "Rekap • Semua",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 300.0,
+          "id": 7088,
+          "name": "Pilih penilaian",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 900.0,
+          "id": 7096,
+          "name": "Rekap • Pilihan 000",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 7211,
+          "name": "Rekap • Pilihan 001",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 7326,
+          "name": "Rekap • Pilihan 010",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 7441,
+          "name": "Rekap • Pilihan 011",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 7556,
+          "name": "Rekap • Pilihan 100",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 7671,
+          "name": "Rekap • Pilihan 101",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 7786,
+          "name": "Rekap • Pilihan 110",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 440.0,
+          "id": 7901,
+          "name": "Finalkan 1 penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 7911,
+          "name": "1 penilaian menjadi Final",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 440.0,
+          "id": 7916,
+          "name": "Finalkan 2 penilaian?",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 300.0,
+          "id": 7926,
+          "name": "2 penilaian menjadi Final",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 448.0,
+          "id": 7957,
+          "name": "Navigasi cepat • Super HC",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 540.0,
+          "id": 11340,
+          "name": "Tambah divisi",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 580.0,
+          "id": 11341,
+          "name": "Tambah unit",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 620.0,
+          "id": 11342,
+          "name": "Tambah anggota • Belum dipilih",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 11343,
+          "name": "Tambah anggota • 1 dipilih",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 600.0,
+          "id": 11344,
+          "name": "Pindahkan anggota",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 390.0,
+          "id": 11345,
+          "name": "Konfirmasi pemindahan anggota",
+          "type": "FRAME",
+          "width": 560.0
+        },
+        {
+          "height": 500.0,
+          "id": 11346,
+          "name": "Tetapkan Kepala Divisi",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 500.0,
+          "id": 11347,
+          "name": "Tetapkan Kepala Unit",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 580.0,
+          "id": 12168,
+          "name": "Tambah unit • Divisi Pengembangan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 620.0,
+          "id": 12169,
+          "name": "Tambah anggota Pengadaan • 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 12170,
+          "name": "Tambah anggota Pengadaan • 1",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 12171,
+          "name": "Tambah anggota divisi baru • 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 12172,
+          "name": "Tambah anggota divisi baru • 1",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 730.0,
+          "id": 13508,
+          "name": "Atur akses • Super HC",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13557,
+          "name": "Atur akses • KD Pelayanan Medis",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13582,
+          "name": "Atur akses • KD Keperawatan",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13607,
+          "name": "Atur akses • KD Penunjang Medis",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13632,
+          "name": "Atur akses • KU SDM",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13657,
+          "name": "Atur akses • KU Logistik",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13682,
+          "name": "Atur akses • KU IT",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 730.0,
+          "id": 13707,
+          "name": "Atur akses • KU UGD",
+          "type": "FRAME",
+          "width": 760.0
+        },
+        {
+          "height": 420.0,
+          "id": 14139,
+          "name": "Penanggung jawab • Pelayanan Medis",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14148,
+          "name": "Penanggung jawab • Keperawatan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14157,
+          "name": "Penanggung jawab • Penunjang Medis",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14166,
+          "name": "Penanggung jawab • Pengembangan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14175,
+          "name": "Kepala Unit • SDM",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14184,
+          "name": "Kepala Unit • Logistik",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14193,
+          "name": "Kepala Unit • UGD",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14202,
+          "name": "Kepala Unit • Pengadaan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14211,
+          "name": "Kepala Unit • Pengadaan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14220,
+          "name": "Kepala Unit • Pengadaan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 420.0,
+          "id": 14229,
+          "name": "Kepala Unit • Pengadaan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 620.0,
+          "id": 14581,
+          "name": "Tambah anggota • SDM / 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 14582,
+          "name": "Tambah anggota • SDM / 1",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 14808,
+          "name": "Tambah anggota • Logistik / 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 14809,
+          "name": "Tambah anggota • Logistik / 1",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 580.0,
+          "id": 15200,
+          "name": "Tambah unit • Pelayanan Medis",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 620.0,
+          "id": 15201,
+          "name": "Tambah anggota • Pelayanan Medis / 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 15202,
+          "name": "Tambah anggota • Pelayanan Medis / 1",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 580.0,
+          "id": 15632,
+          "name": "Tambah unit • Keperawatan",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 620.0,
+          "id": 15633,
+          "name": "Tambah anggota • Keperawatan / 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 15634,
+          "name": "Tambah anggota • Keperawatan / 1",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 580.0,
+          "id": 16064,
+          "name": "Tambah unit • Penunjang Medis",
+          "type": "FRAME",
+          "width": 600.0
+        },
+        {
+          "height": 620.0,
+          "id": 16065,
+          "name": "Tambah anggota • Penunjang Medis / 0",
+          "type": "FRAME",
+          "width": 680.0
+        },
+        {
+          "height": 620.0,
+          "id": 16066,
+          "name": "Tambah anggota • Penunjang Medis / 1",
+          "type": "FRAME",
+          "width": 680.0
+        }
+      ],
+      "id": 4992,
+      "name": "Arsip 8 November / 03 • Super HC",
+      "nodes": 7316,
+      "topLevel": 153
+    },
+    {
+      "frames": [
+        {
+          "height": 900.0,
+          "id": 2577,
+          "name": "State • empty",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2599,
+          "name": "State • loading",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2623,
+          "name": "State • error",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2645,
+          "name": "State • conflict",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2667,
+          "name": "State • forbidden",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2689,
+          "name": "State • session",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 2711,
+          "name": "Validasi & focus input",
+          "type": "FRAME",
+          "width": 1440.0
+        },
+        {
+          "height": 900.0,
+          "id": 5437,
+          "name": "Review desain & handoff",
+          "type": "FRAME",
+          "width": 1440.0
+        }
+      ],
+      "id": 4993,
+      "name": "Arsip 8 November / 04 • Komponen & State",
+      "nodes": 522,
+      "topLevel": 10
+    }
+  ],
+  "styles": 14,
+  "variables": 0
+}

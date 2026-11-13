@@ -67,7 +67,7 @@ class Insights
             foreach ($items[$a->id] ?? [] as $item) {
                 $key = $a->assessment_kind.':'.$a->kpi_template_id.':'.$item->source_kpi_item_id;
                 $itemGroups[$key] ??= ['template_id' => $a->kpi_template_id, 'template_name' => $a->template_name_snapshot, 'kind' => $a->assessment_kind, 'area' => $a->assessment_kind === 'member' ? $a->unit_name_snapshot : $a->division_name_snapshot, 'item_id' => $item->source_kpi_item_id, 'pillar' => $item->pillar_snapshot, 'name' => $item->kpi_name_snapshot, 'weight' => $item->weight_percent_snapshot, 'sum' => '0', 'count' => 0];
-                $itemGroups[$key]['sum'] = bcadd($itemGroups[$key]['sum'], (string) $item->score, 6);
+                $itemGroups[$key]['sum'] = bcadd($itemGroups[$key]['sum'], (string) ($item->computed_score ?? $item->score), 6);
                 $itemGroups[$key]['count']++;
             }
         }

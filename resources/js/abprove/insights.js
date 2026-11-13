@@ -216,6 +216,16 @@ function reviewData(s, filters) {
 
 export function initInsights(c, s, link) {
     if (!$('[data-insights-root]')) return;
+    const dashboard = $('[data-role-dashboard]');
+    if (dashboard) {
+        $('[data-dashboard-report]').href =
+            c.role === 'ku'
+                ? link('riwayat')
+                : link('dashboard', { detail: 'laporan' });
+        $('[data-dashboard-reload]').addEventListener('click', () =>
+            location.reload(),
+        );
+    }
     let sequence = 0,
         timer,
         controller;
@@ -403,7 +413,12 @@ export function initInsights(c, s, link) {
             }
         }
     }
-    function render(d) {
+    async function render(d) {
+        if ($('[data-role-dashboard]')) {
+            const { renderRoleDashboard } = await import('./dashboard');
+            renderRoleDashboard(c, s, d, link);
+            return;
+        }
         if ($('[data-reference-layout]')) {
             renderReference(c, s, d, link, filters());
             return;
@@ -670,13 +685,30 @@ export function initInsights(c, s, link) {
                 ).data;
             } else d = reviewData(s, filters());
             if (current !== sequence) return;
-            render(d);
+            await render(d);
             document.documentElement.dataset.insightsReady = 'true';
         } catch (e) {
             if (current !== sequence || e.name === 'AbortError') return;
             if (error) {
-                error.textContent = e.message;
+                error.textContent = dashboard
+                    ? 'Ringkasan dan grafik belum dapat dimuat. Coba muat ulang.'
+                    : e.message;
                 error.hidden = false;
+            }
+            if (dashboard) {
+                $('[data-dashboard-reload]').hidden = false;
+                $('[data-dashboard-metrics]').textContent =
+                    'Ringkasan belum tersedia.';
+                for (const chart of dashboard.querySelectorAll('[aria-busy]')) {
+                    chart.setAttribute('aria-busy', 'false');
+                    chart.replaceChildren(
+                        node(
+                            'p',
+                            'Grafik belum tersedia.',
+                            'dashboard-loading',
+                        ),
+                    );
+                }
             }
             document.documentElement.dataset.insightsReady = 'error';
         } finally {
