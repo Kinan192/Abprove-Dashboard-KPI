@@ -58,30 +58,6 @@ class ReportingController extends Controller
         return response()->json(['data' => $q->orderBy('name')->get()]);
     }
 
-    public function dashboard(Request $r)
-    {
-        $d = $r->validate(['cycle_id' => ['required', 'integer', 'exists:assessment_cycles,id']]);
-        $ctx = $r->attributes->get('access_context');
-        $cycle = AssessmentCycle::findOrFail($d['cycle_id']);
-        $month = $cycle->assessment_month->format('Y-m-d');
-        $counts = $this->records->assessments($ctx)->where('cycle_id', $cycle->id)->selectRaw('status,COUNT(*) as total')->groupBy('status')->pluck('total', 'status');
-        $pending = [];
-        foreach ([false, true] as $heads) {
-            if ($heads && $ctx->role === 'kepala_unit') {
-                $pending['unit_heads'] = 0;
-                $pending['not_started_heads'] = 0;
-
-                continue;
-            }
-            $q = $this->records->members($ctx, $heads, $month);
-            $pending[$heads ? 'unit_heads' : 'members'] = (clone $q)->count();
-            $pending[$heads ? 'not_started_heads' : 'not_started_members'] = $q->whereNotExists(fn ($s) => $s->selectRaw('1')->from('assessments as a')->whereColumn($heads ? 'a.subject_user_id' : 'a.employee_id', 'e.id')->where('a.cycle_id', $cycle->id))->count();
-        }
-        $breakdown = $this->records->assessments($ctx)->where('cycle_id', $cycle->id)->selectRaw('division_id,unit_id,assessment_kind,status,COUNT(*) as total')->groupBy('division_id', 'unit_id', 'assessment_kind', 'status')->get();
-
-        return response()->json(['data' => ['cycle_id' => $cycle->id, 'statuses' => $counts, 'breakdown' => $breakdown] + $pending]);
-    }
-
     public function recap(Request $r)
     {
         $f = $r->validate(['cycle_id' => ['required', 'integer', 'min:1'], 'unit_id' => ['sometimes', 'integer', 'min:1'], 'division_id' => ['sometimes', 'integer', 'min:1'], 'format' => ['sometimes', 'in:json,tsv'], 'status' => ['sometimes', 'in:submitted,returned,final,all'], 'kind' => ['sometimes', 'in:member,unit_head'], 'search' => ['sometimes', 'string', 'max:160']]);

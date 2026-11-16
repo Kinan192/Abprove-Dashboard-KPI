@@ -1,6 +1,0 @@
-@once
-@push('dialogs')
-<x-abprove.dialog id="review-dialog" title="Lembar nilai" :drawer="true"><p class="mb-5 text-xs text-muted" data-review-month>{{ $vm->monthLabel() }}</p><div class="mb-6 grid grid-cols-3 gap-3 text-[13px]"><div class="border-t-2 border-success pt-3"><b>Kepala Unit</b><p class="text-muted">memberi nilai</p></div><div class="border-t-2 border-primary pt-3"><b>Kepala Divisi</b><p class="text-muted">menyetujui</p></div><div class="border-t-2 border-line pt-3"><b>Final</b><p class="text-muted">oleh Kepala Divisi</p></div></div><div data-review-content></div><div class="mt-6" data-local-timeline><h3 class="mb-3 text-sm font-semibold">Riwayat</h3><ol class="space-y-3 text-xs text-muted" data-timeline-list></ol></div><x-slot:footer>@if($vm->role==='kd')<button class="btn btn-warning" type="button" data-action="return-assessment">Kembalikan</button><button class="btn btn-primary" type="button" data-action="approve-assessment">Tetapkan Final</button>@else<button class="btn" type="button" data-dialog-close>Tutup</button>@endif</x-slot:footer></x-abprove.dialog>
-@foreach($vm->people() as $person)<template id="review-template-{{ $person['id'] }}"><x-abprove.score-sheet :vm="$vm" :person="$person" :readonly="true" :comparison="true"/></template>@endforeach
-@endpush
-@endonce

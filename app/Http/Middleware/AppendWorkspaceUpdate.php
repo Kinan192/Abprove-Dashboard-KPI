@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Controllers\WorkspaceController;
-use App\Queries\ScopedRecords;
+use App\Queries\WorkspaceQuery;
 use App\Services\IdentityAccess\ScopeResolver;
+use App\ViewModels\AbproveDesign;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,9 +15,9 @@ class AppendWorkspaceUpdate
     public function handle(Request $request, Closure $next)
     {
         $response = $next($request);
-        $page = $request->header('X-KPI-Workspace');
+        $profile = $request->header('X-KPI-Workspace');
         if ($request->isMethodSafe() || ! $response instanceof JsonResponse || ! $response->isSuccessful()
-            || ! is_string($page) || ! preg_match('/^[a-z-]{1,32}$/D', $page)
+            || ! is_string($profile) || ! array_key_exists($profile, AbproveDesign::WORKSPACE_PROFILES)
             || ! $request->attributes->has('access_context')) {
             return $response;
         }
@@ -28,20 +28,21 @@ class AppendWorkspaceUpdate
         $path = preg_replace('#^(unit|division|hc)/#', '', $request->path());
         $ids = null;
         $sections = match (true) {
-            $path === 'approvals/bulk', $path === 'assessments', str_starts_with($path, 'assessments/') => ['assessments', 'assessmentTemplates', 'notifications'],
+            $path === 'approvals/bulk', $path === 'assessments', str_starts_with($path, 'assessments/') => ['assessments', 'assessmentTemplates', 'notifications', 'navCounts'],
             $path === 'profile' => ['accounts', 'profiles'],
             str_starts_with($path, 'organization/positions') => ['positions'],
-            str_starts_with($path, 'organization/employees'), (bool) preg_match('#^employees/\d+/placement$#', $path) => ['staff', 'notifications'],
-            str_starts_with($path, 'organization/'), (bool) preg_match('#^(divisions|units)/\d+/head$#', $path),
-            str_starts_with($path, 'assignments/'), (bool) preg_match('#^users/\d+/grant-hc$#', $path) => ['accounts', 'divisions', 'units', 'kpiUnits', 'heads', 'notifications'],
+            str_starts_with($path, 'organization/employees'), $path === 'employees/transfers' => ['staff', 'notifications', 'navCounts'],
+            str_starts_with($path, 'organization/'), $path === 'heads/reassign' => ['accounts', 'divisions', 'units', 'kpiUnits', 'heads', 'notifications', 'navCounts'],
             str_starts_with($path, 'kpi-templates') => ['kpis'],
-            $path === 'cycles', str_starts_with($path, 'cycles/') => ['cycles', 'notifications'],
-            $path === 'notifications/read', (bool) preg_match('#^units/\d+/remind$#', $path) => ['notifications', 'activities'],
+            $path === 'cycles', str_starts_with($path, 'cycles/') => ['cycles', 'notifications', 'navCounts'],
+            $path === 'notifications/read' => ['notifications'],
             default => null,
         };
         if ($sections === null) {
             return $response;
         }
+        // The update uses the page profile, so it carries the same sections and month window as the page.
+        $sections = array_values(array_intersect($sections, AbproveDesign::WORKSPACE_PROFILES[$profile]['sections']));
         if (in_array('assessments', $sections, true)) {
             $rows = array_is_list($payload['data']) ? $payload['data'] : [$payload['data']];
             $ids = array_values(array_unique(array_filter(array_map(
@@ -52,22 +53,13 @@ class AppendWorkspaceUpdate
                 return $response;
             }
         }
-        $query = ['compact' => 1, 'page' => $page, 'only' => $sections];
         $cycle = $request->header('X-KPI-Cycle');
-        if (is_string($cycle) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $cycle)) {
-            $query['cycle'] = $cycle;
-        }
-        if ($ids !== null) {
-            $query['assessment_ids'] = $ids;
-        }
-        $query['include_insights'] = $request->header('X-KPI-Insights') === '1';
+        $cycle = is_string($cycle) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $cycle) ? $cycle : null;
         try {
             // Build fresh read data after the mutation transaction has committed, including replays.
-            $read = Request::create($request->url(), 'GET', $query);
             $user = $request->user()->fresh();
-            $read->attributes->set('access_context', app(ScopeResolver::class)->resolve($user));
-            $read->setUserResolver(fn () => $user);
-            $update = app(WorkspaceController::class)->show($read, app(ScopedRecords::class))->getData(true);
+            $update = app(WorkspaceQuery::class)->build(app(ScopeResolver::class)->resolve($user), $user, $profile, $sections, $cycle,
+                $ids === null ? null : array_map('intval', $ids), $request->header('X-KPI-Insights') === '1');
             $update['assessmentIds'] = $ids;
             $payload['workspace'] = $update;
         } catch (Throwable $error) {

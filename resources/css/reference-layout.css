@@ -97,17 +97,6 @@ body[data-app-shell] [data-previous-cell] [data-previous]::before {
 body[data-app-shell] [data-previous-cell] [data-previous] {
     font-size: 13px;
 }
-body[data-app-shell] .score-table.score-review-comparison th:nth-child(2) {
-    width: 36%;
-}
-body[data-app-shell] .score-table.score-review-comparison th:nth-child(3),
-body[data-app-shell] .score-table.score-review-comparison th:nth-child(4),
-body[data-app-shell] .score-table.score-review-comparison th:nth-child(5) {
-    width: 12%;
-}
-body[data-app-shell] .score-table.score-review-comparison th:last-child {
-    width: 22%;
-}
 .reference-kpi-history > summary {
     list-style: none;
 }
@@ -140,23 +129,9 @@ body[data-app-shell] [data-status='Disetujui'],
 body[data-app-shell] [data-flow-status='Final'] {
     color: color-mix(in srgb, var(--color-success) 92%, var(--color-ink));
 }
-body[data-app-shell] .compact-workspace {
-    gap: 18px;
-}
-body[data-app-shell] .compact-workspace .page-stack {
-    gap: 16px;
-}
-body[data-app-shell] .compact-workspace.page-content {
-    padding-top: 24px;
-    padding-bottom: 24px;
-}
 .workspace-tabs {
     flex-wrap: wrap;
     width: fit-content;
-}
-body[data-app-shell] .workspace-tabs [role='tab'] {
-    min-height: 38px;
-    padding: 8px 14px;
 }
 body[data-app-shell] .compact-workspace .reference-heat td:first-child {
     padding: 4px 10px;
@@ -170,11 +145,6 @@ body[data-app-shell] .compact-workspace .reference-figures > div {
 }
 body[data-app-shell] .compact-workspace .reference-figures .figure-value {
     line-height: 34px;
-}
-body[data-app-shell] .compact-workspace .data-table td {
-    padding: 8px 10px;
-    font-size: 13px;
-    line-height: 18px;
 }
 body[data-app-shell] .compact-workspace .reference-heat td {
     font-size: 11px;
@@ -201,130 +171,6 @@ body[data-app-shell] .compact-workspace .reference-ranking-table td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-body[data-app-shell] .sidebar {
-    width: 256px;
-}
-body[data-app-shell] .app-main {
-    margin-left: 256px;
-}
-body[data-app-shell].nav-collapsed .sidebar {
-    width: 76px;
-}
-body[data-app-shell].nav-collapsed .app-main {
-    margin-left: 76px;
-}
-body[data-app-shell] .sidebar > a {
-    padding: 18px 22px 20px;
-}
-body[data-app-shell] .sidebar .nav-link {
-    min-height: 44px;
-    padding: 10px 12px;
-    font-size: 15px;
-}
-body[data-app-shell] .sidebar nav + nav {
-    margin-top: 20px;
-    padding-top: 16px;
-}
-body[data-app-shell] .sidebar-note {
-    padding: 20px 24px;
-    font-size: 12px;
-}
-body[data-app-shell] .topbar {
-    height: 80px;
-    padding: 0 40px;
-    gap: 16px;
-}
-body[data-app-shell] .top-title {
-    font-size: 20px;
-    line-height: 26px;
-}
-body[data-app-shell] .top-scope {
-    font-size: 13px;
-}
-body[data-app-shell] .topbar .quick-search {
-    min-width: 170px;
-    max-width: 360px;
-}
-body[data-app-shell] .page-content {
-    padding: 32px 40px 48px;
-}
-body[data-app-shell] .page-stack {
-    gap: 28px;
-}
-body[data-app-shell] .lead {
-    display: block;
-    font-size: 28px;
-    line-height: 36px;
-    font-weight: 650;
-}
-body[data-app-shell] .section-title {
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 650;
-}
-body[data-app-shell] .metric-number {
-    font-size: 28px;
-    line-height: 36px;
-}
-body[data-app-shell] .data-table {
-    font-size: 14px;
-}
-body[data-app-shell] .data-table th {
-    padding: 11px 12px;
-    font-size: 12px;
-    font-weight: 500;
-}
-body[data-app-shell] .data-table td {
-    padding: 12px;
-    line-height: 20px;
-}
-body[data-app-shell] .field {
-    min-height: 40px;
-    padding: 9px 12px;
-    font-size: 13px;
-}
-body[data-app-shell] .btn {
-    min-height: 40px;
-    padding: 9px 13px;
-    font-size: 13px;
-}
-body[data-app-shell] .btn-small {
-    min-height: 32px;
-    padding: 6px 10px;
-}
-body[data-app-shell] .label {
-    font-size: 13px;
-    margin-bottom: 6px;
-}
-body[data-app-shell] .seg {
-    background: #e8eaed;
-}
-[data-theme='dark'] body[data-app-shell] .seg {
-    background: var(--color-line);
-}
-body[data-app-shell] .seg button,
-body[data-app-shell] .seg a {
-    min-height: 34px;
-    padding: 7px 12px;
-    font-size: 13px;
-}
-body[data-app-shell] .notice {
-    font-size: 13px;
-    padding: 12px 16px;
-}
-body[data-app-shell] .card-pad {
-    padding: 20px;
-}
-body[data-app-shell] .list-pagination {
-    font-size: 12px;
-    margin-top: 8px;
-}
-body[data-app-shell]
-    .list-pagination:has([data-page-prev]:disabled):has(
-        [data-page-next]:disabled
-    ) {
-    display: none;
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th {
     width: auto;
@@ -456,39 +302,6 @@ body[data-app-shell] .reference-kpi-definition [data-kpi-editor] {
     color: var(--color-ink);
     width: 100%;
 }
-body[data-app-shell] .score-layout {
-    grid-template-columns: 300px minmax(0, 1fr);
-    min-height: calc(100dvh - 80px);
-}
-body[data-app-shell] .score-pane {
-    padding: 28px 40px 32px;
-}
-body[data-app-shell] .people-rail {
-    padding: 16px;
-}
-body[data-app-shell] .person-button {
-    padding: 12px;
-    min-height: 64px;
-}
-body[data-app-shell] .score-input {
-    height: 40px;
-    width: 64px;
-    font-size: 16px;
-}
-body[data-app-shell] .score-table [data-kpi-name] {
-    font-size: 13px;
-}
-body[data-app-shell] .score-table th:first-child {
-    width: 5%;
-}
-body[data-app-shell] .score-table th:nth-child(2) {
-    width: 56%;
-}
-body[data-app-shell] .score-table th:nth-child(3),
-body[data-app-shell] .score-table th:nth-child(4),
-body[data-app-shell] .score-table th:nth-child(5) {
-    width: 13%;
-}
 body[data-role='ku'] [data-flow-editor] [data-previous] {
     display: none;
 }
@@ -500,51 +313,6 @@ body[data-app-shell] .reference-score-total {
 body[data-app-shell] .reference-score-total [data-total] {
     font-size: 36px;
     line-height: 44px;
-}
-body[data-app-shell] .profile-avatar-header {
-    padding: 20px 24px;
-}
-body[data-app-shell] .profile-avatar-header [data-profile-avatar] {
-    width: 72px !important;
-    height: 72px;
-    font-size: 24px !important;
-}
-body[data-app-shell] .preview-badge {
-    display: none;
-}
-body[data-app-shell] .quick-search kbd {
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-body[data-app-shell] .topbar .profile-copy {
-    max-width: 180px;
-}
-body[data-app-shell] .topbar .profile-copy strong {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-body[data-app-shell] .score-table [data-kpi-meta] {
-    font-size: 12px;
-    line-height: 18px;
-}
-body[data-app-shell] .score-pane {
-    padding-bottom: 28px;
-}
-body[data-app-shell] .score-footer {
-    position: static;
-    z-index: auto;
-    max-width: none;
-    width: 100%;
-    margin: 20px 0 0;
-    padding: 12px 14px;
-    border: 1px solid var(--color-line);
-    border-radius: 12px;
-    background: var(--color-paper);
-    box-shadow: 0 1px 2px rgb(12 32 26/0.04);
-}
-body[data-app-shell] .score-footer .btn {
-    flex: 0 0 auto;
 }
 .reference-home-grid {
     display: grid;
@@ -934,22 +702,24 @@ body[data-app-shell] .reference-home [data-home-progress].page-stack {
 }
 .notification-badge {
     position: absolute;
-    top: -4px;
-    right: -6px;
+    top: -5px;
+    right: -5px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
+    border: 2px solid var(--color-paper);
     border-radius: 999px;
     background: var(--color-primary);
     color: #fff;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    line-height: 18px;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    box-sizing: content-box;
 }
 .reference-unit-average .reference-bar {
     margin-top: 6px;
@@ -1078,16 +848,16 @@ body[data-app-shell] .reference-kpi-table th:nth-child(9) {
     width: 100%;
     min-width: 0;
     border-color: transparent;
-    background: transparent;
+    background-color: transparent;
     padding: 5px 3px;
-    border-radius: 4px;
+    border-radius: 6px;
 }
 .reference-kpi-table .field:hover {
     border-color: var(--color-line);
 }
 .reference-kpi-table .field:focus {
-    border-color: var(--color-brand);
-    background: var(--color-paper);
+    border-color: var(--color-primary);
+    background-color: var(--color-paper);
 }
 .reference-kpi-table [data-item-name] {
     display: -webkit-box;
@@ -1160,29 +930,6 @@ body[data-app-shell][data-role='hc'] .reference-kpi-table .kpi-table-actions but
         min-height: 44px;
     }
 }
-#audit-reference-wrap {
-    overflow: auto;
-}
-#audit-reference {
-    height: auto;
-    object-fit: initial;
-}
-body[data-app-shell] .page-content.compact-workspace,
-body[data-app-shell] .page-stack.compact-workspace {
-    gap: 18px;
-}
-body[data-app-shell] .workspace-v4 {
-    gap: 14px;
-}
-body[data-app-shell] .workspace-v4 .data-table td {
-    padding: 6px 10px;
-    font-size: 13px;
-    line-height: 18px;
-}
-body[data-app-shell] .workspace-v4.page-content {
-    padding-top: 24px;
-    padding-bottom: 16px;
-}
 body[data-app-shell] .workspace-v4 .data-table td p {
     margin-top: 1px;
     line-height: 16px;
@@ -1244,19 +991,6 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     padding: 12px 16px;
 }
 @media (max-width: 1250px) {
-    body[data-app-shell] .score-layout {
-        grid-template-columns: 240px minmax(0, 1fr);
-    }
-    body[data-app-shell] .score-pane {
-        padding: 24px;
-    }
-    body[data-app-shell] .topbar {
-        padding: 0 24px;
-        gap: 12px;
-    }
-    body[data-app-shell] .topbar .quick-search {
-        display: none;
-    }
     .reference-home-grid {
         grid-template-columns: minmax(0, 1fr) 280px;
         gap: 20px;
@@ -1282,22 +1016,7 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
         grid-template-columns: minmax(0, 1fr) 1fr;
     }
 }
-@media (max-width: 900px) {
-    body[data-app-shell] .app-main,
-    body[data-app-shell].nav-collapsed .app-main {
-        margin-left: 0;
-    }
-    body[data-app-shell].nav-collapsed .sidebar {
-        width: 256px;
-    }
-    body[data-app-shell] .page-content {
-        padding: 24px;
-    }
-}
 @media (max-width: 600px) {
-    body[data-app-shell] .workspace-tabs [role='tab'] {
-        min-height: 44px;
-    }
     body[data-app-shell][data-role='hc'] .reference-ranking-table td {
         width: auto;
         padding: 0;
@@ -1319,46 +1038,9 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
         min-width: 0;
         max-width: 54%;
     }
-    body[data-app-shell] .score-table td:first-child {
-        display: none;
-    }
-    body[data-app-shell] .score-table td:nth-child(2) {
-        grid-column: 1/-1;
-    }
     body[data-app-shell] .reference-score-total [data-total] {
         font-size: 30px;
         line-height: 38px;
-    }
-    body[data-app-shell] .topbar {
-        height: 64px;
-        padding: 0 12px;
-        gap: 7px;
-    }
-    body[data-app-shell] .top-title {
-        font-size: 17px;
-        line-height: 22px;
-    }
-    body[data-app-shell] .page-content {
-        padding: 20px 14px 84px;
-    }
-    body[data-app-shell] .page-stack {
-        gap: 24px;
-    }
-    body[data-app-shell] .lead {
-        font-size: 24px;
-        line-height: 31px;
-    }
-    body[data-app-shell] .score-layout {
-        display: block;
-    }
-    body[data-app-shell] .score-pane {
-        padding: 16px 14px 84px;
-    }
-    body[data-app-shell] .btn,
-    body[data-app-shell] .field,
-    body[data-app-shell] .seg button,
-    body[data-app-shell] .seg a {
-        min-height: 44px;
     }
     .reference-home-grid > aside,
     .reference-figures,
@@ -1434,7 +1116,7 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     }
 }
 
-/* KPI and period workspace aligned with the design-review layout. */
+/* Shared KPI and period workspace layout. */
 .kpi-page-heading,
 .period-page-heading {
     align-items: flex-start;

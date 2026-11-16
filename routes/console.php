@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\ScopeResolver;
-use App\Support\DomainSchema;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -31,12 +30,12 @@ Artisan::command('kpi:auth-key', function () {
 });
 
 Artisan::command('kpi:create-admin {--name=} {--email=}', function () {
-    if (DB::table('scope_assignments')->where('role_key', 'super_hc')->whereNull('revoked_at')->exists()) {
-        $this->error('Super HC sudah tersedia. Gunakan pengelolaan akun oleh HC untuk menambah akun.');
+    if (DB::table('scope_assignments')->where('role_key', 'admin')->whereNull('revoked_at')->exists()) {
+        $this->error('Admin sudah tersedia. Tambah akun lain melalui menu Akun Pengguna milik Admin.');
 
         return 1;
     }
-    $name = $this->option('name') ?: $this->ask('Nama Super HC');
+    $name = $this->option('name') ?: $this->ask('Nama Admin');
     $email = $this->option('email') ?: $this->ask('Email login');
     $password = $this->secret('Kata sandi (minimal 12 karakter, huruf dan angka)');
     $confirmation = $this->secret('Ulangi kata sandi');
@@ -52,15 +51,15 @@ Artisan::command('kpi:create-admin {--name=} {--email=}', function () {
         return 1;
     }
     $user = DB::transaction(function () use ($name, $email, $password) {
-        $user = User::create(compact('name', 'email', 'password') + (DomainSchema::ready() ? ['role_key' => 'super_hc'] : []));
-        DB::table('user_roles')->insert(['user_id' => $user->id, 'role_key' => 'super_hc']);
-        DB::table('scope_assignments')->insert(['user_id' => $user->id, 'role_key' => 'super_hc', 'assigned_by' => $user->id, 'assigned_at' => now()->format('Y-m-d H:i:s.u')]);
+        $user = User::create(compact('name', 'email', 'password') + ['role_key' => 'admin']);
+        DB::table('user_roles')->insert(['user_id' => $user->id, 'role_key' => 'admin']);
+        DB::table('scope_assignments')->insert(['user_id' => $user->id, 'role_key' => 'admin', 'assigned_by' => $user->id, 'assigned_at' => now()->format('Y-m-d H:i:s.u')]);
         $ctx = app(ScopeResolver::class)->resolve($user->fresh());
         app(AuditWriter::class)->record($ctx, 'user', $user->id, 'bootstrap.admin', null, ['id' => $user->id, 'email' => $email]);
 
         return $user;
     });
-    $this->info('Super HC dibuat: '.$user->email);
+    $this->info('Admin dibuat: '.$user->email.'. Buat akun Super HC dan kepala melalui menu Akun Pengguna.');
 
     return 0;
-})->purpose('Membuat akun Super HC pertama secara interaktif, tanpa password default.');
+})->purpose('Membuat akun Admin pertama secara interaktif, tanpa password default.');

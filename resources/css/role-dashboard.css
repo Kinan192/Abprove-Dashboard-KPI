@@ -1,571 +1,826 @@
-body[data-app-shell] .role-dashboard.page-content {
-    display: grid;
-    gap: 16px;
-    margin: 0;
-    padding: 20px 24px;
-    background: var(--color-paper);
-    border: 1px solid var(--color-line);
-    border-radius: 12px;
-    box-shadow: 0 1px 2px rgb(12 32 26/0.03);
-    min-width: 0;
+/* Role dashboard (KU/KD/HC): compact operational summary. Neutral canvas and
+   surfaces, emerald brand for the hero metric and selected summaries, amber
+   and semantic colours only for attention. Chart tokens live on :root because
+   dashboard.js reads them through getComputedStyle(document.documentElement). */
+:root {
+    --dashboard-primary: #13795b;
+    --dashboard-status-submitted: #4f7fd6;
+    --dashboard-status-returned: #d99a2b;
+    --dashboard-status-pending: #d5e0db;
+    --dashboard-category-1: #13795b;
+    --dashboard-category-2: #5fae8c;
+    --dashboard-category-3: #d9a63f;
+    --dashboard-category-4: #d07a2d;
+    --dashboard-category-5: #b42318;
+    --dashboard-hero: var(--color-brand);
+    --dashboard-hero-hover: var(--color-brand-deep);
+    --dashboard-hero-ink: #fff;
+    --dashboard-hero-soft: rgb(255 255 255 / 0.84);
+    --dashboard-tint: var(--color-accent-soft);
+    --dashboard-tint-line: color-mix(in srgb, var(--color-primary) 22%, var(--color-line));
+    --dashboard-plot: 160px;
+    --dashboard-list: 156px;
 }
-.role-dashboard .dashboard-heading,
-.role-dashboard .dashboard-section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+[data-theme='dark'] {
+    --dashboard-primary: #5fd0a6;
+    --dashboard-status-submitted: #8fb0f2;
+    --dashboard-status-returned: #e7b363;
+    --dashboard-status-pending: #2a3c35;
+    --dashboard-category-1: #6fd8ab;
+    --dashboard-category-2: #3f9e78;
+    --dashboard-category-3: #e7c06a;
+    --dashboard-category-4: #f0a25c;
+    --dashboard-category-5: #f38e98;
+    --dashboard-hero: #0e5c46;
+    --dashboard-hero-hover: #12684f;
+    --dashboard-hero-ink: #f2fbf7;
+    --dashboard-hero-soft: rgb(242 251 247 / 0.82);
+    --dashboard-tint-line: color-mix(in srgb, var(--color-accent) 22%, var(--color-line));
+}
+body[data-app-shell] .role-dashboard.page-content {
+    @apply m-0 grid min-w-0 content-start gap-3.5;
+    padding-top: 22px;
+    padding-bottom: 28px;
+}
+
+/* Heading and panel heads */
+.role-dashboard .dashboard-heading {
+    @apply flex flex-wrap items-end justify-between gap-x-6 gap-y-2;
 }
 .role-dashboard .dashboard-heading .lead {
-    font-size: 21px;
-    line-height: 28px;
+    @apply text-[22px] leading-7 font-semibold tracking-[-0.02em];
 }
-.role-dashboard .dashboard-heading .btn {
-    flex-shrink: 0;
+.role-dashboard .dashboard-heading .dashboard-caption {
+    @apply mt-0.5 text-[13px] leading-5;
+}
+.role-dashboard .dashboard-heading [data-dashboard-month] {
+    @apply font-semibold text-ink;
+}
+.role-dashboard .dashboard-heading-actions {
+    @apply flex shrink-0 gap-2;
+}
+.role-dashboard .dashboard-heading-actions .btn {
+    @apply min-h-10 rounded-lg px-4;
+}
+.role-dashboard .btn svg {
+    @apply size-4;
 }
 .role-dashboard .dashboard-caption {
-    font-size: 11.5px;
-    line-height: 17px;
-    color: var(--color-muted);
-    margin-top: 3px;
+    @apply mt-0.5 text-xs leading-[18px] text-muted;
 }
-.role-dashboard .dashboard-section-head > .link {
-    font-size: 11.5px;
-    min-height: 32px;
-    flex-shrink: 0;
+.role-dashboard .dashboard-panel-head {
+    @apply flex items-start justify-between gap-3;
 }
-.role-dashboard .dashboard-metrics {
-    display: grid;
+.role-dashboard .dashboard-panel-head .section-title {
+    @apply text-[14.5px] leading-5 font-semibold;
+}
+.role-dashboard .dashboard-panel-head > .link,
+.role-dashboard .dashboard-panel-head > button.link {
+    @apply -my-2 -mr-2 inline-flex min-h-10 shrink-0 items-center rounded-lg px-2.5 text-[12.5px] transition-colors hover:bg-accent-soft hover:no-underline;
+}
+.role-dashboard .dashboard-panel-head > button.link:disabled {
+    @apply cursor-default bg-transparent opacity-45;
+}
+.role-dashboard .dashboard-panel {
+    @apply flex min-w-0 flex-col gap-2.5 rounded-[14px] border border-line bg-paper px-4 py-3;
+}
+.role-dashboard .dashboard-row {
+    @apply grid min-w-0 items-start gap-3.5;
+}
+.role-dashboard .dashboard-row-status {
+    grid-template-columns: minmax(0, 1.5fr) minmax(380px, 1fr);
+}
+/* Every row is top-aligned: a sparse chart or short list never inherits the
+   height of a taller sibling. */
+.role-dashboard .dashboard-row-analytics {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr) minmax(0, 1fr);
+}
+/* Two independent columns: progress (+ HC activity) and tasks + indicators. */
+.role-dashboard .dashboard-row-work {
+    grid-template-columns: minmax(0, 1.7fr) minmax(320px, 1fr);
+}
+.role-dashboard .dashboard-column {
+    @apply grid min-w-0 content-start gap-3.5;
+}
+.role-dashboard .dashboard-loading,
+.role-dashboard .dashboard-empty {
+    @apply list-none py-2 text-[13px] leading-5 text-muted;
+}
+.role-dashboard .dashboard-empty {
+    @apply rounded-[10px] bg-subtle px-3.5 py-3 text-center;
+}
+.role-dashboard .dashboard-count {
+    @apply font-medium text-muted tabular-nums;
+}
+.role-dashboard :is(ol, div)[tabindex='0']:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* KPI cards: one emerald hero (Rerata nilai Final), one tinted summary
+   (Ketuntasan), action counts on neutral surfaces. */
+.role-dashboard .dashboard-cards {
+    @apply grid gap-3;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
 }
-.role-dashboard .dashboard-metric {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 14px 16px;
-    background: var(--color-subtle);
-    border: 1px solid transparent;
-    border-radius: 10px;
-    color: var(--color-ink);
-    min-width: 0;
+.role-dashboard .dashboard-cards > .dashboard-empty {
+    grid-column: 1 / -1;
 }
-.role-dashboard .dashboard-metric:hover {
-    border-color: color-mix(in srgb, var(--dashboard-chart) 35%, transparent);
-    background: var(--dashboard-accent-soft);
+.role-dashboard .dashboard-card {
+    --tone: var(--color-muted);
+    @apply grid min-w-0 content-start gap-x-2 gap-y-0.5 rounded-[14px] border border-line bg-paper px-4 py-3.5 text-ink transition-colors;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 100px;
 }
-.role-dashboard .figure-label {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--color-muted);
+.role-dashboard a.dashboard-card:hover {
+    border-color: color-mix(in srgb, var(--tone) 50%, var(--color-line));
 }
-.role-dashboard .figure-value {
-    font-size: 28px;
-    font-weight: 600;
-    line-height: 34px;
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
+.role-dashboard a.dashboard-card:focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: 2px;
 }
-.role-dashboard .figure-hint {
-    font-size: 11px;
-    color: var(--color-muted);
+.role-dashboard .dashboard-card[data-tone='neutral'] {
+    --tone: var(--dashboard-primary);
 }
-.role-dashboard .dashboard-overview {
-    display: grid;
-    grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr);
-    gap: 24px;
+.role-dashboard .dashboard-card[data-tone='good'] {
+    --tone: var(--color-success);
 }
-.role-dashboard .dashboard-aside {
-    display: grid;
-    gap: 12px;
-    min-width: 0;
-    align-content: start;
+.role-dashboard .dashboard-card[data-tone='warn'] {
+    --tone: var(--dashboard-status-returned);
 }
-.role-dashboard .dashboard-category-panel {
-    padding: 0 0 10px;
-    border-bottom: 1px solid var(--color-line);
-    min-width: 0;
+.role-dashboard .dashboard-card[data-tone='info'] {
+    --tone: var(--dashboard-status-submitted);
 }
-.role-dashboard .dashboard-category-body {
-    display: grid;
-    grid-template-columns: 84px minmax(0, 1fr);
-    gap: 12px;
-    align-items: center;
-    margin-top: 5px;
+.role-dashboard .dashboard-card:nth-child(2) {
+    border-color: var(--dashboard-tint-line);
+    background: var(--dashboard-tint);
 }
-.role-dashboard .dashboard-category-chart {
-    position: relative;
-    width: 84px;
-    height: 84px;
+.role-dashboard .dashboard-card:first-child {
+    --tone: #9fe0c3;
+    border-color: var(--dashboard-hero);
+    background: var(--dashboard-hero);
+    color: var(--dashboard-hero-ink);
 }
-.role-dashboard .dashboard-category-chart .dashboard-chart-empty {
-    top: 20%;
-    left: 0;
-    right: 0;
-    font-size: 10px;
+.role-dashboard a.dashboard-card:first-child:hover {
+    border-color: var(--dashboard-hero-hover);
+    background: var(--dashboard-hero-hover);
 }
-.role-dashboard .dashboard-category-legend {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
+.role-dashboard .dashboard-card:first-child :is(.dashboard-card-label, .dashboard-card-unit, .dashboard-card-hint) {
+    color: var(--dashboard-hero-soft);
 }
-.role-dashboard .dashboard-category-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--color-ink);
-    min-height: 26px;
-    width: 100%;
-    text-align: left;
+.role-dashboard .dashboard-card:first-child .dashboard-delta {
+    background: rgb(255 255 255 / 0.16);
+    color: var(--dashboard-hero-ink);
 }
-.role-dashboard .dashboard-category-item i {
-    width: 7px;
-    height: 7px;
-    border-radius: 2px;
-    flex-shrink: 0;
+.role-dashboard .dashboard-card[data-skeleton] {
+    animation: dashboard-pulse 1.2s ease-in-out infinite;
 }
-.role-dashboard .dashboard-category-item span {
-    flex: 1;
-    overflow-wrap: anywhere;
+.role-dashboard .dashboard-card-label {
+    @apply flex min-w-0 items-center gap-2 text-xs leading-[18px] font-semibold text-muted;
+    grid-column: 1 / -1;
 }
-.role-dashboard .dashboard-category-item strong {
-    font-variant-numeric: tabular-nums;
-}
-.role-dashboard .dashboard-category-item:hover span {
-    text-decoration: underline;
-}
-.role-dashboard .dashboard-trend-panel {
-    min-width: 0;
-    padding: 2px 0;
-}
-.role-dashboard .dashboard-trend-summary {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-top: 4px;
-}
-.role-dashboard .dashboard-trend-summary > strong {
-    font-size: 28px;
-    line-height: 34px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-}
-.role-dashboard .dashboard-trend-summary > span {
-    font-size: 11px;
-    color: var(--color-muted);
-}
-.role-dashboard .dashboard-chart-context {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-}
-.role-dashboard .dashboard-series-key {
-    font-size: 11px;
-    color: var(--color-muted);
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    white-space: nowrap;
-}
-.role-dashboard .dashboard-series-key::before {
+.role-dashboard .dashboard-card-label::before {
     content: '';
-    width: 16px;
-    height: 3px;
-    background: var(--dashboard-chart);
+    @apply size-2 shrink-0 rounded-full;
+    background: var(--tone);
 }
-.role-dashboard .dashboard-line-chart {
-    position: relative;
-    height: 192px;
-    margin-top: 8px;
+.role-dashboard .dashboard-card-value {
+    @apply mt-0.5 text-[26px] leading-8 font-semibold tracking-[-0.025em] whitespace-nowrap tabular-nums;
+    grid-column: 1;
 }
-.role-dashboard .dashboard-bar-chart {
-    position: relative;
-    height: 148px;
-    margin-top: 10px;
+.role-dashboard .dashboard-card[data-tone='warn'] .dashboard-card-value {
+    color: var(--color-warning);
+}
+.role-dashboard .dashboard-card-unit {
+    @apply ml-1 text-[12.5px] font-medium tracking-normal text-muted;
+}
+.role-dashboard .dashboard-delta {
+    @apply inline-flex w-fit items-center gap-1 self-center justify-self-end rounded-full bg-subtle px-2 py-0.5 text-[11px] leading-4 font-semibold whitespace-nowrap text-muted;
+    grid-column: 2;
+    grid-row: 2;
+}
+.role-dashboard .dashboard-delta[data-trend='up'] {
+    @apply bg-success-soft text-success;
+}
+.role-dashboard .dashboard-delta[data-trend='down'] {
+    @apply bg-danger-soft text-danger;
+}
+.role-dashboard .dashboard-delta[data-trend='up']::before {
+    content: '▲';
+    font-size: 0.75em;
+}
+.role-dashboard .dashboard-delta[data-trend='down']::before {
+    content: '▼';
+    font-size: 0.75em;
+}
+.role-dashboard .dashboard-card-hint {
+    @apply mt-0.5 truncate text-xs leading-[17px] text-muted;
+    grid-column: 1 / -1;
+}
+@keyframes dashboard-pulse {
+    50% {
+        opacity: 0.55;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .role-dashboard .dashboard-card[data-skeleton] {
+        animation: none;
+    }
+}
+
+/* Status colours shared by the completion bar, legends and table bars. */
+.role-dashboard [data-status='final']:is(.dashboard-stack-segment, i, span) {
+    background: var(--dashboard-primary);
+}
+.role-dashboard [data-status='submitted']:is(.dashboard-stack-segment, i, span) {
+    background: var(--dashboard-status-submitted);
+}
+.role-dashboard [data-status='returned']:is(.dashboard-stack-segment, i, span) {
+    background: var(--dashboard-status-returned);
+}
+.role-dashboard [data-status='not_started']:is(.dashboard-stack-segment, i, span) {
+    background: var(--dashboard-status-pending);
+}
+
+/* Completion ribbon: tinted emerald summary with counts per status. */
+.role-dashboard .dashboard-completion {
+    @apply grid items-center gap-x-6 gap-y-2;
+    grid-template-columns: auto minmax(0, 1fr);
+    border-color: var(--dashboard-tint-line);
+    background: var(--dashboard-tint);
+}
+.role-dashboard .dashboard-completion > .dashboard-panel-head {
+    @apply flex-col items-start gap-0;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+}
+.role-dashboard .dashboard-completion .section-title {
+    @apply whitespace-nowrap;
+}
+/* Desktop: the denominator already sits on the Ketuntasan card, so the long
+   caption and per-status percentages stay available to screen readers only. */
+.role-dashboard [data-dashboard-completion-caption],
+.role-dashboard .dashboard-stack-item small {
+    @apply sr-only;
+}
+.role-dashboard .dashboard-completion > :is(.dashboard-stack, .dashboard-stack-legend) {
+    grid-column: 2;
+}
+.role-dashboard .dashboard-completion > .dashboard-stack {
+    align-self: end;
+}
+.role-dashboard .dashboard-completion > .dashboard-stack-legend {
+    align-self: start;
+}
+.role-dashboard .dashboard-completion-figure {
+    @apply text-[22px] leading-7 font-semibold tracking-[-0.02em] whitespace-nowrap tabular-nums;
+}
+.role-dashboard .dashboard-stack {
+    @apply flex h-2.5 gap-0.5 overflow-hidden rounded-full bg-paper;
+}
+.role-dashboard .dashboard-stack-segment {
+    min-width: 4px;
+    flex-basis: 0;
+}
+.role-dashboard .dashboard-stack-legend {
+    @apply flex flex-wrap gap-1.5;
+}
+.role-dashboard .dashboard-stack-legend:empty {
+    display: none;
+}
+.role-dashboard .dashboard-stack-item {
+    @apply inline-flex min-h-8 items-center gap-1.5 rounded-full border border-line bg-paper px-2.5 text-ink transition-colors hover:border-primary/40;
+}
+.role-dashboard .dashboard-stack-item i {
+    @apply size-2.5 shrink-0 rounded-[3px];
+}
+.role-dashboard .dashboard-stack-item span {
+    @apply text-xs whitespace-nowrap text-muted;
+}
+.role-dashboard .dashboard-stack-item strong {
+    @apply text-[13px] font-semibold tabular-nums;
+}
+.role-dashboard .dashboard-stack-item small {
+    @apply text-[11.5px] text-muted tabular-nums;
+}
+
+/* Charts: fixed plot heights; panels never stretch the canvas. */
+.role-dashboard .dashboard-chart {
+    @apply relative min-w-0;
+}
+.role-dashboard .dashboard-chart-trend {
+    height: var(--dashboard-plot);
+}
+/* dashboard.js sizes the bar chart to its row count (at most 176px). */
+.role-dashboard .dashboard-chart-performance {
+    height: 176px;
+    max-height: 176px;
+}
+.role-dashboard :is(.dashboard-chart-trend, .dashboard-chart-performance) > .dashboard-loading {
+    @apply grid h-full place-items-center;
+}
+.role-dashboard [data-dashboard-chart][data-empty='true'] {
+    height: auto;
+    min-height: 0;
 }
 .role-dashboard canvas {
     display: block;
     width: 100% !important;
-    height: 100% !important;
 }
-.role-dashboard .dashboard-chart-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 32px;
+.role-dashboard .dashboard-series {
+    @apply inline-flex items-center gap-1.5 font-medium text-ink;
 }
-.role-dashboard .dashboard-chart-detail {
-    font-size: 10px;
-    color: var(--color-muted);
-}
-.role-dashboard .dashboard-chart-footer .link {
-    font-size: 11px;
-    min-height: 32px;
-    flex-shrink: 0;
-}
-.role-dashboard .dashboard-chart-empty {
-    position: absolute;
-    top: 40%;
-    left: 20px;
-    right: 20px;
-    color: var(--color-muted);
-    background: var(--color-paper);
-    font-size: 11px;
-    text-align: center;
-    padding: 8px;
-    pointer-events: none;
-}
-.role-dashboard .dashboard-agenda {
-    min-width: 0;
-    border-radius: 8px;
-    background: var(--dashboard-accent-soft);
-    padding: 12px;
-}
-.role-dashboard .dashboard-cycle-status {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--color-success);
-}
-.role-dashboard .dashboard-agenda-month {
-    font-size: 12px;
-    color: var(--color-muted);
-    margin-top: 4px;
-}
-.role-dashboard .dashboard-next-deadline {
-    font-size: 11px;
-    margin: 9px 0 4px;
-    line-height: 17px;
-}
-.role-dashboard .dashboard-agenda-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-}
-.role-dashboard .dashboard-agenda-footer .link {
-    font-size: 10px;
-    min-height: 32px;
-}
-#dashboard-agenda-dialog .dashboard-deadlines {
-    list-style: none;
-    padding: 0;
-}
-#dashboard-agenda-dialog .dashboard-deadlines li {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--color-line);
-}
-#dashboard-agenda-dialog .dashboard-deadlines strong {
-    display: block;
-    font-size: 12px;
-}
-#dashboard-agenda-dialog .dashboard-deadlines span {
-    display: block;
-    color: var(--color-muted);
-    font-size: 12px;
-    margin-top: 3px;
-}
-.role-dashboard .dashboard-deadlines {
-    list-style: none;
-    margin: 12px 0;
-    padding: 0;
-}
-.role-dashboard .dashboard-deadlines li {
-    position: relative;
-    border-left: 1px solid
-        color-mix(in srgb, var(--dashboard-chart) 25%, transparent);
-    padding: 0 0 12px 14px;
-    margin-left: 4px;
-}
-.role-dashboard .dashboard-deadlines li:last-child {
-    border-left-color: transparent;
-    padding-bottom: 0;
-}
-.role-dashboard .dashboard-deadlines li::before {
+.role-dashboard .dashboard-series[data-series='average']::before {
     content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--dashboard-chart);
-    position: absolute;
-    top: 4px;
-    left: -3.5px;
+    @apply h-0.5 w-4 rounded-full;
+    background: var(--dashboard-primary);
 }
-.role-dashboard .dashboard-deadlines strong {
-    font-size: 11px;
-    font-weight: 600;
-    display: block;
-}
-.role-dashboard .dashboard-deadlines span {
-    color: var(--color-muted);
-    font-size: 10px;
-    display: block;
-    margin-top: 2px;
-}
-body[data-app-shell] .role-dashboard .dashboard-agenda-action {
-    width: 100%;
-    justify-content: space-between;
-    background: var(--color-paper);
-    border: 1px solid var(--color-line);
-    color: var(--color-ink);
-    min-height: 36px;
-}
-.role-dashboard .btn svg {
-    width: 16px;
-    height: 16px;
-}
-.role-dashboard .dashboard-details {
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.1fr) minmax(0, 1fr);
-    grid-template-areas: 'comparison tasks findings';
-    gap: 0;
-    align-items: start;
-    padding-top: 18px;
-    border-top: 1px solid var(--color-line);
-}
-.role-dashboard[data-role-dashboard='hc'] .dashboard-details {
-    grid-template-areas: 'comparison findings tasks';
-}
-.role-dashboard .dashboard-comparison-panel {
-    grid-area: comparison;
-    min-width: 0;
-    padding-right: 20px;
-}
-.role-dashboard .dashboard-followup {
-    grid-area: tasks;
-    min-width: 0;
-    padding: 0 18px;
-    border-left: 1px solid var(--color-line);
-}
-.role-dashboard .dashboard-findings-panel {
-    grid-area: findings;
-    min-width: 0;
-    padding-left: 18px;
-    border-left: 1px solid var(--color-line);
-}
-.role-dashboard[data-role-dashboard='hc'] .dashboard-followup {
-    padding: 0 0 0 18px;
-}
-.role-dashboard[data-role-dashboard='hc'] .dashboard-findings-panel {
-    padding: 0 18px;
-}
-.role-dashboard .dashboard-legend {
-    display: flex;
-    gap: 5px 10px;
-    flex-wrap: wrap;
-    font-size: 9px;
-    color: var(--color-muted);
-    margin-top: 6px;
-}
-.role-dashboard .dashboard-legend span {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-.role-dashboard .dashboard-legend i {
-    width: 7px;
-    height: 7px;
-    border-radius: 2px;
-}
-.role-dashboard .dashboard-chart-paging {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-top: 7px;
-    color: var(--color-muted);
-    font-size: 10px;
-}
-.role-dashboard .dashboard-chart-paging[hidden] {
+.role-dashboard .dashboard-show-table :is(.dashboard-chart, .dashboard-donut-body, .dashboard-chart-hint) {
     display: none;
 }
-.role-dashboard .dashboard-chart-paging > div {
-    display: flex;
-    align-items: center;
-    gap: 7px;
+.role-dashboard .dashboard-donut-body {
+    @apply grid items-center gap-4;
+    grid-template-columns: 128px minmax(0, 1fr);
 }
-.role-dashboard .dashboard-chart-paging .pagination-button {
-    width: 44px;
-    height: 44px;
+.role-dashboard .dashboard-donut {
+    @apply relative;
+    width: 128px;
+    height: 128px;
 }
-.role-dashboard .dashboard-task-list,
-.role-dashboard .dashboard-findings {
-    margin-top: 8px;
+.role-dashboard .dashboard-chart-donut {
+    @apply size-full;
 }
-.role-dashboard .dashboard-task,
-.role-dashboard .dashboard-finding {
-    display: block;
-    color: var(--color-ink);
-    padding: 9px 0;
-    border-bottom: 1px solid var(--color-line);
+.role-dashboard .dashboard-chart-donut > .dashboard-loading {
+    @apply grid h-full place-items-center rounded-full text-center;
+    border: 12px solid var(--color-subtle);
 }
-.role-dashboard .dashboard-task:last-child,
-.role-dashboard .dashboard-finding:last-child {
+/* No Final results: a compact message instead of an empty ring. */
+.role-dashboard .dashboard-donut-body:has(.dashboard-empty) {
+    grid-template-columns: minmax(0, 1fr);
+}
+.role-dashboard .dashboard-donut:has(.dashboard-empty) {
+    width: auto;
+    height: auto;
+}
+.role-dashboard .dashboard-donut-center {
+    @apply pointer-events-none absolute inset-0 grid place-content-center text-center;
+}
+.role-dashboard .dashboard-donut-center:empty {
+    display: none;
+}
+.role-dashboard .dashboard-donut-center strong {
+    @apply text-[22px] leading-7 font-semibold tracking-[-0.02em] tabular-nums;
+}
+.role-dashboard .dashboard-donut-center span {
+    @apply text-[11px] text-muted;
+}
+.role-dashboard .dashboard-category-legend {
+    @apply grid;
+}
+.role-dashboard .dashboard-category-legend:empty {
+    display: none;
+}
+.role-dashboard .dashboard-category-item {
+    @apply grid items-baseline gap-x-2 border-b border-line py-1.5;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+}
+.role-dashboard .dashboard-category-item:last-child {
     border-bottom: 0;
 }
-.role-dashboard .dashboard-task:hover strong,
-.role-dashboard .dashboard-finding:hover strong {
-    color: var(--dashboard-chart);
-    text-decoration: underline;
+.role-dashboard .dashboard-category-item i {
+    @apply size-2.5 self-center rounded-full;
 }
-.role-dashboard .dashboard-task strong,
-.role-dashboard .dashboard-finding strong {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    overflow-wrap: anywhere;
+.role-dashboard .dashboard-category-item span {
+    @apply truncate text-[12.5px] font-medium;
 }
-.role-dashboard .dashboard-task-detail,
-.role-dashboard .dashboard-finding p {
-    font-size: 10px;
-    color: var(--color-muted);
-    margin: 3px 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.role-dashboard .dashboard-category-item strong {
+    @apply text-[13px] font-semibold tabular-nums;
 }
-.role-dashboard .dashboard-task small {
-    display: block;
-    font-size: 9px;
+.role-dashboard .dashboard-category-item small {
+    grid-column: 2 / -1;
+    @apply text-[11px] leading-4 text-muted;
+}
+
+/* Local scrolling: chart data, progress table and lists scroll in place with
+   sticky headers so the dashboard itself stays short. */
+.role-dashboard .table-wrap.dashboard-chart-table {
+    max-height: 240px;
+    overflow: auto;
+}
+.role-dashboard .dashboard-progress-scroll {
+    max-height: 200px;
+    overflow: auto;
+}
+.role-dashboard :is(.dashboard-progress-scroll, .dashboard-chart-table) > .data-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: color-mix(in srgb, var(--color-subtle) 60%, var(--color-paper));
+}
+.role-dashboard :is(.dashboard-task-list, .dashboard-indicator-list, .dashboard-activity-list) {
+    max-height: var(--dashboard-list);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* Indicators */
+.role-dashboard .dashboard-indicators .workspace-tabs {
+    align-self: flex-start;
+}
+.role-dashboard .dashboard-indicator-list {
+    @apply grid content-start;
+}
+.role-dashboard .dashboard-indicator {
+    --tone: var(--dashboard-primary);
+    @apply grid items-center gap-3 border-b border-line py-1.5;
+    grid-template-columns: minmax(0, 1fr) minmax(64px, 26%) 36px;
+}
+.role-dashboard .dashboard-indicator:last-child {
+    border-bottom: 0;
+}
+.role-dashboard .dashboard-indicator[data-tone='low'] {
+    --tone: var(--dashboard-status-returned);
+}
+.role-dashboard .dashboard-indicator-text {
+    @apply grid min-w-0 gap-0.5;
+}
+.role-dashboard .dashboard-indicator-text strong {
+    @apply line-clamp-2 text-[13px] leading-[18px] font-medium;
+}
+.role-dashboard .dashboard-indicator-text small {
+    @apply text-[11px] text-muted;
+}
+.role-dashboard .dashboard-indicator-track {
+    @apply h-1.5 overflow-hidden rounded-full bg-subtle;
+}
+.role-dashboard .dashboard-indicator-track span {
+    @apply block h-full rounded-[inherit];
+    background: var(--tone);
+}
+.role-dashboard .dashboard-indicator b {
+    @apply text-right text-[13px] font-semibold tabular-nums;
+}
+
+/* Agenda: next deadline first, full schedule in a native disclosure. */
+.role-dashboard .dashboard-agenda {
+    @apply gap-1.5;
+}
+.role-dashboard .dashboard-chip {
+    @apply rounded-full bg-subtle px-2.5 py-0.5 text-[11.5px] leading-[18px] font-semibold whitespace-nowrap text-muted;
+}
+.role-dashboard .dashboard-chip[data-status='open'] {
+    @apply bg-success-soft text-success;
+}
+.role-dashboard .dashboard-deadline {
+    @apply flex flex-wrap items-center gap-x-2 gap-y-1;
+}
+.role-dashboard .dashboard-deadline strong {
+    @apply text-sm leading-5 font-semibold;
+}
+.role-dashboard .dashboard-deadline-time {
+    @apply text-[12.5px] leading-5 text-muted;
+}
+.role-dashboard .dashboard-deadline > .dashboard-countdown {
+    @apply ml-auto w-fit rounded-full bg-success-soft px-2.5 py-0.5 text-[12.5px] leading-[18px] font-semibold whitespace-nowrap text-success;
+}
+.role-dashboard .dashboard-countdown[data-tone='warn'] {
+    @apply bg-warning-soft text-warning;
+}
+.role-dashboard .dashboard-countdown[data-tone='danger'] {
+    @apply bg-danger-soft text-danger;
+}
+.role-dashboard .dashboard-deadline > :is(.dashboard-loading, .dashboard-empty) {
+    @apply w-full;
+}
+.role-dashboard .dashboard-agenda-foot {
+    @apply flex flex-wrap items-center justify-between gap-x-3;
+}
+.role-dashboard .dashboard-schedule-details {
+    @apply min-w-0 flex-auto;
+}
+.role-dashboard .dashboard-schedule-details[open] {
+    flex-basis: 100%;
+}
+.role-dashboard .dashboard-schedule-details summary {
+    @apply inline-flex min-h-8 cursor-pointer list-none items-center gap-1.5 rounded-lg text-[13px] font-semibold text-link;
+}
+.role-dashboard .dashboard-schedule-details summary::-webkit-details-marker {
+    display: none;
+}
+.role-dashboard .dashboard-schedule-details summary::before {
+    content: '▸';
+    transition: transform 0.15s;
+}
+.role-dashboard .dashboard-schedule-details[open] summary::before {
+    transform: rotate(90deg);
+}
+.role-dashboard .dashboard-schedule {
+    @apply grid pb-1;
+    max-height: 220px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+.role-dashboard .dashboard-schedule li {
+    @apply relative grid py-1.5 pl-6 text-[12.5px] leading-[18px];
+}
+.role-dashboard .dashboard-schedule li::before {
+    content: '';
+    @apply absolute top-[10px] left-0.5 z-[1] size-2.5 rounded-full border-2 border-line bg-paper;
+}
+.role-dashboard .dashboard-schedule li:not(:last-child)::after {
+    content: '';
+    @apply absolute top-5 -bottom-2.5 left-[6px] w-0.5 bg-line;
+}
+.role-dashboard .dashboard-schedule li[data-state='past'] {
+    @apply text-muted;
+}
+.role-dashboard .dashboard-schedule li[data-state='past']::before {
+    border-color: color-mix(in srgb, var(--dashboard-primary) 45%, var(--color-paper));
+    background: color-mix(in srgb, var(--dashboard-primary) 45%, var(--color-paper));
+}
+.role-dashboard .dashboard-schedule li[data-state='next'] {
+    @apply font-semibold;
+}
+.role-dashboard .dashboard-schedule li[data-state='next']::before {
+    border-color: var(--dashboard-primary);
+    background: var(--dashboard-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dashboard-primary) 20%, transparent);
+}
+.role-dashboard .dashboard-schedule li[data-relevant] > span::after {
+    content: 'Batas Anda';
+    @apply ml-1.5 rounded-full bg-info-soft px-1.5 py-px text-[10.5px] font-semibold text-info;
+}
+.role-dashboard .dashboard-schedule time {
+    @apply text-xs font-normal text-muted;
+}
+.role-dashboard .dashboard-panel-link {
+    @apply inline-flex min-h-8 items-center text-[13px];
+}
+
+/* Tasks */
+.role-dashboard .dashboard-task-list {
+    @apply grid content-start;
+}
+.role-dashboard .dashboard-task-list > li + li {
+    @apply border-t border-line;
+}
+.role-dashboard .dashboard-task {
+    @apply grid min-h-10 items-center gap-2.5 py-1.5 text-ink;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+}
+.role-dashboard .dashboard-task-body {
+    @apply grid min-w-0 gap-0.5;
+}
+.role-dashboard .dashboard-task-body strong {
+    @apply truncate text-[13px] font-semibold transition-colors;
+}
+.role-dashboard .dashboard-task:hover .dashboard-task-body strong {
+    @apply text-link;
+}
+.role-dashboard .dashboard-task-body small {
+    @apply truncate text-xs text-muted;
 }
 .role-dashboard .dashboard-task .assessment-status {
-    font-size: 9px;
+    font-size: 10.5px;
 }
 .role-dashboard .dashboard-task-action {
-    display: inline-block;
-    color: var(--dashboard-chart);
-    font-size: 10px;
-    font-weight: 600;
-    margin-left: 8px;
+    @apply text-[12.5px] font-semibold text-link;
 }
-.role-dashboard .dashboard-finding-label {
-    font-size: 9px;
-    color: var(--color-success);
+.role-dashboard .dashboard-task:hover .dashboard-task-action {
+    text-decoration: underline;
 }
-.role-dashboard .dashboard-finding-label[data-kind='negative'] {
-    color: var(--color-warning);
+
+/* Progress table */
+.role-dashboard .dashboard-progress .data-table th {
+    @apply py-2;
 }
-.role-dashboard .dashboard-empty {
-    color: var(--color-muted);
-    font-size: 11px;
-    padding: 12px 0;
+.role-dashboard .dashboard-progress .data-table td {
+    @apply py-2;
 }
-.role-dashboard .dashboard-loading {
-    color: var(--color-muted);
-    font-size: 11px;
-    padding: 50px 10px;
-    text-align: center;
+.role-dashboard .dashboard-progress .data-table td small {
+    @apply block text-[11.5px] leading-4 text-muted;
+}
+@media (min-width: 901px) {
+    /* One line per row; wide content scrolls sideways inside the table box. */
+    .role-dashboard .dashboard-progress-scroll > .data-table {
+        min-width: 720px;
+    }
+    .role-dashboard .dashboard-progress-scroll > .data-table :is(th, td):not(.empty) {
+        white-space: nowrap;
+    }
+}
+.role-dashboard .dashboard-mini {
+    @apply flex min-w-0 items-center gap-2 text-xs tabular-nums;
+}
+.role-dashboard .dashboard-mini-stack {
+    @apply flex h-1.5 flex-1 gap-px overflow-hidden rounded-full bg-subtle;
+    min-width: 48px;
+}
+.role-dashboard .dashboard-mini-stack span {
+    min-width: 2px;
+    flex-basis: 0;
+}
+.role-dashboard .dashboard-expand {
+    @apply ml-2 inline-flex min-h-6 items-center gap-1 align-middle text-xs font-semibold whitespace-nowrap text-link;
+}
+.role-dashboard .dashboard-expand::before {
+    content: '▸';
+    transition: transform 0.15s;
+}
+.role-dashboard .dashboard-expand[aria-expanded='true']::before {
+    transform: rotate(90deg);
+}
+.role-dashboard .dashboard-subrow {
+    background: color-mix(in srgb, var(--color-subtle) 70%, transparent);
+}
+.role-dashboard .dashboard-subrow td:first-child {
+    padding-left: 28px;
+}
+
+/* Activities */
+.role-dashboard .dashboard-activity-list {
+    @apply grid content-start;
+}
+.role-dashboard .dashboard-activity {
+    @apply grid min-w-0 items-baseline gap-x-2 gap-y-0.5 border-b border-line py-1.5;
+    grid-template-columns: auto minmax(0, 1fr);
+}
+.role-dashboard .dashboard-activity:last-child {
+    border-bottom: 0;
+}
+.role-dashboard .dashboard-activity strong {
+    @apply text-[13px] font-semibold whitespace-nowrap;
+}
+.role-dashboard .dashboard-activity span {
+    @apply truncate text-[12.5px];
+}
+.role-dashboard .dashboard-activity small {
+    grid-column: 1 / -1;
+    @apply text-[11.5px] text-muted;
+}
+
+@media (min-width: 601px) {
+    /* Fixed table layout: give the name and progress columns room to breathe. */
+    .role-dashboard .dashboard-progress .data-table :is(th, td):first-child {
+        width: 26%;
+    }
+    .role-dashboard .dashboard-progress .data-table th:nth-child(7) {
+        width: 18%;
+    }
+    .role-dashboard .dashboard-progress .data-table :is(th, td):last-child:not(:first-child) {
+        width: 76px;
+        text-align: right;
+    }
+}
+@media (max-width: 1280px) {
+    .role-dashboard .dashboard-row-analytics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .role-dashboard .dashboard-trend {
+        grid-column: 1 / -1;
+    }
 }
 @media (max-width: 1100px) {
-    body[data-app-shell] .role-dashboard.page-content {
-        padding: 18px;
-        margin: 12px;
-    }
-    .role-dashboard .dashboard-metrics {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .role-dashboard .dashboard-overview {
+    .role-dashboard :is(.dashboard-row-status, .dashboard-row-work) {
         grid-template-columns: minmax(0, 1fr);
-        gap: 18px;
     }
-    .role-dashboard .dashboard-aside {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+    .role-dashboard .dashboard-column:last-child {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
         align-items: start;
     }
-    .role-dashboard .dashboard-category-panel {
-        border-bottom: 0;
+}
+@media (max-width: 900px) {
+    /* Tables become stacked rows here: let the page scroll instead of
+       nesting a second vertical scroller. */
+    .role-dashboard .dashboard-progress-scroll {
+        max-height: none;
     }
-    .role-dashboard .dashboard-details,
-    .role-dashboard[data-role-dashboard='hc'] .dashboard-details {
+    /* Plain vertical flow: no desktop grid placement survives here. */
+    .role-dashboard .dashboard-completion {
+        @apply flex flex-col items-stretch gap-2.5;
+    }
+    .role-dashboard .dashboard-completion > .dashboard-panel-head {
+        @apply w-full min-w-0;
+    }
+    .role-dashboard .dashboard-completion .section-title {
+        @apply whitespace-normal;
+    }
+    .role-dashboard .dashboard-completion > .dashboard-stack-legend {
+        @apply grid w-full min-w-0 gap-2;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .role-dashboard .dashboard-completion > .dashboard-stack-legend:empty {
+        display: none;
+    }
+    .role-dashboard .dashboard-stack-legend > li {
+        @apply min-w-0;
+    }
+    .role-dashboard .dashboard-stack-item {
+        @apply flex w-full min-w-0 rounded-[10px];
+    }
+    .role-dashboard .dashboard-stack-item span {
+        @apply min-w-0 truncate;
+    }
+    .role-dashboard .dashboard-stack-item strong {
+        @apply ml-auto;
+    }
+    .role-dashboard [data-dashboard-completion-caption],
+    .role-dashboard .dashboard-stack-item small {
+        @apply not-sr-only;
+    }
+}
+@media (max-width: 760px) {
+    .role-dashboard .dashboard-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .role-dashboard .dashboard-row-analytics {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: 'comparison' 'tasks' 'findings';
-        gap: 18px;
-    }
-    .role-dashboard .dashboard-comparison-panel,
-    .role-dashboard .dashboard-followup,
-    .role-dashboard .dashboard-findings-panel,
-    .role-dashboard[data-role-dashboard='hc'] .dashboard-followup,
-    .role-dashboard[data-role-dashboard='hc'] .dashboard-findings-panel {
-        padding: 0;
-        border-left: 0;
-    }
-    .role-dashboard .dashboard-followup,
-    .role-dashboard .dashboard-findings-panel {
-        border-top: 1px solid var(--color-line);
-        padding-top: 14px !important;
-    }
-    .role-dashboard .dashboard-bar-chart {
-        height: 190px;
     }
 }
 @media (max-width: 600px) {
     body[data-app-shell] .role-dashboard.page-content {
-        margin: 8px;
-        padding: 14px 12px;
-        gap: 16px;
+        @apply gap-3;
+        padding-top: 18px;
     }
-    .role-dashboard .dashboard-heading {
-        align-items: flex-start;
-        flex-wrap: wrap;
+    .role-dashboard .dashboard-heading .lead {
+        @apply text-[20px] leading-7;
     }
-    .role-dashboard .dashboard-metrics {
-        gap: 8px;
+    .role-dashboard .dashboard-heading-actions {
+        @apply w-full;
     }
-    .role-dashboard .dashboard-metric {
-        padding: 10px;
+    .role-dashboard .dashboard-heading-actions .btn {
+        @apply min-h-11;
     }
-    .role-dashboard .figure-label {
-        font-size: 11px;
+    .role-dashboard .dashboard-heading-actions .btn-primary {
+        @apply flex-1 justify-center;
     }
-    .role-dashboard .figure-value {
-        font-size: 25px;
+    .role-dashboard .dashboard-heading-actions [data-dashboard-reload] {
+        @apply min-w-11 px-0;
     }
-    .role-dashboard .dashboard-trend-panel > .dashboard-section-head {
-        align-items: flex-start;
+    .role-dashboard [data-dashboard-reload] span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
     }
-    .role-dashboard .dashboard-trend-summary {
-        flex-wrap: wrap;
-        gap: 2px;
+    .role-dashboard .dashboard-panel-head > .link,
+    .role-dashboard .dashboard-panel-head > button.link,
+    .role-dashboard .dashboard-panel-link,
+    .role-dashboard .dashboard-schedule-details summary,
+    .role-dashboard .dashboard-stack-item,
+    .role-dashboard .dashboard-expand {
+        @apply min-h-11;
     }
-    .role-dashboard .dashboard-chart-context {
-        max-width: 110px;
+    .role-dashboard .dashboard-cards {
+        @apply gap-2.5;
     }
-    .role-dashboard .dashboard-aside {
+    .role-dashboard .dashboard-card {
+        @apply rounded-xl px-3.5 py-3;
+        min-height: 92px;
+    }
+    .role-dashboard .dashboard-card-value {
+        @apply text-[22px] leading-7;
+    }
+    .role-dashboard .dashboard-delta {
+        grid-column: 1 / -1;
+        grid-row: auto;
+        justify-self: start;
+    }
+    .role-dashboard .dashboard-card-hint {
+        @apply text-[11px] leading-4;
+    }
+    .role-dashboard .dashboard-panel {
+        @apply rounded-xl;
+    }
+    .role-dashboard .dashboard-completion-figure {
+        @apply text-[20px] leading-7;
+    }
+    /* Page scroll only on phones: no nested scroll traps. */
+    .role-dashboard :is(.dashboard-task-list, .dashboard-indicator-list, .dashboard-activity-list, .dashboard-schedule) {
+        max-height: none;
+        overflow: visible;
+    }
+    .role-dashboard .dashboard-donut-body {
         grid-template-columns: minmax(0, 1fr);
+        justify-items: center;
     }
-    .role-dashboard .dashboard-category-item {
-        min-height: 44px;
+    .role-dashboard .dashboard-category-legend {
+        @apply w-full;
     }
-    .role-dashboard .dashboard-category-chart {
-        width: 112px;
-        height: 112px;
+    .role-dashboard .dashboard-indicator {
+        grid-template-columns: minmax(0, 1fr) 36px;
+        row-gap: 6px;
     }
-    .role-dashboard .dashboard-category-body {
-        grid-template-columns: 112px minmax(0, 1fr);
+    .role-dashboard .dashboard-indicator-text {
+        grid-column: 1 / -1;
     }
-    .role-dashboard .dashboard-agenda-footer .link {
-        min-height: 44px;
+    .role-dashboard .dashboard-task {
+        grid-template-columns: minmax(0, 1fr) auto;
     }
-    .role-dashboard .dashboard-line-chart {
-        height: 210px;
+    .role-dashboard .dashboard-task-action {
+        display: none;
     }
-    .role-dashboard .dashboard-bar-chart {
-        height: 200px;
-    }
-    .role-dashboard .dashboard-section-head > .link,
-    .role-dashboard .dashboard-chart-footer .link {
-        min-height: 44px;
-    }
-    body[data-app-shell] .role-dashboard .dashboard-agenda-action {
-        min-height: 44px;
-    }
-    .role-dashboard .dashboard-task,
-    .role-dashboard .dashboard-finding {
-        padding: 12px 0;
+    .role-dashboard .dashboard-subrow td:first-child {
+        padding-left: 0;
     }
 }

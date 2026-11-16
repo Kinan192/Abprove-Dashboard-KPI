@@ -1,4 +1,3 @@
-export const FLOW_KEY = 'abprove-flow-v2';
 export const uid = (prefix) => `${prefix}-${crypto.randomUUID()}`;
 export const previousMonth = (key) => {
     const [y, m] = key.split('-').map(Number);
@@ -19,6 +18,32 @@ export const itemSignature = (r) =>
         r.target,
         r.formula,
     ]);
+/** Status of a person-month whose assessments are outside the loaded window; never "Belum diisi". */
+export const NOT_LOADED = 'Belum dimuat';
+/** Sections fetched for a month outside the page window, using the `kerja` profile (month and the one before). */
+const MONTH_SECTIONS = ['accounts', 'positions', 'staff', 'heads', 'kpis', 'assessments', 'assessmentTemplates'];
+export function workspaceQuery(profile, cycle, sections) {
+    const query = new URLSearchParams({ page: profile });
+    if (cycle) query.set('cycle', cycle);
+    for (const section of sections) query.append('only[]', section);
+    return query;
+}
+function monthsBetween(from, to) {
+    const keys = [];
+    for (let key = from; key <= to; key = nextMonth(key)) keys.push(key);
+    return keys;
+}
+/** Month -> 'all' (every status loaded) or 'final' (Final results only), from the server window. */
+function coverageOf(window) {
+    return new Map(
+        window
+            ? monthsBetween(window.from, window.to).map((key) => [
+                  key,
+                  window.complete.includes(key) ? 'all' : 'final',
+              ])
+            : [],
+    );
+}
 function resolveSnapshots(data) {
     if (!data.assessmentTemplates) return;
     for (const assessment of Object.values(data.assessments || {})) {
@@ -27,201 +52,104 @@ function resolveSnapshots(data) {
     }
     delete data.assessmentTemplates;
 }
-export function createFlowStore(c) {
-    const f = c.fixture || { year: new Date().getFullYear() },
-        items = (key) =>
-            f.templates[key].kpi.map((r, i) => ({
-                id: `${key}-${i}`,
-                pillar: r[0],
-                name: r[1],
-                numerator: r[2],
-                denominator: r[3],
-                formula: r[4],
-                target: r[5],
-                weight: +r[6],
-            }));
-    function seed() {
-        const positions = [...new Set(f.employees.map((p) => p.jab))].map(
-            (name, i) => ({
-                id: `POS-${i}`,
-                code: `J${i + 1}`,
-                name,
-                active: true,
-            }),
-        );
-        const accounts = f.accounts.map((a) => ({
-            id: a.key,
-            name: a.nama,
-            nip: a.nip,
-            email: a.email,
-            role: a.role,
-            active: true,
-        }));
-        const divisions = f.divisions.map((d) => ({
-            id: d.id,
-            name: d.nama,
-            code: d.id,
-            headId: accounts.find(
-                (a) =>
-                    a.role === 'kd' &&
-                    f.accounts.find((x) => x.key === a.id)?.div === d.id,
-            )?.id,
-            active: true,
-        }));
-        const units = f.units.map((u) => ({
-            id: u.id,
-            name: u.nama,
-            code: u.id,
-            divisionId: u.div,
-            headId: accounts.find(
-                (a) =>
-                    a.role === 'ku' &&
-                    f.accounts.find((x) => x.key === a.id)?.unit === u.id,
-            )?.id,
-            active: true,
-        }));
-        const staff = f.employees.map((p) => ({
-            id: p.id,
-            name: p.nama,
-            nip: p.nip,
-            positionId: positions.find((x) => x.name === p.jab).id,
-            active: true,
-            placements: [{ unitId: p.unit, from: '2026-01', until: null }],
-        }));
-        const heads = units.map((u) => ({
-            id: `HEAD-${u.headId}`,
-            accountId: u.headId,
-            unitId: u.id,
-            divisionId: u.divisionId,
-            from: '2026-01',
-            until: null,
-        }));
-        const kpis = [
-            ...units.map((u) => ({
-                id: `KPI-unit-${u.id}-v1`,
-                level: 'unit',
-                areaId: u.id,
-                name: `KPI Staf - ${u.name}`,
-                version: 1,
-                from: '2026-01',
-                until: null,
-                items: items('GP'),
-            })),
-            ...divisions.map((d) => ({
-                id: `KPI-division-${d.id}-v1`,
-                level: 'division',
-                areaId: d.id,
-                name: `KPI Kepala Unit - ${d.name}`,
-                version: 1,
-                from: '2026-01',
-                until: null,
-                items: items('YJM'),
-            })),
-        ];
-        const cycles = Array.from({ length: 12 }, (_, i) => ({
-            id: `2026-${String(i + 1).padStart(2, '0')}`,
-            status: i < 10 ? 'closed' : i === 10 ? 'open' : 'planned',
-            opens: `2026-${String(i + 1).padStart(2, '0')}-01T00:00`,
-            submission: `${i === 11 ? 2027 : 2026}-${String(i === 11 ? 1 : i + 2).padStart(2, '0')}-05T23:59`,
-            approval: `${i === 11 ? 2027 : 2026}-${String(i === 11 ? 1 : i + 2).padStart(2, '0')}-10T23:59`,
-            closes: `${i === 11 ? 2027 : 2026}-${String(i === 11 ? 1 : i + 2).padStart(2, '0')}-15T23:59`,
-            categories: { sb: 90, b: 80, c: 70 },
-        }));
-        const assessments = {};
-        for (const [key, a] of Object.entries(f.state.ev)) {
-            const [id, month] = key.split('|'),
-                p = staff.find((p) => p.id === id);
-            if (!p || ['Draft', 'Belum'].includes(a.status)) continue;
-            const raw = f.employees.find((e) => e.id === id),
-                unit = units.find((u) => u.id === raw.unit),
-                cycle = `2026-${String(+month + 1).padStart(2, '0')}`;
-            assessments[`${id}|${cycle}`] = {
-                status: a.status === 'Disetujui' ? 'Final' : a.status,
-                values: { ...a.vals },
-                positive: a.pos || '',
-                negative: a.neg || '',
-                reason: a.note || '',
-                snapshot:
-                    a.status === 'Final'
-                        ? {
-                              id: `legacy-${raw.tpl}`,
-                              name: f.templates[raw.tpl].nama,
-                              version: 1,
-                              items: items(raw.tpl),
-                          }
-                        : structuredClone(
-                              kpis.find(
-                                  (k) =>
-                                      k.level === 'unit' &&
-                                      k.areaId === unit.id,
-                              ),
-                          ),
-                scope: { unitId: unit.id, divisionId: unit.divisionId },
-                history: [],
-                category:
-                    a.status === 'Final'
-                        ? categorize(totalValues(a.vals, items(raw.tpl)), {
-                              sb: 90,
-                              b: 80,
-                              c: 70,
-                          })
-                        : null,
-            };
-        }
-        return {
-            version: 2,
-            accounts,
-            positions,
-            divisions,
-            units,
-            staff,
-            heads,
-            kpis,
-            cycles,
-            assessments,
-            activities: [],
-            profiles: {},
-            read: [],
-        };
+function unionBy(rows, extra, key, combine = (old) => old) {
+    const merged = new Map(rows.map((row) => [key(row), row]));
+    for (const row of extra) {
+        const id = key(row);
+        merged.set(id, merged.has(id) ? combine(merged.get(id), row) : row);
     }
-    let data = c.workspace;
-    try {
-        if (c.review) data = JSON.parse(localStorage.getItem(FLOW_KEY));
-    } catch {}
-    if (c.review && data?.version !== 2) data = seed();
+    return [...merged.values()];
+}
+export function createFlowStore(c) {
+    const data = c.workspace;
     if (!data) throw new Error('Data server belum tersedia.');
     resolveSnapshots(data);
+    for (const name of ['positions', 'staff', 'heads', 'kpis']) data[name] ??= [];
+    data.assessments ??= {};
+    let coverage = coverageOf(c.workspaceWindow);
     const cycleKey =
         c.selectedCycle ||
         new URLSearchParams(location.search).get('cycle') ||
-        `${f.year}-${String(c.month + 1).padStart(2, '0')}`;
-    const requested = c.review
-        ? new URLSearchParams(location.search).get('account')
-        : null;
+        `${new Date().getFullYear()}-${String(c.month + 1).padStart(2, '0')}`;
     const actor =
         data.accounts.find(
-            (a) => a.id === (requested || c.actor.key) && a.role === c.role,
+            (a) => a.id === c.actor.key && a.role === c.role,
         ) || data.accounts.find((a) => a.role === c.role);
-    const account = (id) => data.accounts.find((a) => a.id === id),
-        unit = (id) => data.units.find((u) => u.id === id),
-        division = (id) => data.divisions.find((d) => d.id === id);
-    const cycle = () => data.cycles.find((x) => x.id === cycleKey);
+    // Derived lookups are rebuilt when a source section is replaced, and cleared on every merge.
+    const indexes = new Map();
+    function cached(name, sources, build) {
+        const inputs = sources.map((source) => data[source]);
+        let entry = indexes.get(name);
+        if (!entry || entry.inputs.some((input, i) => input !== inputs[i]))
+            indexes.set(name, (entry = { inputs, value: build() }));
+        return entry.value;
+    }
+    const byId = (name, id) =>
+        cached(name, [name], () => new Map(data[name].map((row) => [row.id, row]))).get(id);
+    const account = (id) => byId('accounts', id),
+        unit = (id) => byId('units', id),
+        division = (id) => byId('divisions', id),
+        position = (id) => byId('positions', id),
+        cycle = (key = cycleKey) => byId('cycles', key);
+    const areas = () =>
+        cached('areas', ['units', 'divisions'], () => {
+            const divisions = new Set(
+                data.divisions
+                    .filter((d) => d.headId === actor?.id)
+                    .map((d) => d.id),
+            );
+            return {
+                divisions,
+                units: new Set(
+                    data.units
+                        .filter((u) =>
+                            c.role === 'hc'
+                                ? true
+                                : c.role === 'ku'
+                                  ? u.headId === actor?.id
+                                  : divisions.has(u.divisionId),
+                        )
+                        .map((u) => u.id),
+                ),
+            };
+        });
+    /** Sealed templates by assigned person and by unit/division area, in server order. */
+    const kpiIndex = () =>
+        cached('kpiIndex', ['kpis'], () => {
+            const byPerson = new Map(),
+                byArea = new Map();
+            const add = (map, key, k) =>
+                map.get(key)?.push(k) ?? map.set(key, [k]);
+            for (const k of data.kpis)
+                if (k.forPeople?.length)
+                    k.forPeople.forEach((id) => add(byPerson, id, k));
+                else add(byArea, `${k.level}|${k.areaId}`, k);
+            return { byPerson, byArea };
+        });
+    const loaded = (key, finalOnly = false) =>
+        coverage.get(key) === 'all' ||
+        (finalOnly && coverage.get(key) === 'final');
     const assessment = (id, key = cycleKey) =>
         data.assessments[`${id}|${key}`] || {
-            status: 'Belum',
+            status: loaded(key) ? 'Belum' : NOT_LOADED,
             values: {},
             positive: '',
             negative: '',
             reason: '',
             snapshot: null,
-            history: [],
         };
     const placement = (p, key = cycleKey) =>
         p.placements
             .filter((x) => x.from <= key && (!x.until || x.until >= key))
             .at(-1);
+    function allowed(p) {
+        if (c.role === 'hc') return true;
+        if (c.role === 'ku')
+            return p.type === 'member' && areas().units.has(p.unitId);
+        return areas().divisions.has(p.divisionId);
+    }
     const peopleByMonth = new Map();
-    function allPeople(key = cycleKey) {
+    function month(key) {
         if (peopleByMonth.has(key)) return peopleByMonth.get(key);
         const staff = data.staff
             .map((p) => {
@@ -233,9 +161,7 @@ export function createFlowStore(c) {
                           type: 'member',
                           unitId: u.id,
                           divisionId: a.scope?.divisionId || u.divisionId,
-                          job:
-                              data.positions.find((x) => x.id === p.positionId)
-                                  ?.name || '-',
+                          job: position(p.positionId)?.name || '-',
                           unitName: u.name,
                           divisionName:
                               division(a.scope?.divisionId || u.divisionId)
@@ -245,17 +171,19 @@ export function createFlowStore(c) {
                     : null;
             })
             .filter(Boolean);
+        const headRows = Map.groupBy(data.heads, (h) => h.id);
         const heads = data.heads
-            .filter((h, _, records) => {
+            .filter((h) => {
                 const scope = assessment(h.id, key).scope;
-                const matches = records.filter(
-                    (r) =>
-                        r.id === h.id &&
-                        r.from <= key &&
-                        (scope
-                            ? r.unitId === scope.unitId
-                            : !r.until || r.until >= key),
-                );
+                const matches = headRows
+                    .get(h.id)
+                    .filter(
+                        (r) =>
+                            r.from <= key &&
+                            (scope
+                                ? r.unitId === scope.unitId
+                                : !r.until || r.until >= key),
+                    );
                 return (
                     h ===
                     matches.sort((a, b) => b.from.localeCompare(a.from))[0]
@@ -276,107 +204,55 @@ export function createFlowStore(c) {
                     active: !h.until || h.until >= key,
                 };
             });
-        const rows = [...staff, ...heads];
-        peopleByMonth.set(key, rows);
-        return rows;
-    }
-    function allowed(p) {
-        if (c.role === 'hc') return true;
-        if (c.role === 'ku')
-            return (
-                p.type === 'member' &&
-                data.units.some(
-                    (u) => u.id === p.unitId && u.headId === actor?.id,
-                )
-            );
-        return data.divisions.some(
-            (d) => d.id === p.divisionId && d.headId === actor?.id,
-        );
-    }
-    const people = (kind = 'all', key = cycleKey) =>
-        allPeople(key).filter(
+        const all = [...staff, ...heads];
+        const visible = all.filter(
             (p) =>
                 allowed(p) &&
-                (kind === 'all' || p.type === kind) &&
                 (p.active !== false ||
-                    assessment(p.id, key).status !== 'Belum'),
+                    !['Belum', NOT_LOADED].includes(
+                        assessment(p.id, key).status,
+                    )),
         );
-    const scopedUnits = () =>
-        data.units.filter(
-            (u) =>
-                c.role === 'hc' ||
-                (c.role === 'ku' && u.headId === actor?.id) ||
-                (c.role === 'kd' &&
-                    division(u.divisionId)?.headId === actor?.id),
-        );
-    const person = (id, key = cycleKey) =>
-        people('all', key).find((p) => p.id === id);
+        const entry = {
+            all,
+            visible,
+            byId: new Map(visible.map((p) => [p.id, p])),
+        };
+        peopleByMonth.set(key, entry);
+        return entry;
+    }
+    const allPeople = (key = cycleKey) => month(key).all;
+    const people = (kind = 'all', key = cycleKey) =>
+        month(key).visible.filter((p) => kind === 'all' || p.type === kind);
+    const person = (id, key = cycleKey) => month(key).byId.get(id);
+    const scopedUnits = () => data.units.filter((u) => areas().units.has(u.id));
+    const current = (k, key) => k.from <= key && (!k.until || k.until >= key);
     function template(p, key = cycleKey) {
         const a = assessment(p.id, key);
         if (a.snapshot) return a.snapshot;
-        const assigned = data.kpis.findLast(
-            (k) => k.forPeople?.includes(p.id) && k.from <= key && (!k.until || k.until >= key),
-        );
+        const index = kpiIndex();
+        const assigned = index.byPerson.get(p.id)?.findLast((k) => current(k, key));
         if (assigned) return assigned.items.length ? assigned : null;
-        if (data.cycles.find((cycle) => cycle.id === key)?.managed) return null;
-        const level = p.type === 'member' ? 'unit' : 'division',
-            areaId = p.type === 'member' ? p.unitId : p.divisionId;
-        return (
-            data.kpis
-                .filter(
-                    (k) =>
-                        !k.forPeople?.length && k.level === level &&
-                        k.areaId === areaId &&
-                        k.from <= key &&
-                        (!k.until || k.until >= key),
-                )
-                .at(-1) || null
-        );
+        if (cycle(key)?.managed) return null;
+        const area = p.type === 'member' ? `unit|${p.unitId}` : `division|${p.divisionId}`;
+        return index.byArea.get(area)?.findLast((k) => current(k, key)) || null;
     }
     const total = (id, key = cycleKey) => {
-        if (!c.review && assessment(id, key).serverTotal != null)
-            return +assessment(id, key).serverTotal;
+        const a = assessment(id, key);
+        if (a.serverTotal != null) return +a.serverTotal;
         const p = person(id, key);
-        return p
-            ? totalValues(
-                  assessment(id, key).values,
-                  template(p, key)?.items || [],
-              )
-            : null;
+        return p ? totalValues(a.values, template(p, key)?.items || []) : null;
     };
     const category = (id, key = cycleKey) =>
         assessment(id, key).category ||
         categorize(
             total(id, key),
-            (c.review
-                ? data.cycles.find((x) => x.id === key)?.categories
-                : data.cycles.find((x) => x.id === key)?.ranges) || {
+            cycle(key)?.ranges || {
                 sb: 90,
                 b: 80,
                 c: 70,
             },
         );
-    function save(action, detail, before = null, after = null) {
-        if (!c.review)
-            throw new Error('Data aplikasi harus disimpan melalui API.');
-        peopleByMonth.clear();
-        if (action)
-            data.activities.unshift({
-                id: uid('ACT'),
-                at: new Date().toISOString(),
-                who: actor?.name || c.actor.nama,
-                action,
-                detail,
-                before,
-                after,
-            });
-        try {
-            localStorage.setItem(FLOW_KEY, JSON.stringify(data));
-        } catch {
-            window.dispatchEvent(new CustomEvent('storage-error'));
-        }
-        document.dispatchEvent(new Event('flow-updated'));
-    }
     function canWrite(kind = 'member') {
         const x = cycle();
         if (!x) return 'Periode belum dibuat oleh Super HC.';
@@ -403,15 +279,99 @@ export function createFlowStore(c) {
                 (!unitId || a.scope?.unitId === unitId) &&
                 (!divisionId || a.scope?.divisionId === divisionId),
         );
+    function invalidate() {
+        indexes.clear();
+        peopleByMonth.clear();
+    }
+    function checkActor(result) {
+        if (result.actorId && String(result.actorId) !== String(actor.id))
+            throw new Error('Akun aktif telah berubah. Silakan masuk kembali.');
+    }
+    /** Applies a page workspace (refresh or mutation update): sections are replaced within the page window. */
+    function apply(update) {
+        checkActor(update);
+        const next = { ...update.data };
+        resolveSnapshots(next);
+        const window = update.window?.assessments ?? null;
+        if (Array.isArray(update.assessmentIds)) {
+            const ids = new Set(update.assessmentIds.map(String));
+            for (const [key, row] of Object.entries(data.assessments))
+                if (ids.has(String(row.id))) delete data.assessments[key];
+            Object.assign(data.assessments, next.assessments);
+            delete next.assessments;
+        } else if (next.assessments) coverage = coverageOf(window);
+        else if (['staff', 'heads', 'kpis'].some((name) => name in next)) {
+            // A replaced roster covers the page window only, so months loaded on demand are dropped.
+            const kept = coverageOf(window);
+            coverage = new Map([...coverage].filter(([key]) => kept.has(key)));
+            for (const key of Object.keys(data.assessments))
+                if (!coverage.has(key.slice(key.indexOf('|') + 1)))
+                    delete data.assessments[key];
+        }
+        Object.assign(data, next);
+        c.initialInsights = update.insights;
+    }
+    /** Adds a month workspace loaded on demand without replacing what the page already holds. */
+    function merge(result) {
+        checkActor(result);
+        const next = { ...result.data };
+        resolveSnapshots(next);
+        for (const [key, row] of Object.entries(next.assessments || {}))
+            data.assessments[key] ??= row;
+        for (const [key, scope] of coverageOf(result.window?.assessments))
+            if (!loaded(key)) coverage.set(key, scope);
+        const id = (row) => row.id;
+        data.accounts = unionBy(data.accounts, next.accounts || [], id);
+        data.positions = unionBy(data.positions, next.positions || [], id);
+        data.staff = unionBy(data.staff, next.staff || [], id, (old, row) => ({
+            ...old,
+            placements: unionBy(old.placements, row.placements, id).sort(
+                (a, b) => a.from.localeCompare(b.from),
+            ),
+        }));
+        data.heads = unionBy(
+            data.heads,
+            next.heads || [],
+            (h) => `${h.id}|${h.unitId}|${h.from}`,
+        );
+        data.kpis = unionBy(data.kpis, next.kpis || [], id, (old, row) => ({
+            ...old,
+            forPeople: [...new Set([...old.forPeople, ...row.forPeople])],
+        }));
+        invalidate();
+    }
+    const loading = new Map();
+    /**
+     * Loads months outside the page window before the UI reads them. Months without a period have
+     * nothing to load; each request also covers the month before the requested one.
+     */
+    async function ensureMonths(keys, { finalOnly = false } = {}) {
+        for (const key of [...new Set(keys)].sort().reverse()) {
+            if (loaded(key, finalOnly)) continue;
+            if (!cycle(key)) {
+                coverage.set(key, 'all');
+                peopleByMonth.delete(key);
+                continue;
+            }
+            if (!loading.has(key))
+                loading.set(
+                    key,
+                    c.api
+                        .request(
+                            '/data/workspace?' +
+                                workspaceQuery('kerja', key, MONTH_SECTIONS),
+                        )
+                        .then(merge)
+                        .finally(() => loading.delete(key)),
+                );
+            await loading.get(key);
+        }
+    }
     async function refresh({ force = false } = {}) {
         let updates = c.api.takeWorkspaceUpdates?.();
         if (force) updates = [];
         if (!updates?.length) {
-            const query = new URLSearchParams({
-                compact: '1',
-                page: c.page,
-                cycle: cycleKey,
-            });
+            const query = workspaceQuery(c.workspaceProfile, cycleKey, c.sections);
             if (c.api.reportRequested?.()) query.set('include_insights', '1');
             try {
                 updates = [await c.api.request('/data/workspace?' + query)];
@@ -424,38 +384,19 @@ export function createFlowStore(c) {
                 throw error;
             }
         }
-        for (const update of updates) {
-            if (update.actorId && String(update.actorId) !== String(actor.id))
-                throw new Error(
-                    'Akun aktif telah berubah. Silakan masuk kembali.',
-                );
-            const next = { ...update.data };
-            resolveSnapshots(next);
-            if (Array.isArray(update.assessmentIds)) {
-                const ids = new Set(update.assessmentIds.map(String));
-                for (const [key, assessment] of Object.entries(
-                    data.assessments,
-                )) {
-                    if (ids.has(String(assessment.id)))
-                        delete data.assessments[key];
-                }
-                Object.assign(data.assessments, next.assessments);
-                delete next.assessments;
-            }
-            Object.assign(data, next);
-            c.initialInsights = update.insights;
-        }
+        updates.forEach(apply);
         Object.assign(
             actor,
             data.accounts.find((a) => a.id === actor.id),
         );
-        peopleByMonth.clear();
+        invalidate();
         document.dispatchEvent(new Event('flow-updated'));
     }
     return {
-        live: !c.review,
         api: c.api,
         refresh,
+        ensureMonths,
+        loaded,
         data,
         actor,
         cycleKey,
@@ -473,13 +414,8 @@ export function createFlowStore(c) {
         category,
         allowed,
         scopedUnits,
-        save,
         canWrite,
         pending,
-        reset: () => {
-            localStorage.removeItem(FLOW_KEY);
-            location.reload();
-        },
     };
 }
 export function totalValues(values, rows) {

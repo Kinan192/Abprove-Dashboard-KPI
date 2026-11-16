@@ -64,7 +64,7 @@ export function confirm(
         open('confirm-dialog');
     });
 }
-export function initUI(config) {
+export function initUI() {
     document.addEventListener('click', (event) => {
         const opener = event.target.closest('[data-dialog-open]');
         if (opener) {
@@ -126,8 +126,7 @@ export function initUI(config) {
             if (expanded) $('#sidebar a').focus();
         }
         if (action === 'logout') {
-            if (config?.review) location.assign('/design-review/login/masuk');
-            else $('#logout-form')?.requestSubmit();
+            $('#logout-form')?.requestSubmit();
         }
         if (action === 'read-all') {
             $$('[data-notification-count]').forEach((e) => (e.hidden = true));

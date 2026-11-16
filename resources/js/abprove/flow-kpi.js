@@ -8,15 +8,13 @@ import {
     field,
     error,
     labelCycle,
-    dateTime,
     empty,
 } from './flow-dom';
 import { open, close, confirm, toast } from './ui';
-import { uid, previousMonth } from './flow-store';
+import { uid } from './flow-store';
 import { paginate, reveal } from './pagination';
 export function initKpi(c, s) {
-    let level =
-            c.role === 'kd' || c.state === 'division-kpi' ? 'division' : 'unit',
+    let level = c.role === 'kd' ? 'division' : 'unit',
         areaId,
         selected,
         imported,
@@ -394,7 +392,7 @@ export function initKpi(c, s) {
             const id = selected.id;
             const download = async () => {
                 const { XL } = await import('./xlsx');
-                if (s.live) await s.refresh();
+                await s.refresh();
                 const k = s.data.kpis.find((k) => k.id === id);
                 if (!k)
                     throw new Error(
@@ -443,9 +441,7 @@ export function initKpi(c, s) {
                 setTimeout(() => URL.revokeObjectURL(url), 1500);
                 toast('Indikator dan bobot KPI telah diekspor.');
             };
-            if (s.live) return s.api.perform(null, download);
-            await download();
-            return;
+            return s.api.perform(null, download);
         }
         if (!editor) return;
         const indicator = e.target.closest('[data-indicator-edit]');
@@ -481,34 +477,18 @@ export function initKpi(c, s) {
             )
                 return;
             const removed = structuredClone(selected);
-            if (s.live)
-                return s.api.perform(null, async () => {
-                    await s.api.request(
-                        '/kpi-templates/' + removed.id,
-                        'DELETE',
-                        {},
-                    );
-                    selected = null;
-                    dirty = false;
-                    await s.refresh();
-                    render();
-                    toast('Versi KPI telah dihapus.');
-                });
-            s.data.kpis = s.data.kpis.filter((k) => k.id !== removed.id);
-            const siblings = s.data.kpis
-                .filter((k) => k.level === level && k.areaId === areaId)
-                .sort((a, b) => a.from.localeCompare(b.from));
-            siblings.forEach(
-                (k, i) =>
-                    (k.until = siblings[i + 1]
-                        ? previousMonth(siblings[i + 1].from)
-                        : null),
-            );
-            selected = null;
-            dirty = false;
-            s.save('Hapus versi KPI', removed.name, removed, null);
-            render();
-            toast('Versi yang belum digunakan telah dihapus.');
+            return s.api.perform(null, async () => {
+                await s.api.request(
+                    '/kpi-templates/' + removed.id,
+                    'DELETE',
+                    {},
+                );
+                selected = null;
+                dirty = false;
+                await s.refresh();
+                render();
+                toast('Versi KPI telah dihapus.');
+            });
         }
         if (action === 'preview-kpi' && preview()) open('kpi-preview-dialog');
         if (action === 'apply-kpi' && c.role === 'hc') {
@@ -558,54 +538,28 @@ export function initKpi(c, s) {
                 $('[data-kpi-error]').hidden = false;
                 return;
             }
-            if (s.live)
-                return s.api.perform(editor, async () => {
-                    await s.api.request('/kpi-templates', 'POST', {
-                        scope_level: level,
-                        [level === 'unit' ? 'unit_id' : 'division_id']: +areaId,
-                        name: field(editor, 'name').value.trim(),
-                        effective_from: from + '-01',
-                        items: values().map((i) => ({
-                            pillar: i.pillar,
-                            name: i.name,
-                            numerator: i.numerator || null,
-                            denominator: i.denominator || null,
-                            measurement_formula: i.formula || null,
-                            target_text: i.target,
-                            weight_percent: String(i.weight),
-                        })),
-                    });
-                    dirty = false;
-                    selected = null;
-                    await s.refresh();
-                    render();
-                    toast('Versi KPI berhasil diterapkan.');
+            return s.api.perform(editor, async () => {
+                await s.api.request('/kpi-templates', 'POST', {
+                    scope_level: level,
+                    [level === 'unit' ? 'unit_id' : 'division_id']: +areaId,
+                    name: field(editor, 'name').value.trim(),
+                    effective_from: from + '-01',
+                    items: values().map((i) => ({
+                        pillar: i.pillar,
+                        name: i.name,
+                        numerator: i.numerator || null,
+                        denominator: i.denominator || null,
+                        measurement_formula: i.formula || null,
+                        target_text: i.target,
+                        weight_percent: String(i.weight),
+                    })),
                 });
-            const prev = existing.sort((a, b) =>
-                b.from.localeCompare(a.from),
-            )[0];
-            if (prev) prev.until = previousMonth(from);
-            const k = {
-                id: uid('KPI'),
-                level,
-                areaId,
-                name: field(editor, 'name').value.trim(),
-                version: Math.max(0, ...existing.map((k) => k.version)) + 1,
-                from,
-                until: null,
-                items: values(),
-            };
-            s.data.kpis.push(k);
-            s.save(
-                'Simpan perubahan KPI',
-                `${k.name} · versi ${k.version} · ${from}`,
-                null,
-                k,
-            );
-            selected = k;
-            dirty = false;
-            render();
-            toast('Versi KPI diterapkan pada simulasi.');
+                dirty = false;
+                selected = null;
+                await s.refresh();
+                render();
+                toast('Versi KPI berhasil diterapkan.');
+            });
         }
         if (action === 'use-import' && imported) {
             $('[data-kpi-body]').replaceChildren();
@@ -656,74 +610,33 @@ export function initKpi(c, s) {
         button.disabled = true;
         imported = null;
         if (!file) return;
-        if (s.live)
-            return s.api.perform(null, async () => {
-                const fd = new FormData();
-                fd.append('file', file);
-                const result = await s.api.request(
-                    '/kpi-templates/import-preview',
-                    'POST',
-                    fd,
-                );
-                if (!result.data.valid) {
-                    root.textContent = Object.values(result.data.errors)
-                        .flat()
-                        .join('\n');
-                    return;
-                }
-                imported = result.data.items.map((i) => ({
-                    id: uid('ITEM'),
-                    pillar: i.pillar,
-                    name: i.name,
-                    numerator: i.numerator || '',
-                    denominator: i.denominator || '',
-                    formula: i.measurement_formula || '',
-                    target: i.target_text,
-                    weight: +i.weight_percent,
-                }));
-                root.textContent = `${imported.length} indikator valid, bobot 100%. Terapkan untuk menyimpan.`;
-                button.disabled = false;
-            });
-        if (file.size > 2 * 1024 * 1024) {
-            root.textContent = 'Ukuran maksimal 2 MB.';
-            return;
-        }
-        if (!file.name.toLowerCase().endsWith('.csv')) {
-            root.textContent =
-                'Pembacaan Excel belum dihubungkan. Gunakan CSV untuk mencoba alur lokal.';
-            return;
-        }
-        const rows = parseCSV(await file.text())
-            .slice(1)
-            .filter((r) => r.some(Boolean));
-        if (
-            !rows.length ||
-            rows.some(
-                (r) =>
-                    r.length !== 7 ||
-                    !r[1] ||
-                    !r[5] ||
-                    !Number.isFinite(+r[6]) ||
-                    +r[6] <= 0,
-            ) ||
-            Math.abs(rows.reduce((n, r) => n + +r[6], 0) - 100) > 0.0001
-        ) {
-            root.textContent =
-                'CSV tidak valid. Periksa tujuh kolom, nama, target dan bobot tepat 100%.';
-            return;
-        }
-        imported = rows.map((r) => ({
-            id: uid('ITEM'),
-            pillar: r[0],
-            name: r[1],
-            numerator: r[2],
-            denominator: r[3],
-            formula: r[4],
-            target: r[5],
-            weight: +r[6],
-        }));
-        root.textContent = `${rows.length} indikator valid, bobot 100%. Belum disimpan hingga diterapkan.`;
-        button.disabled = false;
+        return s.api.perform(null, async () => {
+            const fd = new FormData();
+            fd.append('file', file);
+            const result = await s.api.request(
+                '/kpi-templates/import-preview',
+                'POST',
+                fd,
+            );
+            if (!result.data.valid) {
+                root.textContent = Object.values(result.data.errors)
+                    .flat()
+                    .join('\n');
+                return;
+            }
+            imported = result.data.items.map((i) => ({
+                id: uid('ITEM'),
+                pillar: i.pillar,
+                name: i.name,
+                numerator: i.numerator || '',
+                denominator: i.denominator || '',
+                formula: i.measurement_formula || '',
+                target: i.target_text,
+                weight: +i.weight_percent,
+            }));
+            root.textContent = `${imported.length} indikator valid, bobot 100%. Terapkan untuk menyimpan.`;
+            button.disabled = false;
+        });
     });
     if (editor && c.role === 'hc')
         window.addEventListener('beforeunload', (e) => {
@@ -732,499 +645,6 @@ export function initKpi(c, s) {
                 e.returnValue = '';
             }
         });
-    const coverage = $('[data-kpi-coverage]');
-    if (coverage)
-        for (const level of ['unit', 'division'])
-            for (const area of level === 'unit'
-                ? s.data.units
-                : s.data.divisions) {
-                const panel = node('a', null, 'card p-5 coverage-link'),
-                    k = s.data.kpis
-                        .filter(
-                            (k) =>
-                                k.level === level &&
-                                k.areaId === area.id &&
-                                k.from <= s.cycleKey &&
-                                (!k.until || k.until >= s.cycleKey),
-                        )
-                        .at(-1);
-                panel.href =
-                    new URL(c.links.kpi, location.origin).href +
-                    '&level=' +
-                    level +
-                    '&area=' +
-                    encodeURIComponent(area.id) +
-                    '&cycle=' +
-                    s.cycleKey;
-                panel.setAttribute('aria-label', 'Buka KPI ' + area.name);
-                panel.append(
-                    node('h2', area.name, 'section-title'),
-                    node(
-                        'p',
-                        `${level === 'unit' ? 'Untuk staf · penilai KU' : 'Untuk Kepala Unit · penilai KD'} · ${k?.name || 'KPI belum disusun'}`,
-                        'mt-3 text-sm text-muted',
-                    ),
-                );
-                coverage.append(panel);
-            }
-    paginate(coverage, 'coverage', { size: innerWidth <= 600 ? 2 : 4 });
     render();
     if (c.page === 'impor') open('import-dialog');
-}
-function parseCSV(text) {
-    const rows = [];
-    let row = [],
-        v = '',
-        quoted = false;
-    for (let i = 0; i < text.length; i++) {
-        const ch = text[i];
-        if (ch === '"') {
-            if (quoted && text[i + 1] === '"') {
-                v += '"';
-                i++;
-            } else quoted = !quoted;
-        } else if (ch === ',' && !quoted) {
-            row.push(v.trim());
-            v = '';
-        } else if (ch === '\n' && !quoted) {
-            row.push(v.trim());
-            rows.push(row);
-            row = [];
-            v = '';
-        } else if (ch !== '\r') v += ch;
-    }
-    if (quoted) return [];
-    if (v || row.length) {
-        row.push(v.trim());
-        rows.push(row);
-    }
-    return rows;
-}
-export function initCycles(c, s) {
-    const form = $('#cycle-form');
-    if (!form) return;
-    function render() {
-        const body = $('[data-cycle-body]');
-        body.replaceChildren();
-        for (const x of [...s.data.cycles].sort((a, b) =>
-            b.id.localeCompare(a.id),
-        )) {
-            const tr = node('tr');
-            tr.append(
-                node('td', labelCycle(x.id)),
-                node(
-                    'td',
-                    {
-                        open: 'Terbuka',
-                        planned: 'Direncanakan',
-                        closed: 'Ditutup',
-                    }[x.status],
-                ),
-                node(
-                    'td',
-                    `${dateTime(x.opens)} / ${dateTime(x.submission)}`,
-                    'text-xs',
-                ),
-                node(
-                    'td',
-                    `${dateTime(x.approval)} / ${dateTime(x.closes)}`,
-                    'text-xs',
-                ),
-            );
-            const td = node('td');
-            const used = Object.keys(s.data.assessments).some((k) =>
-                k.endsWith('|' + x.id),
-            );
-            if (x.status !== 'closed' && !used) {
-                const edit = node(
-                    'button',
-                    x.status === 'planned' ? 'Ubah / buka' : 'Ubah',
-                    'link v2-row-action',
-                );
-                edit.type = 'button';
-                edit.dataset.cycleEdit = x.id;
-                td.append(edit);
-            }
-            if (x.status === 'open') {
-                const close = node(
-                    'button',
-                    'Tutup periode',
-                    'link v2-row-action',
-                );
-                close.type = 'button';
-                close.dataset.cycleClose = x.id;
-                td.append(close);
-            }
-            if (!td.childElementCount)
-                td.textContent = used
-                    ? 'Jadwal terpakai, terkunci'
-                    : 'Hanya baca';
-            if (!used && x.status !== 'open') {
-                if (!td.children.length) td.replaceChildren();
-                const del = node('button', 'Hapus', 'link v2-row-action');
-                del.type = 'button';
-                del.dataset.cycleDelete = x.id;
-                td.append(del);
-            }
-            tr.append(td);
-            body.append(tr);
-        }
-        const root = $('[data-cycle-categories]');
-        paginate(body, 'cycles');
-        root.replaceChildren();
-        const cats = s.cycle()?.categories;
-        if (cats)
-            for (const [label, value] of [
-                ['Sangat Baik', `≥ ${cats.sb}`],
-                ['Baik', `${cats.b} - < ${cats.sb}`],
-                ['Cukup', `${cats.c} - < ${cats.b}`],
-                ['Kurang', `< ${cats.c}`],
-            ]) {
-                const cell = node('div', null, 'reference-setting-row');
-                cell.append(
-                    node('strong', label, 'block text-sm'),
-                    node('p', value, 'reference-setting-value'),
-                );
-                root.append(cell);
-            }
-        const selected = s.cycle(),
-            schedule = $('[data-reference-schedule]');
-        if (schedule) {
-            schedule.replaceChildren();
-            for (const [label, key] of [
-                ['Batas pengisian Kepala Unit', 'submission'],
-                ['Batas persetujuan Kepala Divisi', 'approval'],
-                ['Siklus ditutup', 'closes'],
-            ]) {
-                const row = node('div', null, 'reference-setting-row');
-                row.append(
-                    node('span', label),
-                    node(
-                        'span',
-                        selected
-                            ? `${dateTime(selected[key])} WIB`
-                            : 'Belum diatur',
-                        'reference-setting-value',
-                    ),
-                );
-                schedule.append(row);
-            }
-            text(
-                document,
-                '[data-reference-cycle-label]',
-                selected
-                    ? `Berlaku untuk penilaian ${labelCycle(selected.id)}.`
-                    : 'Buat periode untuk mengatur jadwal dan kategori.',
-            );
-            const button = $('[data-reference-cycle-edit]'),
-                used =
-                    selected &&
-                    Object.keys(s.data.assessments).some((k) =>
-                        k.endsWith('|' + selected.id),
-                    );
-            button.disabled = !selected || used || selected.status === 'closed';
-            button.dataset.cycleEdit = selected?.id || '';
-            text(
-                document,
-                '[data-reference-cycle-help]',
-                used
-                    ? 'Jadwal dan kategori periode terpakai hanya baca. Gunakan Buat periode untuk bulan berikutnya.'
-                    : 'Ubah jadwal dan kategori sebelum periode dipakai penilaian.',
-            );
-        }
-        const users = $('[data-reference-cycle-users]');
-        if (users) {
-            users.replaceChildren();
-            for (const account of s.data.accounts) {
-                const row = node('tr'),
-                    who = node('td'),
-                    name = node('div', null, 'reference-person');
-                name.append(
-                    node(
-                        'span',
-                        account.name
-                            .split(/[ ,]+/)
-                            .slice(0, 2)
-                            .map((x) => x[0])
-                            .join(''),
-                        'avatar',
-                    ),
-                    node('strong', account.name),
-                );
-                who.append(name);
-                row.append(
-                    who,
-                    node(
-                        'td',
-                        {
-                            hc: 'Super HC',
-                            ku: 'Kepala Unit',
-                            kd: 'Kepala Divisi',
-                        }[account.role],
-                    ),
-                );
-                users.append(row);
-            }
-            paginate(users, 'settings-users', { size: 10 });
-        }
-    }
-    function edit(id) {
-        form.reset();
-        const x = s.data.cycles.find((x) => x.id === id);
-        field(form, 'id').value = id || '';
-        field(form, 'month').readOnly = !!id;
-        for (const [key, value] of Object.entries(
-            x || {
-                month: '2026-12',
-                status: 'planned',
-                opens: '2026-12-01T00:00',
-                submission: '2027-01-05T23:59',
-                approval: '2027-01-10T23:59',
-                closes: '2027-01-15T23:59',
-            },
-        )) {
-            if (field(form, key)) field(form, key).value = value;
-        }
-        field(form, 'month').value = x?.id || '2026-12';
-        for (const [key, value] of Object.entries(
-            x?.categories || { sb: 90, b: 80, c: 70 },
-        ))
-            field(form, key).value = value;
-        $('[data-form-error]', form).hidden = true;
-        open('cycle-dialog');
-    }
-    document.addEventListener('click', async (e) => {
-        const action =
-            e.target.closest('[data-flow-action]')?.dataset.flowAction;
-        if (action === 'new-cycle') edit();
-        if (
-            action === 'empty-preview' &&
-            (await confirm(
-                'Mulai persiapan kosong pada simulasi browser? Akun HC ini dipertahankan. Data contoh lainnya dihapus lokal; database tidak berubah.',
-            ))
-        ) {
-            s.data.accounts = [s.actor];
-            for (const name of [
-                'positions',
-                'divisions',
-                'units',
-                'staff',
-                'heads',
-                'kpis',
-                'cycles',
-                'activities',
-            ])
-                s.data[name] = [];
-            s.data.assessments = {};
-            s.save('Mulai persiapan kosong', 'Data simulasi dikosongkan');
-            location.assign(c.links.akun);
-        }
-
-        if (
-            action === 'reset-preview' &&
-            (await confirm(
-                'Hapus perubahan data contoh alur v2 pada browser ini? Database tidak berubah.',
-            ))
-        )
-            s.reset();
-        const a = e.target.closest('[data-cycle-edit]');
-        if (a) edit(a.dataset.cycleEdit);
-        const del = e.target.closest('[data-cycle-delete]');
-        if (del) {
-            const x = s.data.cycles.find(
-                (x) => x.id === del.dataset.cycleDelete,
-            );
-            if (
-                x.status === 'open' ||
-                Object.keys(s.data.assessments).some((k) =>
-                    k.endsWith('|' + x.id),
-                )
-            )
-                return toast(
-                    'Periode terbuka atau terpakai tidak dapat dihapus.',
-                    true,
-                );
-            if (
-                await confirm(
-                    `Hapus periode ${labelCycle(x.id)} yang belum digunakan?`,
-                )
-            ) {
-                if (s.live)
-                    return s.api.perform(null, async () => {
-                        await s.api.request('/cycles/' + x.dbId, 'DELETE', {});
-                        await s.refresh();
-                        render();
-                        toast('Periode telah dihapus.');
-                    });
-                s.data.cycles = s.data.cycles.filter((y) => y !== x);
-                s.save('Hapus periode', x.id, x, null);
-                render();
-                toast('Periode yang belum digunakan telah dihapus.');
-            }
-        }
-        const b = e.target.closest('[data-cycle-close]');
-        if (b) {
-            const x = s.data.cycles.find((x) => x.id === b.dataset.cycleClose),
-                remaining = s
-                    .allPeople(x.id)
-                    .filter(
-                        (p) => s.assessment(p.id, x.id).status !== 'Final',
-                    ).length;
-            if (
-                await confirm(
-                    `Tutup ${labelCycle(x.id)}? ${remaining} orang belum Final. Pengisian dan keputusan akan dihentikan; histori tetap dapat dibaca.`,
-                )
-            ) {
-                if (s.live)
-                    return s.api.perform(null, async () => {
-                        await s.api.request(
-                            '/cycles/' + x.dbId + '/close',
-                            'POST',
-                            {},
-                        );
-                        await s.refresh();
-                        render();
-                        toast('Periode telah ditutup.');
-                    });
-                const before = structuredClone(x);
-                x.status = 'closed';
-                s.save('Tutup periode', x.id, before, x);
-                render();
-                toast('Periode ditutup pada simulasi.');
-            }
-        }
-    });
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!form.reportValidity()) return;
-        const v = Object.fromEntries(new FormData(form)),
-            old = s.data.cycles.find((x) => x.id === v.id),
-            dates = ['opens', 'submission', 'approval', 'closes'].map((k) =>
-                Date.parse(v[k] + '+07:00'),
-            );
-        if (
-            dates.some(Number.isNaN) ||
-            !(
-                dates[0] < dates[1] &&
-                dates[1] <= dates[2] &&
-                dates[2] <= dates[3]
-            )
-        )
-            return error(
-                form,
-                'Urutan jadwal harus: mulai < batas KU ≤ batas KD ≤ tutup.',
-            );
-        if (!(+v.sb > +v.b && +v.b > +v.c && +v.c > 0 && +v.sb <= 100))
-            return error(
-                form,
-                'Kategori harus berurutan: Sangat Baik > Baik > Cukup.',
-            );
-        if (!old && s.data.cycles.some((x) => x.id === v.month))
-            return error(form, 'Periode bulan ini sudah ada.');
-        if (
-            old &&
-            Object.keys(s.data.assessments).some((k) =>
-                k.endsWith('|' + old.id),
-            )
-        )
-            return error(
-                form,
-                'Jadwal/kategori sudah terpakai dan tidak diubah.',
-            );
-        if (v.status === 'open') {
-            const missing = [
-                ...s.data.units
-                    .filter((u) => u.active)
-                    .map((u) => ({ level: 'unit', area: u })),
-                ...s.data.divisions
-                    .filter((d) => d.active)
-                    .map((d) => ({ level: 'division', area: d })),
-            ].filter(
-                ({ level, area }) =>
-                    !s.account(area.headId)?.active ||
-                    !s.data.kpis.some(
-                        (k) =>
-                            k.level === level &&
-                            k.areaId === area.id &&
-                            k.from <= v.month &&
-                            (!k.until || k.until >= v.month),
-                    ),
-            );
-            if (missing.length)
-                return error(
-                    form,
-                    'Lengkapi akun kepala dan KPI untuk: ' +
-                        missing.map((x) => x.area.name).join(', '),
-                );
-        }
-        if (
-            !(await confirm(
-                `Simpan periode ${labelCycle(v.month)} dengan status ${v.status === 'open' ? 'Terbuka' : 'Direncanakan'}? Jadwal menggunakan WIB.`,
-            ))
-        )
-            return;
-        const record = {
-            id: v.month,
-            status: v.status,
-            opens: v.opens,
-            submission: v.submission,
-            approval: v.approval,
-            closes: v.closes,
-            categories: { sb: +v.sb, b: +v.b, c: +v.c },
-        };
-        if (s.live)
-            return s.api.perform(form, async () => {
-                const payload = {
-                    assessment_month: v.month + '-01',
-                    status: v.status,
-                    opens_at: v.opens + ':00+07:00',
-                    submission_due_at: v.submission + ':00+07:00',
-                    approval_due_at: v.approval + ':00+07:00',
-                    closes_at: v.closes + ':00+07:00',
-                    categories: [
-                        {
-                            code: 'poor',
-                            label: 'Kurang',
-                            lower_bound: 0,
-                            upper_bound: +v.c,
-                        },
-                        {
-                            code: 'fair',
-                            label: 'Cukup',
-                            lower_bound: +v.c,
-                            upper_bound: +v.b,
-                        },
-                        {
-                            code: 'good',
-                            label: 'Baik',
-                            lower_bound: +v.b,
-                            upper_bound: +v.sb,
-                        },
-                        {
-                            code: 'excellent',
-                            label: 'Sangat Baik',
-                            lower_bound: +v.sb,
-                            upper_bound: null,
-                        },
-                    ],
-                };
-                await s.api.request(
-                    '/cycles' + (old ? '/' + old.dbId : ''),
-                    old ? 'PATCH' : 'POST',
-                    payload,
-                );
-                await s.refresh();
-                close('cycle-dialog');
-                render();
-                toast('Periode berhasil disimpan.');
-            });
-        const before = old ? structuredClone(old) : null;
-        if (old) s.data.cycles[s.data.cycles.indexOf(old)] = record;
-        else s.data.cycles.push(record);
-        s.save('Atur periode', record.id, before, record);
-        close('cycle-dialog');
-        render();
-        toast('Periode dicatat pada simulasi.');
-    });
-    render();
 }

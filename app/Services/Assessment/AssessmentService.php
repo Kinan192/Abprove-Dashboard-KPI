@@ -201,7 +201,10 @@ class AssessmentService
             }
             $scores[$item->id] = $value;
             $weight = bcadd($weight, (string) $item->weight_percent, 4);
-            $total = bcadd($total, bcdiv(bcmul((string) $value, (string) $item->weight_percent, 6), '100', 6), 6);
+            // assessment_items.weighted_result_raw is DECIMAL(12,6) and MySQL rounds half-up on store; the
+            // protect_assessment_update trigger requires the total to equal the sum of those stored values.
+            $weighted = bcadd(bcdiv(bcmul((string) $value, (string) $item->weight_percent, 10), '100', 10), '0.0000005', 6);
+            $total = bcadd($total, $weighted, 6);
         }
         if (bccomp($weight, '100', 4) !== 0) {
             throw new BusinessRule('INVALID_WEIGHT', 'Bobot KPI harus 100%.', 422);

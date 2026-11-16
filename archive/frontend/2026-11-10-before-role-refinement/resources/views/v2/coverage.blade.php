@@ -1,4 +1,0 @@
-@extends('layouts.app')
-@section('content')<div class="page-content page-stack workspace-v4">
-@include('v4.section-tabs')
-<h2 class="lead">Cakupan KPI</h2><div class="notice">KPI mengikuti Unit untuk staf dan Divisi untuk Kepala Unit. Tidak ada pemilihan template bebas per orang.</div><div data-kpi-coverage class="grid gap-5 min-[1100px]:grid-cols-2"></div><a class="btn btn-primary w-fit" href="{{ $vm->link('kpi') }}">Kelola KPI Unit & Divisi</a></div>@endsection

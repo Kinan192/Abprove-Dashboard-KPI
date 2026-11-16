@@ -5,18 +5,10 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "test:ui": "playwright test --config=playwright.blade.config.js",
-        "preview:design": "php artisan serve --host=127.0.0.1 --port=8000",
-        "test:design": "playwright test --config=playwright.blade.config.js",
-        "test:goals-prototype": "npm run test:kpi-prototype",
-        "test:kpi-prototype": "node --test tests/SimpleKpiPrototype/model.test.js tests/SimpleKpiPrototype/formula.test.js && playwright test --config=playwright.kpi-simple.config.js",
-        "test:simple-dashboard": "playwright test --config=playwright.simple-dashboard.config.js",
-        "verify:design": "node tools/design-review/verify-blade.mjs",
         "auth:start": "npm run start --workspace @kpi/auth",
         "start": "node tools/serve.mjs"
     },
     "devDependencies": {
-        "@playwright/test": "^1.56.0",
         "@tailwindcss/vite": "^4.0.0",
         "laravel-vite-plugin": "^3.1",
         "prettier": "^3.9.10",

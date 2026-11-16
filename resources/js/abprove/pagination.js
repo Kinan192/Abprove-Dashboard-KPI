@@ -20,6 +20,7 @@ export function paginate(
         selector,
         records,
         renderRow,
+        server,
     } = {},
 ) {
     if (!container) return;
@@ -28,7 +29,8 @@ export function paginate(
         state = { page: 0, key };
         lists.set(key, state);
     }
-    if (state.token !== token) state.page = 0;
+    if (server) state.page = server.page - 1;
+    else if (state.token !== token) state.page = 0;
     Object.assign(state, {
         container,
         token,
@@ -37,6 +39,7 @@ export function paginate(
         selector,
         records,
         renderRow,
+        server,
     });
     let footer = document.querySelector(`[data-pagination="${key}"]`);
     if (!footer) {
@@ -54,7 +57,7 @@ export function paginate(
     const sizeWrap = $('[data-page-size-wrap]', footer);
     if (sizeWrap) sizeWrap.hidden = !state.isTable;
     if (state.isTable) {
-        state.userSize ||= 10;
+        state.userSize = server?.perPage || state.userSize || 10;
         $('[data-page-size]', footer).value = String(state.userSize);
     }
     apply(state);
@@ -68,22 +71,32 @@ function apply(state) {
     const empty =
         rows.length === 1 &&
         (rows[0].matches('.empty') || rows[0].querySelector('td[colspan]'));
-    const count = state.records
-        ? state.records.length
-        : empty
-          ? 0
-          : rows.length;
+    const count = state.server
+        ? state.server.total
+        : state.records
+          ? state.records.length
+          : empty
+            ? 0
+            : rows.length;
     const size =
-            (state.isTable
-                ? state.userSize
-                : typeof state.size === 'function'
-                  ? state.size()
-                  : state.size) || pageSize(state.kind),
+            (state.server
+                ? state.server.perPage
+                : state.isTable
+                  ? state.userSize
+                  : typeof state.size === 'function'
+                    ? state.size()
+                    : state.size) || pageSize(state.kind),
         pages = Math.max(1, Math.ceil(count / size));
     state.page = Math.max(0, Math.min(state.page, pages - 1));
     state.perPage = size;
     state.pages = pages;
-    if (state.records) {
+    if (state.server) {
+        // Server mode: records are the current page only; an empty page keeps the caller's empty row.
+        if (state.records.length) {
+            rows = state.records.map(state.renderRow);
+            container.replaceChildren(...rows);
+        }
+    } else if (state.records) {
         if (count) {
             const start = state.page * size;
             rows = state.records
@@ -140,7 +153,8 @@ export function reveal(element) {
 }
 export function resetPage(key) {
     const state = lists.get(key);
-    if (state) {
+    if (state?.server) state.server.onChange(1, state.perPage);
+    else if (state) {
         state.page = 0;
         apply(state);
     }
@@ -151,7 +165,9 @@ document.addEventListener('click', (event) => {
     const footer = button.closest('[data-pagination]'),
         state = lists.get(footer?.dataset.pagination);
     if (!state) return;
-    state.page += button.hasAttribute('data-page-prev') ? -1 : 1;
+    const step = button.hasAttribute('data-page-prev') ? -1 : 1;
+    if (state.server) return state.server.onChange(state.page + 1 + step, state.perPage);
+    state.page += step;
     apply(state);
 });
 document.addEventListener('change', (event) => {
@@ -161,6 +177,7 @@ document.addEventListener('change', (event) => {
         ),
         size = +event.target.value;
     if (!state || ![10, 25, 50].includes(size)) return;
+    if (state.server) return state.server.onChange(1, size);
     state.userSize = size;
     state.page = 0;
     apply(state);

@@ -4,9 +4,8 @@ namespace App\ViewModels;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
 
-/** Presentation fixtures supplied with ABprove. No business data queries. */
+/** Presentation metadata for the authenticated workspace. */
 class AbproveDesign
 {
     public array $data;
@@ -15,37 +14,71 @@ class AbproveDesign
 
     public int $month;
 
-    public string $state;
+    public const ROLE_NAMES = ['ku' => 'Kepala Unit', 'kd' => 'Kepala Divisi', 'hc' => 'Super HC', 'adm' => 'Admin'];
 
-    public const ROLE_NAMES = ['ku' => 'Kepala Unit', 'kd' => 'Kepala Divisi', 'hc' => 'Super HC'];
+    /** Backend role key to presentation role key. */
+    public const ROLE_KEYS = ['kepala_unit' => 'ku', 'kepala_divisi' => 'kd', 'super_hc' => 'hc', 'admin' => 'adm'];
 
     public const VIEWS = [
         'ku' => ['dashboard', 'nilai', 'pengajuan', 'riwayat', 'kpi', 'tim', 'panduan', 'profil', 'notifikasi'],
         'kd' => ['dashboard', 'persetujuan', 'kpi', 'nilai-kepala', 'tim', 'panduan', 'profil', 'notifikasi'],
-        'hc' => ['dashboard', 'rekap', 'karyawan', 'struktur', 'akun', 'jabatan', 'kpi', 'pengaturan', 'aktivitas', 'impor', 'panduan', 'profil', 'notifikasi'],
+        'hc' => ['dashboard', 'rekap', 'karyawan', 'struktur', 'jabatan', 'kpi', 'pengaturan', 'aktivitas', 'impor', 'panduan', 'profil', 'notifikasi'],
+        'adm' => ['akun', 'log', 'pengingat', 'panduan', 'profil'],
+    ];
+
+    private const SHELL_SECTIONS = ['accounts', 'divisions', 'units', 'cycles', 'profiles', 'notifications', 'navCounts'];
+
+    private const ROSTER_SECTIONS = ['positions', 'staff', 'heads'];
+
+    /**
+     * Workspace data per page profile. `window` bounds the assessment months:
+     * none, current (selected month), previous (selected and prior month) or year (calendar year of the
+     * selected month; months other than the selected one carry Final results only).
+     * Roster, publications and templates follow the same months unless the section is listed in `history`.
+     * Notification lists are previews; the notification page pages through `GET {prefix}/notifications`.
+     */
+    public const WORKSPACE_PROFILES = [
+        'kerja' => ['window' => 'previous', 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS, 'kpis', 'assessments', 'assessmentTemplates']],
+        'laporan' => ['window' => 'year', 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS, 'kpis', 'assessments', 'assessmentTemplates']],
+        'dashboard' => ['window' => 'none', 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS]],
+        'notifikasi' => ['window' => 'none', 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS]],
+        'aktivitas' => ['window' => 'none', 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS]],
+        'organisasi' => ['window' => 'none', 'history' => ['staff', 'heads'], 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS, 'kpis']],
+        'kpi' => ['window' => 'none', 'history' => ['kpis'], 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS, 'kpiUnits', 'kpis']],
+        'kpi-workspace' => ['window' => 'none', 'sections' => [...self::SHELL_SECTIONS, ...self::ROSTER_SECTIONS]],
+        'personal' => ['window' => 'none', 'sections' => self::SHELL_SECTIONS],
     ];
 
     public function __construct(public string $role, public string $page, public bool $review = false, ?Request $request = null)
     {
+        $request ??= request();
+        $user = $request->user();
+        $ctx = $request->attributes->get('access_context');
+        $now = now('Asia/Jakarta');
         $this->page = $page === 'beranda' ? 'dashboard' : $page;
-        $this->data = json_decode(File::get(resource_path('data/abprove-demo.json')), true, 512, JSON_THROW_ON_ERROR);
-        $this->actor = $this->data['actors'][$role] ?? ['nama' => 'ABprove', 'short' => 'Login'];
-        if ($review && $request?->query('account')) {
-            $account = collect($this->data['accounts'])->first(fn ($a) => $a['key'] === $request->query('account') && $a['role'] === $role);
-            if ($account) {
-                $this->actor = array_replace($this->actor, $account);
-            }
-        }
-        if (! $review && $request?->user()) {
-            $this->actor['nama'] = $request->user()->name;
-            $this->actor['key'] = (string) $request->user()->id;
-            $this->actor['email'] = $request->user()->email;
-            $this->actor['nip'] = $request->user()->login_nip;
-            $ctx = $request->attributes->get('access_context');
-            $this->actor['scopeName'] = $ctx->unitId ? DB::table('units')->where('id', $ctx->unitId)->value('name') : ($ctx->divisionId ? DB::table('divisions')->where('id', $ctx->divisionId)->value('name') : 'Seluruh organisasi');
-        }
-        $this->month = max(0, min(11, (int) ($request?->query('month', 10) ?? 10)));
-        $this->state = (string) ($request?->query('state', '') ?? '');
+        $this->review = false;
+        $this->data = [
+            'months' => ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+            'shortMonths' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            'year' => $now->year,
+        ];
+        $this->actor = [
+            'nama' => $user->name,
+            'short' => self::ROLE_NAMES[$role],
+            'key' => (string) $user->id,
+            'email' => $user->email,
+            'nip' => $user->login_nip,
+            'phone' => $user->phone,
+            'notification' => (bool) $user->email_notifications,
+            'hasPhoto' => (bool) $user->photo_path,
+            'scopeName' => $ctx->unitId ? DB::table('units')->where('id', $ctx->unitId)->value('name') : ($ctx->divisionId ? DB::table('divisions')->where('id', $ctx->divisionId)->value('name') : 'Seluruh organisasi'),
+        ];
+        $this->month = max(0, min(11, (int) $request->query('month', $now->month - 1)));
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'adm';
     }
 
     public function title(): string
@@ -55,36 +88,33 @@ class AbproveDesign
             'kpi' => ['ku' => 'KPI unit', 'kd' => 'KPI divisi', 'hc' => 'Master KPI'][$this->role],
             'persetujuan' => 'Persetujuan', 'nilai-kepala' => 'Nilai Kepala Unit', 'dashboard' => $this->role === 'kd' ? 'Dashboard divisi' : 'Dashboard',
             'tim' => $this->role === 'ku' ? 'Anggota Unit' : 'Tim Divisi',
-            'rekap' => 'Rekap penilaian', 'karyawan','struktur','jabatan' => 'Struktur & Staf', 'akun' => 'Pengguna & akses',
-            'penempatan' => 'Cakupan KPI', 'pengaturan' => 'Pengaturan Periode', 'aktivitas' => 'Riwayat aktivitas', 'impor' => 'Upload master KPI',
+            'rekap' => 'Rekap penilaian', 'karyawan','struktur','jabatan' => 'Struktur & Staf', 'akun' => 'Akun pengguna',
+            'log' => 'Log sistem', 'pengingat' => 'Pengingat email',
+            'pengaturan' => 'Pengaturan Periode', 'aktivitas' => 'Riwayat aktivitas', 'impor' => 'Upload master KPI',
             'panduan' => 'Panduan', 'profil' => 'Profil', 'notifikasi' => 'Notifikasi', default => 'ABprove',
         };
     }
 
     public function scope(): string
     {
-        if (! $this->review && isset($this->actor['scopeName'])) {
-            return $this->actor['scopeName'];
-        }
-
-        return match ($this->role) {
-            'ku' => $this->unit($this->actor['unit'])['nama'],
-            'kd' => $this->division($this->actor['div'])['nama'],
-            default => 'Seluruh rumah sakit',
-        };
+        return $this->actor['scopeName'];
     }
 
     public function link(string $view): string
     {
         $view = $view === 'beranda' ? 'dashboard' : $view;
-        if ($this->review) {
-            return url('/design-review/'.$this->role.'/'.$view).'?'.http_build_query(array_filter(['month' => $this->month, 'account' => $this->actor['key'] ?? null], fn ($v) => $v !== null));
+        if ($this->isAdmin()) {
+            $path = match ($view) {
+                'log' => 'logs', 'pengingat' => 'reminders', 'panduan' => 'help', 'profil' => 'profile', default => 'accounts',
+            };
+
+            return url('/admin/'.$path);
         }
         $prefix = ['ku' => '/unit', 'kd' => '/division', 'hc' => '/hc'][$this->role];
         $path = match ($view) {
-            'notifikasi' => 'notifications','beranda' => 'dashboard','nilai' => 'score','pengajuan' => 'submissions','riwayat' => 'history','persetujuan' => 'approvals','nilai-kepala' => 'heads',
+            'notifikasi' => 'notifications','nilai' => 'score','pengajuan' => 'submissions','riwayat' => 'history','persetujuan' => 'approvals','nilai-kepala' => 'heads',
             'dashboard' => 'dashboard','kpi' => $this->role === 'hc' ? 'kpi-templates' : 'kpis','rekap' => 'recap','karyawan' => 'organization/employees',
-            'struktur' => 'organization','akun' => 'organization/users','jabatan' => 'organization/positions','pengaturan' => 'settings','penempatan' => 'placement',
+            'struktur' => 'organization','jabatan' => 'organization/positions','pengaturan' => 'settings',
             'aktivitas' => 'audit','impor' => 'import','panduan' => 'help','profil' => 'profile','tim' => $this->role === 'ku' ? 'members' : 'team',default => $view,
         };
 
@@ -96,15 +126,11 @@ class AbproveDesign
         $menu = match ($this->role) {
             'ku' => [['dashboard', 'Dashboard', 'chart'], ['nilai', 'Isi nilai', 'edit'], ['pengajuan', 'Pengajuan', 'inbox'], ['riwayat', 'Riwayat', 'clock'], ['kpi', 'KPI Unit', 'table'], ['tim', 'Anggota Unit', 'users']],
             'kd' => [['dashboard', 'Dashboard divisi', 'chart'], ['persetujuan', 'Persetujuan', 'check'], ['kpi', 'KPI Divisi', 'table'], ['nilai-kepala', 'Nilai Kepala Unit', 'clipboard'], ['tim', 'Tim Divisi', 'users']],
-            'hc' => [['dashboard', 'Dashboard', 'chart'], ['rekap', 'Rekap Penilaian', 'check'], ['struktur', 'Struktur & Staf', 'users'], ['akun', 'Akun Kepala', 'user'], ['kpi', 'KPI & Periode', 'table'], ['aktivitas', 'Riwayat Aktivitas', 'clock']],
+            'hc' => [['dashboard', 'Dashboard', 'chart'], ['rekap', 'Rekap Penilaian', 'check'], ['struktur', 'Struktur & Staf', 'users'], ['kpi', 'KPI & Periode', 'table'], ['aktivitas', 'Riwayat Aktivitas', 'clock']],
+            'adm' => [['akun', 'Akun Pengguna', 'users'], ['log', 'Log Sistem', 'clock'], ['pengingat', 'Pengingat Email', 'bell']],
         };
 
         return collect($menu)->map(fn ($item) => ['id' => $item[0], 'label' => $item[1], 'icon' => $item[2], 'href' => $this->link($item[0])])->all();
-    }
-
-    public function unit(string $id): array
-    {
-        return collect($this->data['units'])->firstWhere('id', $id);
     }
 
     public function navActive(string $id): bool
@@ -117,16 +143,6 @@ class AbproveDesign
         }
 
         return $this->page === $id;
-    }
-
-    public function division(string $id): array
-    {
-        return collect($this->data['divisions'])->firstWhere('id', $id);
-    }
-
-    public function units(): array
-    {
-        return array_values(array_filter($this->data['units'], fn ($u) => $this->role === 'hc' || ($this->role === 'ku' ? $u['id'] === $this->actor['unit'] : $u['div'] === $this->actor['div'])));
     }
 
     public function monthLabel(): string
@@ -146,95 +162,52 @@ class AbproveDesign
         return collect(explode(' ', explode(',', $clean)[0]))->filter()->take(2)->map(fn ($s) => mb_strtoupper(mb_substr($s, 0, 1)))->implode('');
     }
 
-    public function assessment(string $id): array
-    {
-        return $this->data['state']['ev'][$id.'|'.$this->month] ?? ['vals' => [], 'status' => 'Belum', 'pos' => '', 'neg' => '', 'note' => '', 'log' => []];
-    }
-
-    public function decorate(array $e): array
-    {
-        $unit = $this->unit($e['unit']);
-        $assessment = $this->assessment($e['id']);
-        $template = $this->data['templates'][$e['tpl']];
-        $total = 0;
-        $complete = true;
-        $items = [];
-        foreach ($template['kpi'] as $index => $k) {
-            $score = $assessment['vals'][$index] ?? null;
-            if ($score === null) {
-                $complete = false;
-            }$result = $score === null ? null : $score * $k[6] / 100;
-            $total += $result ?? 0;
-            $previous = $this->data['state']['ev'][$e['id'].'|'.($this->month - 1)]['vals'][$index] ?? null;
-            $items[] = ['pillar' => $k[0], 'name' => $k[1], 'numerator' => $k[2], 'denominator' => $k[3], 'formula' => $k[4], 'target' => $k[5], 'weight' => $k[6], 'score' => $score, 'result' => $result, 'previous' => $previous, 'delta' => $score === null || $previous === null ? null : $score - $previous];
-        }
-        $total = $complete ? $total : null;
-
-        return $e + ['name' => $e['nama'], 'job' => $e['jab'], 'unitName' => $unit['nama'], 'divisionId' => $unit['div'], 'divisionName' => $this->division($unit['div'])['nama'], 'templateName' => $template['nama'], 'assessment' => $assessment, 'status' => $assessment['status'], 'items' => $items, 'total' => $total, 'category' => $this->category($total)];
-    }
-
-    public function people(bool $heads = false): array
-    {
-        $people = $heads ? array_map(fn ($u) => ['id' => 'H-'.$u['id'], 'nama' => $u['kepala'], 'nip' => '1975'.str_pad((string) (array_search($u, $this->data['units']) + 1), 3, '0', STR_PAD_LEFT), 'jab' => 'Kepala '.$u['nama'], 'unit' => $u['id'], 'tpl' => 'YJM'], $this->data['units']) : $this->data['employees'];
-        $ids = array_column($this->units(), 'id');
-
-        return array_values(array_map(fn ($e) => $this->decorate($e), array_filter($people, fn ($e) => in_array($e['unit'], $ids))));
-    }
-
-    public function category(?float $total): array
-    {
-        if ($total === null) {
-            return ['label' => 'Belum lengkap', 'key' => 'empty'];
-        }
-
-        return $total >= 90 ? ['label' => 'Sangat Baik', 'key' => 'excellent'] : ($total >= 80 ? ['label' => 'Baik', 'key' => 'good'] : ($total >= 70 ? ['label' => 'Cukup', 'key' => 'fair'] : ['label' => 'Kurang', 'key' => 'poor']));
-    }
-
-    public function counts(): array
-    {
-        $rows = $this->people();
-        $result = ['total' => count($rows), 'Belum' => 0, 'Draft' => 0, 'Diajukan' => 0, 'Dikembalikan' => 0, 'Disetujui' => 0, 'Final' => 0];
-        foreach ($rows as $row) {
-            $result[$row['status']]++;
-        }
-
-        return $result;
-    }
-
-    public function template(): array
-    {
-        return $this->data['templates'][request()->query('template', 'GP')] ?? $this->data['templates']['GP'];
-    }
-
     public function view(): string
     {
-        if ($this->role === 'hc' && ! $this->review && in_array($this->page, ['kpi', 'pengaturan'], true)) {
-            return 'v4.kpi-workspace';
+        if ($this->role === 'hc' && in_array($this->page, ['kpi', 'pengaturan'], true)) {
+            return 'kpi.workspace';
         }
 
         return match ($this->page) {
-            'nilai', 'nilai-kepala' => 'v2.editor',
-            'pengajuan', 'persetujuan', 'rekap' => 'v2.list',
-            'akun', 'jabatan', 'struktur', 'karyawan' => 'v2.organization',
-            'kpi', 'impor' => 'v4.kpi',
-            'penempatan' => 'v2.coverage',
-            'pengaturan' => 'v2.cycles',
-            'dashboard' => request()->query('detail') === 'laporan' || request()->is('*/analytics') ? 'reference.analytics' : 'redesign.dashboard',
-            'riwayat' => 'reference.analytics',
-            'tim' => 'v2.team',
-            'aktivitas' => 'v2.activity',
-            'panduan' => 'v2.guide',
-            'notifikasi' => 'v2.notifications',
-            'profil' => 'shared.profil',
+            'akun' => 'admin.accounts',
+            'log' => 'admin.logs',
+            'pengingat' => 'admin.reminders',
+            'nilai', 'nilai-kepala' => 'assessments.editor',
+            'pengajuan', 'persetujuan', 'rekap' => 'assessments.list',
+            'jabatan', 'struktur', 'karyawan' => 'organization.index',
+            'kpi', 'impor' => 'kpi.templates',
+            'dashboard' => request()->query('detail') === 'laporan' || request()->is('*/analytics') ? 'reports.index' : 'dashboard.index',
+            'riwayat' => 'reports.index',
+            'tim' => 'team.index',
+            'aktivitas' => 'organization.activity',
+            'panduan' => 'guide.index',
+            'notifikasi' => 'notifications.index',
+            'profil' => 'profile.index',
+        };
+    }
+
+    /** Workspace data profile of the rendered view, see WORKSPACE_PROFILES. */
+    public function dataProfile(): string
+    {
+        return match ($this->view()) {
+            'assessments.editor', 'assessments.list', 'team.index' => 'kerja',
+            'reports.index' => 'laporan',
+            'dashboard.index' => 'dashboard',
+            'notifications.index' => 'notifikasi',
+            'organization.activity' => 'aktivitas',
+            'organization.index' => 'organisasi',
+            'kpi.templates' => 'kpi',
+            'kpi.workspace' => 'kpi-workspace',
+            default => 'personal',
         };
     }
 
     public function clientConfig(): array
     {
-        if (! $this->review) {
-            return ['mode' => 'live-v3', 'role' => $this->role, 'page' => $this->page, 'month' => $this->month, 'state' => '', 'review' => false, 'kpiWorkspace' => $this->role === 'hc' && in_array($this->page, ['kpi', 'pengaturan'], true), 'links' => collect(self::VIEWS[$this->role])->mapWithKeys(fn ($v) => [$v => $this->link($v)])->all(), 'actor' => $this->actor];
-        }
+        $profile = $this->dataProfile();
 
-        return ['mode' => 'flow-preview-v2', 'role' => $this->role, 'page' => $this->page, 'month' => $this->month, 'state' => $this->state, 'review' => $this->review, 'links' => collect(self::VIEWS[$this->role])->mapWithKeys(fn ($v) => [$v => $this->link($v)])->all(), 'fixture' => $this->data, 'people' => $this->people($this->page === 'nilai-kepala'), 'actor' => $this->actor];
+        return ['mode' => 'live-v3', 'role' => $this->role, 'page' => $this->page, 'month' => $this->month, 'state' => '', 'review' => false,
+            'workspaceProfile' => $profile, 'sections' => self::WORKSPACE_PROFILES[$profile]['sections'],
+            'links' => collect(self::VIEWS[$this->role])->mapWithKeys(fn ($v) => [$v => $this->link($v)])->all(), 'actor' => $this->actor];
     }
 }

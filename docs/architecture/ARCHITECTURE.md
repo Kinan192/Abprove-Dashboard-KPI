@@ -1,6 +1,6 @@
 # Arsitektur MVC KPI v3
 
-Laravel 13/PHP 8.3+/MySQL 8.4 dalam satu root. Layout Blade/Tailwind/JavaScript native tetap layout-1.0; binding data kini memakai API nyata. Better Auth 1.7.18 pada Node 22 di services/auth menangani login dan sesi melalui MySQL. [Detail kontrak v3](../backend/v3/README.md).
+Laravel 13/PHP 8.3+/MySQL dalam satu root. Blade/Tailwind/JavaScript native memakai API nyata. Better Auth pada `services/auth` menangani login dan sesi melalui MySQL.
 
 Browser -> Laravel CSRF -> Better Auth BFF -> layanan Node loopback -> auth_accounts/auth_sessions. Guard Laravel memverifikasi sesi, akun dan penugasan terkini sebelum ActiveContext/Policy. Sesi PHP hanya menyimpan CSRF/flash; tidak menjadi sumber autentikasi. Request bisnis tetap mengikuti MVC dan transaksi di bawah ini. Workspace JSON telah dibatasi server; pagination/filter UI bekerja pada data resmi dalam cakupan tersebut, tanpa localStorage bisnis. Nama komponen RenderFrontend tetap dipakai untuk shell HTML, bukan mode demo pada aplikasi berakun.
 
@@ -52,4 +52,4 @@ Snapshot identitas, organisasi, definisi dan kategori tidak bergantung pada nama
 
 Migration 000001-000004 tetap historis. Migration 000005 memasang snapshot SQL v2 hanya setelah semua tabel data lama terbukti kosong. Jika ada data, migration berhenti sebelum DDL. Tidak ada migrate:fresh/konversi otomatis pada database Laragon pengguna.
 
-Baca [panduan backend](../backend/v2/README.md), [rencana migrasi](../database/MIGRATION-V2.md) dan [kontrak transaksi](../database/TRANSACTIONS-V2.md).
+Baca [panduan migrasi](../database/MIGRATION-V2.md), [skema](../database/SCHEMA.md), dan [kontrak transaksi](../database/TRANSACTIONS-V2.md). Sandbox review dan fixture bisnis tidak menjadi bagian runtime.

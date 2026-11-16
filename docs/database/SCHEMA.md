@@ -4,7 +4,7 @@ Revisi per role v1.4: migration 000008 mengganti CHECK pilar tetap dengan teks w
 
 Target untuk alur v1.3 dan layout yang disetujui 10 November 2026 WIB. SQL fisik: [schema.mysql.sql](../../database/schema/schema.mysql.sql). MySQL 8.4/InnoDB/utf8mb4, koneksi dan timestamp UTC; tampilan jadwal WIB.
 
-Domain v2 menggantikan draft penilaian, template berdasarkan jabatan, dan kepala sebagai staf berakun. Integrasi v3 kini menghubungkan frontend ke database kpi_kinerja_v3_dev. Database legacy kpi_kinerja_dev tetap utuh dan belum diimpor. Migration 000006-000007 menambahkan Better Auth tanpa mengubah aturan KPI. [Panduan aktif](../backend/v3/README.md).
+Domain v2 menggantikan draft penilaian, template berdasarkan jabatan, dan kepala sebagai staf berakun. Frontend mengakses database yang ditetapkan pada `.env`; pembersihan source tidak memindahkan atau mengimpor data. Migration 000006-000007 menambahkan Better Auth tanpa mengubah aturan KPI.
 
 ## Identitas dan struktur
 
@@ -88,6 +88,6 @@ Indeks utama mengikuti daftar role: cycle/status/division/unit, division/cycle/s
 
 ## Validasi dan adopsi
 
-[Hasil validasi SQL](schema-v2-validation.json), [ERD](ERD.md), [rencana migrasi](MIGRATION-V2.md), [kontrak transaksi](TRANSACTIONS-V2.md). SQL hanya diimpor ke database kosong terisolasi saat pengujian. Baseline migration lama tetap tersimpan immutable; jangan mengimpor SQL baru ke database yang berisi tabel lama.
+Lihat [pemeriksaan database](VALIDATION.md), [ERD](ERD.md), [rencana migrasi](MIGRATION-V2.md), dan [kontrak transaksi](TRANSACTIONS-V2.md). Baseline migration lama tetap dipertahankan; jangan mengimpor snapshot SQL ke database yang berisi tabel lama.
 
 Acuan teknis: [MySQL CHECK](https://dev.mysql.com/doc/refman/8.4/en/create-table-check-constraints.html) dan [MySQL FK](https://dev.mysql.com/doc/refman/8.4/en/create-table-foreign-keys.html).

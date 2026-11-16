@@ -407,11 +407,9 @@ Kepala Divisi review/approve/return untuk anggota dan mengisi nilai untuk Kepala
 - PRD KPI Kinerja: Sistem Penilaian Kinerja Bulanan, 7 November 2026, 10 halaman, PDF sumber pada folder Downloads.
 - DESIGN_SYSTEM.md dan UI_UX_BLUEPRINT.md pada folder Downloads. Arahan pengguna terbaru tentang navigasi, pemisahan role dan tim mengungguli bagian lama yang bertentangan.
 - Arahan percakapan: sidebar/navbar tetap, seluruh konten di dashboard; ukuran konsisten; page per role; prototype interaktif; warna design system 60:30:10; multi-divisi/unit dan pengelolaan tim oleh Super HC.
-- Desain: ../../design/prototypes/KPI-Kinerja-UIUX.figcraft.
-- Handoff tim: ../design/TEAM_MANAGEMENT.md.
-- Bukti prototype: ../design/reports/TEAM_PROTOTYPE_TESTS.json dan TEAM_UI_AUDIT.json.
+- Implementasi aktif berada pada MVC Laravel, Blade, Tailwind, dan modul JavaScript proyek.
 
-Dokumen sumber dipertahankan. PRD v1.1 tersedia sebagai PDF untuk review dan Markdown untuk revisi lanjutan. Prioritas dan acceptance di sini adalah kebutuhan aplikasi, bukan klaim bahwa snapshot prototype sudah menjalankan penyimpanan dan keamanan server.
+Arsip desain dan bukti prototype telah dihapus dari source. Prioritas dan acceptance di sini adalah kebutuhan aplikasi, bukan klaim pengujian terhadap snapshot prototype.
 
 
 ## 15. Keputusan implementasi backend v1.2

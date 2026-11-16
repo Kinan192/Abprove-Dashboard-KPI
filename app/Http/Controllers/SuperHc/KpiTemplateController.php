@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\SuperHc;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\KpiTemplateRequest;
+use App\Http\Requests\KpiMaster\KpiTemplateRequest;
 use App\Http\Requests\RequestIdRequest;
 use App\Models\KpiTemplate;
 use App\Services\IdentityAccess\MutationRunner;

@@ -1,76 +1,148 @@
 import {
     Chart,
+    BarController,
+    BarElement,
     LineController,
     LineElement,
     PointElement,
-    BarController,
-    BarElement,
     CategoryScale,
     LinearScale,
-    Filler,
     Tooltip,
     DoughnutController,
     ArcElement,
 } from 'chart.js';
-import { $, node, labelCycle, dateTime, status } from './flow-dom';
+import { $, $$, node, labelCycle, dateTime, status as badge } from './flow-dom';
 import { activityLabel, activitySubject } from './activity-labels';
-import { open } from './ui';
 import { paginate } from './pagination';
 
 Chart.register(
+    BarController,
+    BarElement,
     LineController,
     LineElement,
     PointElement,
-    BarController,
-    BarElement,
     CategoryScale,
     LinearScale,
-    Filler,
     Tooltip,
     DoughnutController,
     ArcElement,
 );
 
-const format = (value) =>
-    value == null
-        ? '-'
-        : new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 }).format(
-              value,
-          );
-const average = (values) =>
-    values.length ? values.reduce((a, b) => a + b, 0) / values.length : null;
-const palette = [
-    ['final', 'Final', '--dashboard-chart'],
-    ['submitted', 'Diajukan', '--color-info'],
-    ['returned', 'Dikembalikan', '--dashboard-returned'],
-    ['not_started', 'Belum diisi', '--dashboard-unfilled'],
-];
-const color = (variable) =>
-    getComputedStyle(document.documentElement)
-        .getPropertyValue(variable)
-        .trim();
-function finals(s, c, key) {
-    return s
-        .people(c.role === 'ku' ? 'member' : 'all', key)
-        .filter((p) => s.assessment(p.id, key).status === 'Final')
-        .map((p) => s.total(p.id, key))
-        .filter((v) => v != null && Number.isFinite(+v))
-        .map(Number);
+const STATUSES = {
+    final: { label: 'Final', badge: 'Final' },
+    submitted: { label: 'Diajukan', badge: 'Diajukan' },
+    returned: { label: 'Dikembalikan', badge: 'Dikembalikan' },
+    not_started: { label: 'Belum diisi', badge: 'Belum' },
+};
+const ROLES = {
+    ku: {
+        status: (key) => [
+            ['final', 'submitted'].includes(key) ? 'pengajuan' : 'nilai',
+            { status: STATUSES[key].badge },
+        ],
+        deadline: 'submission',
+        tasksEmpty: 'Semua staf sudah diajukan atau Final.',
+        report: (link, extra = {}) => link('riwayat', extra),
+    },
+    kd: {
+        status: (key) => ['persetujuan', { status: STATUSES[key].badge }],
+        deadline: 'approval',
+        tasksEmpty:
+            'Tidak ada pengajuan menunggu dan seluruh Kepala Unit sudah dinilai.',
+        report: (link, extra = {}) =>
+            link('dashboard', { detail: 'laporan', ...extra }),
+    },
+    hc: {
+        status: (key) => ['rekap', { status: STATUSES[key].badge }],
+        deadline: 'closes',
+        tasksEmpty: 'Seluruh divisi sudah tuntas pada periode ini.',
+        report: (link, extra = {}) =>
+            link('dashboard', { detail: 'laporan', ...extra }),
+    },
+};
+const CYCLE_STATUS = {
+    open: 'Terbuka',
+    closed: 'Ditutup',
+    planned: 'Direncanakan',
+};
+
+const formatter = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 });
+const fmt = (value) => (value == null ? '–' : formatter.format(value));
+const pct = (value) => (value == null ? '–' : `${fmt(value)}%`);
+const share = (part, total) => (total ? (part * 100) / total : 0);
+const css = (name) =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const shortMonth = (key, withYear = false) =>
+    new Date(`${key}-01T12:00:00+07:00`).toLocaleDateString('id-ID', {
+        month: 'short',
+        ...(withYear ? { year: '2-digit' } : {}),
+        timeZone: 'Asia/Jakarta',
+    });
+
+function cell(content, label, cls = '') {
+    const td = node('td', content, cls);
+    td.dataset.label = label;
+    return td;
 }
-function options() {
+function table(headings, rows) {
+    const t = node('table', null, 'data-table'),
+        head = node('thead'),
+        tr = node('tr'),
+        body = node('tbody');
+    headings.forEach((heading) => tr.append(node('th', heading)));
+    head.append(tr);
+    for (const values of rows) {
+        const row = node('tr');
+        values.forEach((value, i) =>
+            row.append(
+                cell(value, headings[i], i ? 'numeric' : ''),
+            ),
+        );
+        body.append(row);
+    }
+    if (!rows.length) {
+        const row = node('tr'),
+            td = node('td', 'Belum ada data pada periode ini.', 'empty');
+        td.colSpan = headings.length;
+        row.append(td);
+        body.append(row);
+    }
+    t.append(head, body);
+    return t;
+}
+function emptyItem(list, message) {
+    list.replaceChildren(node('li', message, 'dashboard-empty'));
+}
+
+function chartOptions() {
+    const muted = css('--color-muted'),
+        ink = css('--color-ink'),
+        family = getComputedStyle(document.body).fontFamily,
+        font = { family, size: 11 };
     return {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
         resizeDelay: 80,
+        layout: { padding: { top: 4 } },
         plugins: {
+            legend: { display: false },
             tooltip: {
-                backgroundColor: '#1d2433',
-                titleColor: '#ffffff',
-                bodyColor: '#ffffff',
-                cornerRadius: 6,
-                padding: 12,
-                displayColors: false,
+                backgroundColor: css('--color-paper'),
+                borderColor: css('--color-line'),
+                borderWidth: 1,
+                titleColor: ink,
+                bodyColor: ink,
+                titleFont: { family, size: 12, weight: '600' },
+                bodyFont: { family, size: 12 },
+                titleMarginBottom: 6,
+                cornerRadius: 8,
+                caretSize: 5,
+                padding: 10,
+                boxPadding: 6,
+                boxWidth: 8,
+                boxHeight: 8,
+                usePointStyle: true,
             },
         },
         scales: {
@@ -78,905 +150,862 @@ function options() {
                 border: { display: false },
                 grid: { display: false },
                 ticks: {
-                    color: color('--color-muted'),
-                    font: { family: 'Figtree, sans-serif', size: 11 },
+                    color: muted,
+                    font,
+                    padding: 6,
                     maxRotation: 0,
+                    autoSkip: true,
                 },
             },
             y: {
                 min: 0,
                 max: 100,
-                border: { display: false },
-                grid: { color: color('--color-line'), drawTicks: false },
-                ticks: {
-                    color: color('--color-muted'),
-                    padding: 10,
-                    stepSize: 25,
-                    font: { family: 'Figtree, sans-serif', size: 11 },
-                },
+                border: { display: false, dash: [3, 4] },
+                grid: { color: css('--color-line'), drawTicks: false },
+                ticks: { color: muted, font, padding: 10, stepSize: 25 },
             },
         },
     };
 }
-function draw(root, config, label, emptyMessage) {
-    root.chartInstance?.destroy();
+function draw(host, config, label) {
+    host.chart?.destroy();
     const canvas = node('canvas');
     canvas.setAttribute('role', 'img');
     canvas.setAttribute('aria-label', label);
-    canvas.textContent =
-        'Buka Data grafik untuk membaca seluruh nilai dalam tabel.';
-    root.replaceChildren(canvas);
-    root.dataset.chartLibrary = 'chart.js';
-    root.dataset.empty = emptyMessage ? 'true' : 'false';
-    root.setAttribute('aria-busy', 'false');
-    root.chartInstance = new Chart(canvas, config);
-    if (emptyMessage)
-        root.append(node('p', emptyMessage, 'dashboard-chart-empty'));
+    canvas.textContent = 'Pilih Data grafik untuk membaca nilai dalam tabel.';
+    host.replaceChildren(canvas);
+    host.dataset.empty = 'false';
+    host.chart = new Chart(canvas, config);
 }
-function trend(root, state) {
-    const { s, link, history } = state;
-    const values = history.map((r) => r.value).filter((v) => v != null);
-    const min = values.length
-        ? Math.max(0, Math.floor(Math.min(...values) / 10) * 10 - 10)
-        : 0;
-    const config = options();
-    config.scales.y.min = min;
-    config.scales.y.ticks.stepSize = min >= 60 ? 10 : 25;
-    config.interaction = { mode: 'index', intersect: false };
-    config.onHover = (event, elements) => {
-        event.native.target.style.cursor = elements.length
-            ? 'pointer'
-            : 'default';
-        const row = history[elements[0]?.index];
-        $('[data-dashboard-trend-detail]').textContent =
-            row?.value != null
-                ? `${labelCycle(row.key)} · ${format(row.value)} · ${row.count} hasil Final`
-                : 'Pilih titik untuk membuka bulan tersebut.';
+/** Replaces a chart with a compact message; `data-empty` lets the layout drop the chart height. */
+function emptyChart(host, message) {
+    host.chart?.destroy();
+    host.chart = null;
+    host.dataset.empty = 'true';
+    host.replaceChildren(node('p', message, 'dashboard-empty'));
+}
+function pointer(event, elements) {
+    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+}
+
+function delta(current, previous, unit, month) {
+    if (current == null || previous == null)
+        return { text: 'Belum ada pembanding', trend: 'none' };
+    const diff = Math.round((current - previous) * 10) / 10;
+    return {
+        text: `${diff > 0 ? '+' : diff < 0 ? '−' : '±'}${fmt(Math.abs(diff))} ${unit} vs ${shortMonth(month)}`,
+        trend: diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat',
     };
+}
+function cards(state) {
+    const { c, d, link } = state,
+        m = d.metrics,
+        prev = m.previous,
+        role = ROLES[c.role];
+    const open = m.not_started + m.returned;
+    const items = [
+        {
+            label: 'Rerata nilai Final',
+            value: fmt(m.average),
+            unit: m.average == null ? '' : '/100',
+            delta: delta(m.average, prev?.average, 'poin', prev?.month),
+            hint: `${m.final} hasil Final`,
+            tone: 'neutral',
+            href: role.report(link),
+        },
+        {
+            label: 'Ketuntasan',
+            value: pct(m.completion),
+            delta: delta(m.completion, prev?.completion, 'pp', prev?.month),
+            hint: `${m.final} dari ${m.total} sudah Final`,
+            tone: m.total && m.final === m.total ? 'good' : 'neutral',
+            href: '#dashboard-completion',
+        },
+    ];
+    if (c.role === 'ku')
+        items.push(
+            {
+                label: 'Perlu diisi',
+                value: fmt(open),
+                hint: `${m.not_started} belum diisi · ${m.returned} dikembalikan`,
+                tone: open ? 'warn' : 'good',
+                href: link('nilai'),
+            },
+            {
+                label: 'Menunggu Kepala Divisi',
+                value: fmt(m.submitted),
+                hint: 'Sudah diajukan, menunggu persetujuan',
+                tone: 'info',
+                href: link('pengajuan', { status: 'Diajukan' }),
+            },
+        );
+    else if (c.role === 'kd') {
+        const heads = m.kinds.unit_head;
+        items.push(
+            {
+                label: 'Menunggu persetujuan Anda',
+                value: fmt(m.kinds.member.submitted),
+                hint: 'Pengajuan staf dari Kepala Unit',
+                tone: m.kinds.member.submitted ? 'warn' : 'good',
+                href: link('persetujuan', { status: 'Diajukan' }),
+            },
+            {
+                label: 'Kepala Unit belum dinilai',
+                value: fmt(heads.not_started),
+                hint: `dari ${heads.total} Kepala Unit`,
+                tone: heads.not_started ? 'warn' : 'good',
+                href: link('nilai-kepala'),
+            },
+        );
+    } else
+        items.push(
+            {
+                label: 'Menunggu persetujuan KD',
+                value: fmt(m.submitted),
+                hint: 'Diajukan Kepala Unit',
+                tone: 'info',
+                href: link('rekap', { status: 'Diajukan' }),
+            },
+            {
+                label: 'Belum diisi / dikembalikan',
+                value: fmt(open),
+                hint: `${m.not_started} belum diisi · ${m.returned} dikembalikan`,
+                tone: open ? 'warn' : 'good',
+                href: link('rekap', { status: 'all' }),
+            },
+        );
+    const root = $('[data-dashboard-cards]');
+    root.replaceChildren(
+        ...items.map((item) => {
+            const a = node('a', null, 'dashboard-card'),
+                value = node('strong', item.value, 'dashboard-card-value');
+            a.href = item.href;
+            a.dataset.tone = item.tone;
+            if (item.unit)
+                value.append(node('small', item.unit, 'dashboard-card-unit'));
+            a.append(node('span', item.label, 'dashboard-card-label'), value);
+            if (item.delta) {
+                const change = node('span', item.delta.text, 'dashboard-delta');
+                change.dataset.trend = item.delta.trend;
+                a.append(change);
+            }
+            a.append(node('span', item.hint, 'dashboard-card-hint'));
+            return a;
+        }),
+    );
+}
+
+function completion(state) {
+    const { c, d, link } = state,
+        m = d.metrics;
+    $('[data-dashboard-completion-figure]').textContent = m.total
+        ? `${pct(m.completion)} Final`
+        : '–';
+    $('[data-dashboard-completion-caption]').textContent = m.total
+        ? `${m.final} dari ${m.total} subjek sudah Final. Subjek yang belum dinilai ikut dihitung.`
+        : 'Belum ada subjek dalam cakupan pada periode ini.';
+    const stack = $('[data-dashboard-stack]'),
+        legend = $('[data-dashboard-stack-legend]');
+    stack.replaceChildren();
+    legend.replaceChildren();
+    const order = ['final', 'submitted', 'returned', 'not_started'];
+    for (const key of order) {
+        if (m[key]) {
+            const segment = node('span', null, 'dashboard-stack-segment');
+            segment.dataset.status = key;
+            segment.style.flexGrow = m[key];
+            stack.append(segment);
+        }
+        const [page, params] = ROLES[c.role].status(key),
+            li = node('li'),
+            a = node('a', null, 'dashboard-stack-item'),
+            swatch = node('i');
+        swatch.dataset.status = key;
+        a.href = link(page, params);
+        a.append(
+            swatch,
+            node('span', STATUSES[key].label),
+            node('strong', fmt(m[key])),
+            node('small', pct(share(m[key], m.total))),
+        );
+        li.append(a);
+        legend.append(li);
+    }
+    stack.dataset.empty = String(!m.total);
+    stack.setAttribute(
+        'aria-label',
+        m.total
+            ? order
+                  .map((key) => `${STATUSES[key].label} ${m[key]}`)
+                  .join(', ') + ` dari ${m.total} subjek`
+            : 'Belum ada subjek',
+    );
+}
+
+function trend(state) {
+    const { d, link } = state,
+        rows = d.trend,
+        host = $('[data-dashboard-chart="trend"]'),
+        config = chartOptions();
+    config.interaction = { mode: 'index', intersect: false };
+    config.onHover = pointer;
     config.onClick = (_, elements) => {
-        const row = history[elements[0]?.index];
-        if (row?.value != null)
-            location.assign(link('dashboard', { cycle: row.key }));
+        const row = rows[elements[0]?.index];
+        if (row?.scheduled && row.month !== d.month)
+            location.assign(link('dashboard', { cycle: row.month }));
     };
     config.plugins.tooltip.callbacks = {
-        title: (items) => labelCycle(history[items[0].dataIndex].key),
-        label: (item) => `Nilai Final: ${format(item.parsed.y)}`,
-        afterLabel: (item) =>
-            `${history[item.dataIndex].count} penilaian Final`,
+        title: (items) => labelCycle(rows[items[0].dataIndex].month),
+        label: (item) => `Rerata Final: ${fmt(item.raw)} / 100`,
+        afterLabel: (item) => {
+            const row = rows[item.dataIndex];
+            return `${row.final} hasil Final dari ${row.total} subjek`;
+        },
     };
-    draw(
-        root,
+    const current = rows.length - 1,
+        latest = rows[current],
+        primary = css('--dashboard-primary');
+    if (!rows.some((row) => row.average != null))
+        emptyChart(
+            host,
+            'Belum ada hasil Final dalam 12 bulan terakhir. Rincian per bulan tersedia di Data grafik.',
+        );
+    else draw(
+        host,
         {
             type: 'line',
             data: {
-                labels: history.map((r) =>
-                    labelCycle(r.key).split(' ')[0].slice(0, 3),
+                labels: rows.map((row, i) =>
+                    shortMonth(row.month, i === 0 || row.month.endsWith('-01')),
                 ),
                 datasets: [
                     {
-                        label: 'Rata-rata nilai Final',
-                        data: history.map((r) => r.value),
-                        borderColor: color('--dashboard-chart'),
-                        backgroundColor: color('--dashboard-chart') + '0d',
-                        fill: true,
-                        borderWidth: 2.5,
+                        label: 'Rerata nilai Final',
+                        data: rows.map((row) => row.average),
+                        borderColor: primary,
+                        backgroundColor: primary,
+                        borderWidth: 2,
                         tension: 0.3,
                         spanGaps: false,
-                        pointRadius: history.map((r, i) =>
-                            i === history.length - 1 && r.value != null ? 4 : 0,
+                        pointRadius: rows.map((_, i) => (i === current ? 4.5 : 3)),
+                        pointHoverRadius: 5.5,
+                        pointHitRadius: 14,
+                        pointBackgroundColor: rows.map((_, i) =>
+                            i === current ? primary : css('--color-paper'),
                         ),
-                        pointHoverRadius: 5,
-                        pointHitRadius: 15,
-                        pointBackgroundColor: color('--color-paper'),
-                        pointBorderWidth: 2.5,
+                        pointHoverBackgroundColor: primary,
+                        pointBorderWidth: 2,
                     },
                 ],
             },
             options: config,
         },
-        'Grafik garis rata-rata nilai Final per bulan',
-        values.length ? '' : 'Belum ada hasil Final',
+        `Grafik garis rerata nilai Final 12 bulan. ${labelCycle(d.month)}: ${
+            latest.average == null
+                ? 'belum ada hasil Final'
+                : `${fmt(latest.average)} dari ${latest.final} hasil Final`
+        }. Bulan tanpa hasil Final tidak digambar.`,
     );
-    $('[data-dashboard-year]').textContent = s.cycleKey.slice(0, 4);
-    $('[data-dashboard-scale]').textContent = `Skala ${min}–100`;
-}
-function comparisonRows(c, d) {
-    if (c.role === 'ku')
-        return (d.item_averages || [])
-            .filter((r) => r.kind === 'member' && r.average != null)
-            .map((r) => ({ ...r, value: +r.average }))
-            .sort((a, b) => a.value - b.value || a.name.localeCompare(b.name));
-    return [...((c.role === 'hc' ? d.division_progress : d.unit_status) || [])]
-        .filter((r) => r.total > 0)
-        .sort(
-            (a, b) =>
-                a.final / a.total - b.final / b.total ||
-                a.name.localeCompare(b.name),
-        );
-}
-function scopeLink(row, state) {
-    const { c, link } = state;
-    return c.role === 'ku'
-        ? link('riwayat')
-        : link(c.role === 'hc' ? 'rekap' : 'persetujuan', {
-              [c.role === 'hc' ? 'division' : 'unit']: row.id,
-              status: 'all',
-          });
-}
-function comparison(root, state) {
-    if (state.c.role === 'hc') {
-        completion(root, state);
-        return;
-    }
-    const { c, rows } = state,
-        pages = Math.max(1, Math.ceil(rows.length / 5));
-    state.page = Math.max(0, Math.min(state.page, pages - 1));
-    const shown = rows.slice(state.page * 5, state.page * 5 + 5),
-        config = options();
-    state.shown = shown;
-    config.indexAxis = 'y';
-    config.interaction = { mode: 'index', axis: 'y', intersect: false };
-    config.scales.x = {
-        ...config.scales.y,
-        stacked: c.role !== 'ku',
-        min: 0,
-        max: 100,
-        ticks: {
-            ...config.scales.y.ticks,
-            stepSize: 50,
-            callback: (v) => `${v}${c.role === 'ku' ? '' : '%'}`,
-        },
-    };
-    config.scales.y = {
-        stacked: c.role !== 'ku',
-        border: { display: false },
-        grid: { display: false },
-        ticks: {
-            color: color('--color-ink'),
-            font: { family: 'Figtree, sans-serif', size: 11 },
-            autoSkip: false,
-            callback: function (index) {
-                const name = this.getLabelForValue(index);
-                return name.length > 21 ? name.slice(0, 20) + '…' : name;
-            },
-        },
-    };
-    config.onHover = (event, elements) => {
-        event.native.target.style.cursor = elements.length
-            ? 'pointer'
-            : 'default';
-    };
-    config.onClick = (_, elements) => {
-        const row = shown[elements[0]?.index];
-        if (row) location.assign(scopeLink(row, state));
-    };
-    config.plugins.tooltip.callbacks = {
-        title: (items) => shown[items[0].dataIndex].name,
-        label: (item) => {
-            const row = shown[item.dataIndex];
-            return c.role === 'ku'
-                ? `Rata-rata: ${format(row.value)} (${row.count} Final)`
-                : `${palette[item.datasetIndex][1]}: ${row[palette[item.datasetIndex][0]]} penilaian`;
-        },
-        footer: (items) =>
-            c.role === 'ku'
-                ? 'Nilai sebelum dikalikan bobot'
-                : `${shown[items[0].dataIndex].final} dari ${shown[items[0].dataIndex].total} sudah Final`,
-    };
-    const datasets =
-        c.role === 'ku'
-            ? [
-                  {
-                      label: 'Rata-rata nilai KPI',
-                      data: shown.map((r) => r.value),
-                      backgroundColor: color('--dashboard-chart'),
-                      borderRadius: 4,
-                      barThickness: 16,
-                  },
-              ]
-            : palette.map(([key, label, variable]) => ({
-                  label,
-                  data: shown.map((r) => (r[key] / r.total) * 100),
-                  backgroundColor: color(variable),
-                  barThickness: 16,
-                  borderWidth: 0,
-              }));
-    draw(
-        root,
-        {
-            type: 'bar',
-            data: { labels: shown.map((r) => r.name), datasets },
-            options: config,
-        },
-        c.role === 'ku'
-            ? 'Grafik batang rata-rata nilai KPI'
-            : 'Grafik batang bertumpuk progres penilaian',
-        rows.length
-            ? ''
-            : c.role === 'ku'
-              ? 'Belum ada nilai Final per KPI'
-              : 'Belum ada penilaian pada periode ini',
-    );
-    const legend = $('[data-dashboard-legend]');
-    legend.replaceChildren();
-    if (c.role !== 'ku')
-        for (const [, label, variable] of palette) {
-            const item = node('span'),
-                swatch = node('i');
-            swatch.style.background = color(variable);
-            item.append(swatch, document.createTextNode(label));
-            legend.append(item);
-        }
-    else legend.textContent = 'Nilai mentah 10–100, sebelum dikalikan bobot.';
-    $('[data-dashboard-paging]').hidden = rows.length <= 5;
-    $('[data-dashboard-page-summary]').textContent =
-        `${state.page * 5 + 1}–${Math.min((state.page + 1) * 5, rows.length)} dari ${rows.length}`;
-    $('[data-dashboard-page-label]').textContent =
-        `${state.page + 1} / ${pages}`;
-    $('[data-dashboard-prev]').disabled = state.page === 0;
-    $('[data-dashboard-next]').disabled = state.page >= pages - 1;
-}
-function metrics(root, state) {
-    const { c, s, d, link, history } = state,
-        m = d.metrics;
-    const previous = history.at(-2)?.value,
-        current = m.average == null ? null : +m.average;
-    const delta =
-        previous == null || current == null ? null : current - previous;
-    $('[data-dashboard-average]').textContent = format(current);
-    $('[data-dashboard-delta]').textContent =
-        delta == null
-            ? `${m.final} hasil Final bulan ini`
-            : `${delta > 0 ? '+' : ''}${format(delta)} poin dari bulan lalu`;
-    const rows = [
-        [
-            c.role === 'ku'
-                ? 'Anggota unit'
-                : c.role === 'kd'
-                  ? 'Staf & Kepala Unit'
-                  : 'Subjek penilaian',
-            m.total,
-            c.role === 'hc' ? 'Seluruh organisasi' : 'Dalam cakupan Anda',
-            link(c.role === 'hc' ? 'rekap' : 'tim'),
-        ],
-    ];
-    if (c.role === 'ku')
-        rows.push(
-            [
-                'Belum diisi',
-                m.not_started,
-                'Mulai penilaian staf',
-                link('nilai'),
-            ],
-            [
-                'Dikembalikan',
-                m.returned,
-                'Perbaiki sebelum diajukan',
-                link('nilai', { status: 'Dikembalikan' }),
-            ],
-            [
-                'Menunggu persetujuan',
-                m.submitted,
-                'Sudah diajukan ke Kepala Divisi',
-                link('pengajuan', { status: 'Diajukan' }),
-            ],
-        );
-    else if (c.role === 'kd')
-        rows.push(
-            [
-                'Menunggu persetujuan',
-                m.submitted,
-                'Pengajuan staf dalam divisi Anda',
-                link('persetujuan'),
-            ],
-            [
-                'Kepala Unit belum dinilai',
-                s
-                    .people('unit_head')
-                    .filter((p) => s.assessment(p.id).status !== 'Final')
-                    .length,
-                'Penilaian langsung oleh Anda',
-                link('nilai-kepala'),
-            ],
-            [
-                'Dikembalikan',
-                m.returned,
-                'Menunggu perbaikan Kepala Unit',
-                link('persetujuan', { status: 'Dikembalikan' }),
-            ],
-        );
-    else
-        rows.push(
-            [
-                'Sudah Final',
-                m.final,
-                'Keputusan Kepala Divisi',
-                link('rekap', { status: 'Final' }),
-            ],
-            [
-                'Menunggu persetujuan',
-                m.submitted,
-                'Ditinjau Kepala Divisi',
-                link('rekap', { status: 'Diajukan' }),
-            ],
-            [
-                'Perlu tindak lanjut',
-                +m.not_started + +m.returned,
-                `${m.not_started} belum diisi · ${m.returned} dikembalikan`,
-                link('rekap'),
-            ],
-        );
-    root.replaceChildren();
-    for (const [label, value, hint, href] of rows) {
-        const a = node('a', null, 'dashboard-metric');
-        a.href = href;
-        a.append(
-            node('span', label, 'figure-label'),
-            node('strong', value, 'figure-value'),
-            node('span', hint, 'figure-hint'),
-        );
-        root.append(a);
-    }
-}
-function agenda(state) {
-    const { s, c, link } = state,
-        cycle = s.cycle();
-    $('[data-dashboard-cycle-month]').textContent = labelCycle(s.cycleKey);
-    $('[data-dashboard-cycle-status]').textContent = cycle
-        ? { open: 'Terbuka', closed: 'Ditutup', planned: 'Direncanakan' }[
-              cycle.status
-          ] || cycle.status
-        : 'Belum diatur';
-    const rows = [
-        ['Mulai pengisian', cycle?.opens],
-        ['Batas pengajuan staf', cycle?.submission],
-        ['Batas ACC & nilai Kepala Unit', cycle?.approval],
-        ['Penutupan periode', cycle?.closes],
-    ];
-    const root = $('[data-dashboard-deadlines]');
-    root.replaceChildren();
-    for (const [label, value] of rows) {
-        const li = node('li');
-        li.append(
-            node('strong', label),
-            node('span', value ? dateTime(value) + ' WIB' : 'Belum diatur'),
-        );
-        root.append(li);
-    }
-    const next = rows[c.role === 'ku' ? 1 : c.role === 'kd' ? 2 : 3];
-    $('[data-dashboard-next-deadline]').textContent =
-        `${next[0]}: ${next[1] ? dateTime(next[1]) + ' WIB' : 'belum diatur'}`;
-    $('[data-dashboard-agenda-action]').href = link(
-        { ku: 'nilai', kd: 'nilai-kepala', hc: 'pengaturan' }[c.role],
-    );
-}
-function findings(state) {
-    const { c, d, link } = state,
-        root = $('[data-dashboard-findings]');
-    if (!root) return;
-    root.replaceChildren();
-    const rows = [...(d.findings || [])].sort(
-        (a, b) => Number(Boolean(b.negative)) - Number(Boolean(a.negative)),
-    );
-    for (const row of rows.slice(0, 2)) {
-        const a = node('a', null, 'dashboard-finding'),
-            label = node(
-                'span',
-                row.negative ? 'Perlu ditingkatkan' : 'Pencapaian',
-                'dashboard-finding-label',
-            );
-        label.dataset.kind = row.negative ? 'negative' : 'positive';
-        a.href = link(
-            c.role === 'hc'
-                ? 'rekap'
-                : c.role === 'kd'
-                  ? 'persetujuan'
-                  : 'pengajuan',
-            { person: row.personId },
-        );
-        a.append(
-            label,
-            node('strong', row.name),
-            node('p', row.negative || row.positive),
-        );
-        root.append(a);
-    }
-    if (!rows.length)
-        root.append(
-            node('p', 'Belum ada temuan dari hasil Final.', 'dashboard-empty'),
-        );
-    $('[data-dashboard-findings-all]').href =
-        c.role === 'ku'
-            ? link('riwayat', { panel: 'findings' })
-            : link('dashboard', { detail: 'laporan', panel: 'results' });
-}
-function completion(root, state) {
-    const { history, link } = state,
-        config = options();
-    config.scales.y.ticks.callback = (value) => `${value}%`;
-    config.plugins.tooltip.callbacks = {
-        title: (items) => labelCycle(history[items[0].dataIndex].key),
-        label: (item) => `${format(item.parsed.y)}% sudah Final`,
-        afterLabel: (item) =>
-            `${history[item.dataIndex].count} dari ${history[item.dataIndex].total} subjek`,
-    };
-    config.onHover = (event, elements) => {
-        event.native.target.style.cursor = elements.length
-            ? 'pointer'
-            : 'default';
-    };
-    config.onClick = (_, elements) => {
-        const row = history[elements[0]?.index];
-        if (row?.completion != null)
-            location.assign(link('dashboard', { cycle: row.key }));
-    };
-    draw(
-        root,
-        {
-            type: 'bar',
-            data: {
-                labels: history.map((row) =>
-                    labelCycle(row.key).split(' ')[0].slice(0, 3),
-                ),
-                datasets: [
-                    {
-                        label: 'Ketuntasan penilaian',
-                        data: history.map((row) => row.completion),
-                        backgroundColor: color('--dashboard-chart'),
-                        borderRadius: 3,
-                        maxBarThickness: 22,
-                    },
-                ],
-            },
-            options: config,
-        },
-        'Grafik batang persentase ketuntasan penilaian setiap bulan',
-        history.some((row) => row.completion != null)
-            ? ''
-            : 'Belum ada periode penilaian',
-    );
-    $('[data-dashboard-legend]').textContent =
-        'Final ÷ jumlah subjek pada bulan yang sama.';
-    $('[data-dashboard-paging]').hidden = true;
-}
-function lowKpis(root, state) {
-    const rows = (state.d.item_averages || [])
-        .filter((row) => row.average != null)
-        .toSorted(
-            (a, b) => +a.average - +b.average || a.name.localeCompare(b.name),
-        )
-        .slice(0, 5);
-    state.lowKpis = rows;
-    const config = options();
-    config.indexAxis = 'y';
-    config.scales.x = {
-        ...config.scales.y,
-        min: 0,
-        max: 100,
-        ticks: { ...config.scales.y.ticks, stepSize: 50 },
-    };
-    config.scales.y = {
-        border: { display: false },
-        grid: { display: false },
-        ticks: {
-            color: color('--color-ink'),
-            font: { family: 'Figtree, sans-serif', size: 10 },
-            autoSkip: false,
-            callback: function (value) {
-                const name = this.getLabelForValue(value);
-                return name.length > 18 ? name.slice(0, 17) + '…' : name;
-            },
-        },
-    };
-    config.plugins.tooltip.callbacks = {
-        title: (items) => [
-            rows[items[0].dataIndex].name,
-            rows[items[0].dataIndex].area,
-        ],
-        label: (item) => `Rata-rata: ${format(item.parsed.x)}`,
-        afterLabel: (item) =>
-            `${rows[item.dataIndex].count} hasil Final · bobot ${format(+rows[item.dataIndex].weight)}%`,
-    };
-    config.onHover = (event, elements) => {
-        event.native.target.style.cursor = elements.length
-            ? 'pointer'
-            : 'default';
-    };
-    config.onClick = (_, elements) => {
-        if (elements.length) {
-            chartData(state, 'low-kpi');
-            open('dashboard-data-dialog');
-        }
-    };
-    draw(
-        root,
-        {
-            type: 'bar',
-            data: {
-                labels: rows.map((row) => row.name),
-                datasets: [
-                    {
-                        label: 'Rata-rata indikator',
-                        data: rows.map((row) => +row.average),
-                        backgroundColor: color('--dashboard-chart'),
-                        barThickness: 12,
-                        borderRadius: 3,
-                    },
-                ],
-            },
-            options: config,
-        },
-        'Grafik lima indikator KPI dengan rata-rata Final terendah',
-        rows.length ? '' : 'Belum ada hasil Final per KPI',
-    );
-}
-function categories(root, state) {
-    const groups = [
-        ...Map.groupBy(
-            state.d.scores || [],
-            (row) => row.category || 'Belum berkategori',
+    const view = $('[data-dashboard-table="trend"]');
+    view.replaceChildren(
+        table(
+            ['Bulan', 'Rerata Final', 'Final', 'Subjek', 'Ketuntasan'],
+            rows.map((row) => [
+                labelCycle(row.month),
+                fmt(row.average),
+                row.scheduled ? row.final : '–',
+                row.scheduled ? row.total : '–',
+                row.scheduled ? pct(row.completion) : 'Tidak ada periode',
+            ]),
         ),
-    ]
-        .map(([name, rows]) => ({
-            name,
-            rows,
-            average: average(rows.map((row) => +row.total)),
-        }))
-        .sort((a, b) => b.average - a.average);
-    state.categories = groups;
-    const colors = [
-        color('--dashboard-chart'),
-        '#69aa91',
-        '#accfbe',
-        '#d5e5dc',
-        color('--color-info'),
-        color('--color-warning'),
-    ];
-    const config = options();
+    );
+}
+
+const CATEGORY_COLORS = 5;
+function categories(state) {
+    const rows = state.d.categories,
+        total = rows.reduce((sum, row) => sum + row.total, 0),
+        colors = rows.map((_, i) =>
+            css(`--dashboard-category-${Math.min(i, CATEGORY_COLORS - 1) + 1}`),
+        ),
+        host = $('[data-dashboard-chart="categories"]'),
+        legend = $('[data-dashboard-category-legend]'),
+        center = $('[data-dashboard-donut-center]');
+    const config = chartOptions();
     delete config.scales;
-    config.cutout = '64%';
-    config.radius = '94%';
-    config.plugins.tooltip.displayColors = true;
+    config.cutout = '74%';
+    config.layout = { padding: 4 };
     config.plugins.tooltip.callbacks = {
         label: (item) =>
-            `${item.label}: ${item.raw} hasil Final (${format((item.raw / state.d.scores.length) * 100)}%)`,
+            `${item.label}: ${item.raw} (${pct(share(item.raw, total))})`,
     };
-    config.onHover = (event, elements) => {
-        event.native.target.style.cursor = elements.length
-            ? 'pointer'
-            : 'default';
-    };
-    config.onClick = (_, elements) => {
-        const group = groups[elements[0]?.index];
-        if (group) {
-            chartData(state, 'categories', group.name);
-            open('dashboard-data-dialog');
-        }
-    };
-    draw(
-        root,
-        {
-            type: 'doughnut',
-            data: {
-                labels: groups.map((g) => g.name),
-                datasets: [
-                    {
-                        data: groups.map((g) => g.rows.length),
-                        backgroundColor: groups.map(
-                            (_, i) => colors[i % colors.length],
-                        ),
-                        borderWidth: 2,
-                        borderColor: color('--color-paper'),
-                        hoverOffset: 3,
-                    },
-                ],
-            },
-            options: config,
-        },
-        'Diagram donat sebaran kategori nilai Final',
-        groups.length ? '' : 'Belum ada hasil Final',
+    center.replaceChildren(
+        node('strong', fmt(total)),
+        node('span', 'hasil Final'),
     );
-    const legend = $('[data-dashboard-category-legend]');
     legend.replaceChildren();
-    groups.forEach((group, i) => {
-        const button = node('button', null, 'dashboard-category-item'),
-            dot = node('i');
-        button.type = 'button';
-        button.dataset.dashboardCategory = group.name;
-        dot.style.background = colors[i % colors.length];
-        button.append(
-            dot,
-            node('span', group.name),
-            node('strong', group.rows.length),
+    if (!total) {
+        emptyChart(host, 'Belum ada hasil Final.');
+        center.replaceChildren();
+    } else
+        draw(
+            host,
+            {
+                type: 'doughnut',
+                data: {
+                    labels: rows.map((row) => row.label),
+                    datasets: [
+                        {
+                            data: rows.map((row) => row.total),
+                            backgroundColor: colors,
+                            borderColor: css('--color-paper'),
+                            borderWidth: 3,
+                            hoverOffset: 3,
+                        },
+                    ],
+                },
+                options: config,
+            },
+            `Diagram donat sebaran kategori: ${rows.map((row) => `${row.label} ${row.total}`).join(', ')}`,
         );
-        legend.append(button);
+    rows.forEach((row, i) => {
+        const li = node('li', null, 'dashboard-category-item'),
+            swatch = node('i');
+        swatch.style.background = colors[i];
+        li.append(
+            swatch,
+            node('span', row.label),
+            node('strong', fmt(row.total)),
+            node('small', `${pct(share(row.total, total))} · rerata ${fmt(row.average)}`),
+        );
+        legend.append(li);
     });
+    $('[data-dashboard-table="categories"]').replaceChildren(
+        table(
+            ['Kategori', 'Jumlah', 'Persentase', 'Rerata nilai'],
+            rows.map((row) => [
+                row.label,
+                row.total,
+                pct(share(row.total, total)),
+                fmt(row.average),
+            ]),
+        ),
+    );
 }
-function tasks(root, state) {
-    const { c, s, link } = state;
-    root.replaceChildren();
-    if (c.role === 'hc') {
-        for (const entry of (s.data.activities || []).slice(0, 2)) {
-            const a = node('a', null, 'dashboard-task');
-            a.href = link('aktivitas');
-            a.append(
-                node('strong', activityLabel(entry.action)),
-                node('p', activitySubject(entry), 'dashboard-task-detail'),
-                node(
-                    'small',
-                    `${entry.who}${entry.at ? ' · ' + dateTime(entry.at) + ' WIB' : ''}`,
-                    'text-muted',
-                ),
-            );
-            root.append(a);
-        }
-    } else {
-        const candidates = s
-            .people('member')
-            .filter((p) =>
-                c.role === 'kd'
-                    ? s.assessment(p.id).status === 'Diajukan'
-                    : ['Dikembalikan', 'Belum'].includes(
-                          s.assessment(p.id).status,
-                      ),
-            );
-        candidates.sort(
-            (a, b) =>
-                (s.assessment(a.id).status === 'Dikembalikan' ? 0 : 1) -
-                    (s.assessment(b.id).status === 'Dikembalikan' ? 0 : 1) ||
-                a.name.localeCompare(b.name),
+
+const PERFORMANCE_LIMIT = 6;
+const PERFORMANCE = {
+    division: { title: 'Rerata nilai Final per divisi', area: 'Divisi' },
+    unit: { title: 'Rerata nilai Final per unit', area: 'Unit' },
+    indicator: { title: 'KPI dengan rerata nilai terendah', area: 'KPI' },
+};
+const clip = (text, max = 22) =>
+    text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+/** Bar host grows with plotted rows (capped) and collapses to its message when empty; never keeps a stale size. */
+function fitPerformance(host, rows) {
+    host.style.height = rows ? `${Math.min(176, 70 + 26 * rows)}px` : 'auto';
+}
+/** Writes each bar's score at its end so values read without hovering. */
+const barValues = {
+    id: 'dashboardBarValues',
+    afterDatasetsDraw(chart) {
+        const { ctx, chartArea } = chart,
+            values = chart.data.datasets[0].data;
+        ctx.save();
+        ctx.font = `600 11px ${getComputedStyle(document.body).fontFamily}`;
+        ctx.textBaseline = 'middle';
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+            const text = fmt(values[i]),
+                inside = bar.x + ctx.measureText(text).width + 10 > chartArea.right;
+            ctx.fillStyle = css(inside ? '--color-paper' : '--color-ink');
+            ctx.textAlign = inside ? 'right' : 'left';
+            ctx.fillText(text, bar.x + (inside ? -6 : 6), bar.y);
+        });
+        ctx.restore();
+    },
+};
+function performance(state) {
+    const { d } = state,
+        { level, rows } = d.performance,
+        meta = PERFORMANCE[level],
+        area = level !== 'indicator',
+        host = $('[data-dashboard-chart="performance"]'),
+        scored = rows.filter((row) => row.average != null),
+        shown = scored.slice(0, PERFORMANCE_LIMIT),
+        subjects = new Map(d.progress.rows.map((row) => [row.id, row.total])),
+        kpis = new Map(d.indicators.lowest.map((row) => [row.name, row])),
+        noun = meta.area.toLowerCase();
+    $('[data-dashboard-performance-title]').textContent = meta.title;
+    const coverage = area
+        ? `${scored.length} dari ${rows.length} ${noun} memiliki hasil Final (${d.metrics.final} dari ${d.metrics.total} subjek).`
+        : `Rerata nilai indikator dari ${d.metrics.final} hasil Final staf.`;
+    const notes = [
+        coverage,
+        area && scored.length < rows.length
+            ? `${rows.length - scored.length} ${noun} tanpa hasil Final tidak digambar.`
+            : '',
+        shown.length < scored.length
+            ? `Menampilkan ${shown.length} terendah dari ${scored.length}; daftar lengkap di Data grafik.`
+            : '',
+    ];
+    $('[data-dashboard-performance-caption]').textContent = notes
+        .filter(Boolean)
+        .join(' ');
+    if (!shown.length) {
+        fitPerformance(host, 0);
+        emptyChart(
+            host,
+            area
+                ? `Belum ada ${noun} dengan hasil Final pada periode ini.`
+                : 'Belum ada nilai indikator dari hasil Final.',
         );
-        for (const p of candidates.slice(0, 2)) {
-            const a = node('a', null, 'dashboard-task'),
-                badge = node('span');
-            a.href = link(c.role === 'ku' ? 'nilai' : 'persetujuan', {
-                person: p.id,
-            });
-            status(badge, s.assessment(p.id).status);
-            a.append(
-                node('strong', p.name),
-                node('p', `${p.job} · ${p.unitName}`, 'dashboard-task-detail'),
-                badge,
-                node(
-                    'span',
-                    c.role === 'ku' ? 'Buka penilaian' : 'Tinjau pengajuan',
-                    'dashboard-task-action',
-                ),
-            );
-            root.append(a);
-        }
+    } else {
+        fitPerformance(host, shown.length);
+        const config = chartOptions(),
+            { x, y } = config.scales;
+        config.indexAxis = 'y';
+        config.interaction = { mode: 'nearest', axis: 'y', intersect: false };
+        config.layout = { padding: { top: 0, right: 4 } };
+        config.scales = {
+            x: { ...y, ticks: { ...y.ticks, padding: 6 } },
+            y: {
+                ...x,
+                ticks: {
+                    ...x.ticks,
+                    autoSkip: false,
+                    callback: (_, i) => clip(shown[i].name),
+                },
+            },
+        };
+        config.plugins.tooltip.callbacks = {
+            title: (items) => shown[items[0].dataIndex].name,
+            label: (item) => `Rerata Final: ${fmt(item.raw)} / 100`,
+            afterLabel: (item) => {
+                const row = shown[item.dataIndex];
+                if (!area) {
+                    const kpi = kpis.get(row.name);
+                    return `${row.total} nilai${kpi ? ` · ${kpi.units} unit · ${kpi.pillar}` : ''}`;
+                }
+                const total = subjects.get(row.id);
+                return total
+                    ? `${row.total} hasil Final dari ${total} subjek (${pct(share(row.total, total))})`
+                    : `${row.total} hasil Final`;
+            },
+        };
+        draw(
+            host,
+            {
+                type: 'bar',
+                data: {
+                    labels: shown.map((row) => row.name),
+                    datasets: [
+                        {
+                            label: meta.title,
+                            data: shown.map((row) => row.average),
+                            backgroundColor: css('--dashboard-primary'),
+                            borderRadius: 4,
+                            barPercentage: 0.75,
+                            categoryPercentage: 0.85,
+                            maxBarThickness: 18,
+                        },
+                    ],
+                },
+                options: config,
+                plugins: [barValues],
+            },
+            `Grafik batang ${meta.title.toLowerCase()}, skala 0–100: ${shown
+                .map((row) => `${row.name} ${fmt(row.average)} (${row.total} ${area ? 'hasil Final' : 'nilai'})`)
+                .join(', ')}`,
+        );
     }
-    if (!root.childElementCount)
-        root.append(
+    $('[data-dashboard-table="performance"]').replaceChildren(
+        table(
+            area
+                ? [meta.area, 'Rerata Final', 'Hasil Final', 'Subjek', 'Cakupan']
+                : ['KPI', 'Pilar', 'Rerata nilai', 'Jumlah nilai', 'Unit'],
+            rows.map((row) => {
+                if (!area) {
+                    const kpi = kpis.get(row.name);
+                    return [row.name, kpi?.pillar ?? '–', fmt(row.average), row.total, kpi ? kpi.units : '–'];
+                }
+                const total = subjects.get(row.id) ?? 0;
+                return [
+                    row.name,
+                    row.average == null ? 'Belum ada Final' : fmt(row.average),
+                    row.total,
+                    total,
+                    total ? pct(share(row.total, total)) : '–',
+                ];
+            }),
+        ),
+    );
+}
+
+function indicators(state) {
+    const { d } = state;
+    for (const [key, rows] of Object.entries(d.indicators)) {
+        const list = $(`[data-dashboard-indicators="${key}"]`);
+        if (!rows.length) {
+            emptyItem(list, 'Belum ada nilai indikator dari hasil Final.');
+            continue;
+        }
+        list.replaceChildren(
+            ...rows.map((row) => {
+                const li = node('li', null, 'dashboard-indicator'),
+                    text = node('div', null, 'dashboard-indicator-text'),
+                    track = node('div', null, 'dashboard-indicator-track'),
+                    bar = node('span');
+                li.dataset.tone = key === 'lowest' ? 'low' : 'high';
+                bar.style.width = `${Math.max(0, Math.min(100, row.average))}%`;
+                track.append(bar);
+                track.setAttribute('aria-hidden', 'true');
+                text.append(
+                    node('strong', row.name),
+                    node(
+                        'small',
+                        `${row.pillar} · ${row.total} nilai · ${row.units} unit`,
+                    ),
+                );
+                li.append(text, track, node('b', fmt(row.average)));
+                return li;
+            }),
+        );
+    }
+    $('[data-dashboard-indicators-all]').href = ROLES[state.c.role].report(
+        state.link,
+        { panel: 'kpi' },
+    );
+}
+
+function countdown(ms) {
+    const minutes = Math.floor(ms / 60000),
+        days = Math.floor(minutes / 1440),
+        hours = Math.floor((minutes % 1440) / 60);
+    if (days) return `${days} hari ${hours} jam lagi`;
+    if (hours) return `${hours} jam ${minutes % 60} menit lagi`;
+    return `${Math.max(1, minutes)} menit lagi`;
+}
+function agenda(state) {
+    const { c, d } = state,
+        cycle = d.cycle,
+        now = Date.now(),
+        host = $('[data-dashboard-deadline]'),
+        list = $('[data-dashboard-schedule]');
+    $('[data-dashboard-cycle-status]').textContent =
+        CYCLE_STATUS[cycle.status] || cycle.status;
+    $('[data-dashboard-cycle-status]').dataset.status = cycle.status;
+    const next = cycle.schedule.find((step) => Date.parse(step.at) > now);
+    host.replaceChildren();
+    if (next) {
+        const left = Date.parse(next.at) - now,
+            when = node('span', countdown(left), 'dashboard-countdown');
+        when.dataset.tone =
+            left < 86400000 ? 'danger' : left < 3 * 86400000 ? 'warn' : 'calm';
+        host.append(
+            node('strong', next.label),
+            node('span', `${dateTime(next.at)} WIB`, 'dashboard-deadline-time'),
+            when,
+        );
+    } else
+        host.append(
+            node('strong', 'Seluruh jadwal periode ini telah lewat'),
             node(
-                'p',
-                c.role === 'hc'
-                    ? 'Belum ada aktivitas tercatat.'
-                    : c.role === 'kd'
-                      ? 'Tidak ada pengajuan yang menunggu persetujuan.'
-                      : 'Semua penilaian sudah diajukan atau Final.',
-                'dashboard-empty',
+                'span',
+                cycle.status === 'closed'
+                    ? 'Periode sudah ditutup.'
+                    : 'Periode menunggu ditutup oleh Super HC.',
+                'dashboard-deadline-time',
             ),
         );
+    list.replaceChildren(
+        ...cycle.schedule.map((step) => {
+            const li = node('li'),
+                at = Date.parse(step.at);
+            li.dataset.state =
+                step === next ? 'next' : at <= now ? 'past' : 'upcoming';
+            if (step.key === ROLES[c.role].deadline) li.dataset.relevant = 'true';
+            li.append(
+                node('span', step.label),
+                node('time', `${dateTime(step.at)} WIB`),
+            );
+            li.lastChild.dateTime = step.at;
+            return li;
+        }),
+    );
 }
-function chartData(state, kind, selectedCategory = '') {
-    const table = node('table', null, 'data-table'),
-        head = node('thead'),
-        header = node('tr'),
-        body = node('tbody');
-    const trendData = kind === 'trend';
-    if (
-        kind === 'low-kpi' ||
-        (kind === 'comparison' && state.c.role === 'hc')
-    ) {
-        const coverage = kind === 'comparison';
-        const headings = coverage
-            ? ['Bulan', 'Hasil Final', 'Jumlah subjek', 'Ketuntasan']
-            : ['Indikator', 'Cakupan', 'Rata-rata', 'Jumlah Final', 'Bobot'];
-        headings.forEach((label) => header.append(node('th', label)));
-        head.append(header);
-        const rows = coverage ? state.history : state.lowKpis;
-        for (const row of rows) {
-            const tr = node('tr');
-            const values = coverage
-                ? [
-                      labelCycle(row.key),
-                      row.count,
-                      row.total,
-                      row.completion == null
-                          ? '-'
-                          : format(row.completion) + '%',
-                  ]
-                : [
-                      row.name,
-                      row.area,
-                      format(+row.average),
-                      row.count,
-                      format(+row.weight) + '%',
-                  ];
-            values.forEach((value) => tr.append(node('td', value)));
-            body.append(tr);
-        }
-        if (!rows.length) {
-            const tr = node('tr'),
-                td = node('td', 'Belum ada data pada periode ini.', 'empty');
-            td.colSpan = headings.length;
-            tr.append(td);
-            body.append(tr);
-        }
-        table.append(head, body);
-        $('[data-dashboard-data-table]').replaceChildren(table);
-        paginate(body, 'dashboard-data', {
-            token: `${kind}:${state.s.cycleKey}`,
-        });
+
+function tasks(state) {
+    const { c, d, link } = state,
+        list = $('[data-dashboard-tasks]');
+    $('[data-dashboard-task-count]').textContent = d.tasks.total
+        ? `(${d.tasks.total})`
+        : '';
+    if (!d.tasks.rows.length) {
+        emptyItem(list, ROLES[c.role].tasksEmpty);
         return;
     }
-    if (kind === 'categories') {
-        ['Nama', 'Unit', 'Nilai Final', 'Kategori'].forEach((label) =>
-            header.append(node('th', label)),
-        );
-        head.append(header);
-        for (const row of state.d.scores.filter(
-            (row) => !selectedCategory || row.category === selectedCategory,
-        )) {
-            const tr = node('tr');
-            for (const value of [
-                row.name,
-                row.unit_name,
-                format(+row.total),
-                row.category,
-            ])
-                tr.append(node('td', value));
-            body.append(tr);
+    list.replaceChildren(
+        ...d.tasks.rows.map((row) => {
+            const li = node('li'),
+                a = node('a', null, 'dashboard-task'),
+                body = node('span', null, 'dashboard-task-body');
+            a.href = link(row.page, row.params);
+            body.append(
+                node('strong', row.title),
+                node(
+                    'small',
+                    row.at
+                        ? `${row.detail} · diajukan ${dateTime(row.at)} WIB`
+                        : row.detail,
+                ),
+            );
+            a.append(body);
+            if (row.status) {
+                const status = node('span');
+                badge(status, STATUSES[row.status].badge);
+                a.append(status);
+            }
+            a.append(node('span', row.action, 'dashboard-task-action'));
+            li.append(a);
+            return li;
+        }),
+    );
+}
+
+function progressBar(row) {
+    const wrap = node('div', null, 'dashboard-mini'),
+        stack = node('span', null, 'dashboard-mini-stack');
+    for (const key of ['final', 'submitted', 'returned', 'not_started'])
+        if (row[key]) {
+            const segment = node('span');
+            segment.dataset.status = key;
+            segment.style.flexGrow = row[key];
+            stack.append(segment);
         }
-        if (!body.childElementCount) {
-            const tr = node('tr'),
-                td = node('td', 'Belum ada hasil Final.', 'empty');
-            td.colSpan = 4;
-            tr.append(td);
-            body.append(tr);
+    stack.setAttribute('aria-hidden', 'true');
+    wrap.append(stack, node('span', pct(share(row.final, row.total))));
+    return wrap;
+}
+function areaRow(row, label, href, sub = false) {
+    const tr = node('tr', null, sub ? 'dashboard-subrow' : ''),
+        name = cell(null, label),
+        progress = cell(null, 'Ketuntasan'),
+        action = cell(null, ''),
+        open = node('a', 'Lihat', 'link');
+    name.append(node('strong', row.name));
+    progress.append(progressBar(row));
+    open.href = href;
+    open.setAttribute('aria-label', `Lihat ${row.name}`);
+    action.append(open);
+    tr.append(
+        name,
+        cell(fmt(row.total), 'Subjek', 'numeric'),
+        cell(fmt(row.not_started), 'Belum diisi', 'numeric'),
+        cell(fmt(row.submitted), 'Diajukan', 'numeric'),
+        cell(fmt(row.returned), 'Dikembalikan', 'numeric'),
+        cell(fmt(row.final), 'Final', 'numeric'),
+        progress,
+        action,
+    );
+    return tr;
+}
+function progress(state) {
+    const { c, d, link } = state,
+        p = d.progress,
+        host = $('[data-dashboard-progress]');
+    const area = { division: 'Divisi', unit: 'Unit' }[p.level];
+    const headings = area
+        ? [area, 'Subjek', 'Belum diisi', 'Diajukan', 'Dikembalikan', 'Final', 'Ketuntasan', '']
+        : ['Nama', 'Status', 'Nilai', 'Kategori', ''];
+    const t = table(headings, []),
+        body = $('tbody', t);
+    host.replaceChildren(t);
+    if (!p.rows.length) return;
+    body.replaceChildren();
+    if (p.level === 'division') {
+        for (const division of p.rows) {
+            const tr = areaRow(
+                division,
+                area,
+                link('rekap', { division: division.id, status: 'all' }),
+            );
+            const units = division.units.map((unit) =>
+                areaRow(unit, 'Unit', link('rekap', { unit: unit.id, status: 'all' }), true),
+            );
+            const toggle = node('button', null, 'dashboard-expand');
+            toggle.type = 'button';
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', `Tampilkan ${units.length} unit di ${division.name}`);
+            toggle.append(node('span', `${units.length} unit`));
+            toggle.addEventListener('click', () => {
+                const expanded = toggle.getAttribute('aria-expanded') !== 'true';
+                toggle.setAttribute('aria-expanded', String(expanded));
+                units.forEach((row) => (row.hidden = !expanded));
+            });
+            units.forEach((row) => (row.hidden = true));
+            tr.firstChild.append(toggle);
+            body.append(tr, ...units);
         }
-        table.append(head, body);
-        $('[data-dashboard-data-table]').replaceChildren(table);
-        paginate(body, 'dashboard-data', {
-            token: `categories:${selectedCategory}`,
-        });
         return;
     }
-    const headings = trendData
-        ? ['Bulan', 'Rata-rata Final', 'Jumlah Final']
-        : state.c.role === 'ku'
-          ? ['KPI', 'Rata-rata', 'Jumlah Final']
-          : [
-                state.c.role === 'hc' ? 'Divisi' : 'Unit',
-                'Final',
-                'Diajukan',
-                'Dikembalikan',
-                'Belum diisi',
-            ];
-    headings.forEach((label) => header.append(node('th', label)));
-    head.append(header);
-    for (const row of trendData ? state.history : state.shown) {
-        const tr = node('tr'),
-            name = node('td'),
-            a = node('a', trendData ? labelCycle(row.key) : row.name, 'link');
-        a.href = trendData
-            ? state.link('dashboard', { cycle: row.key })
-            : scopeLink(row, state);
-        name.append(a);
-        tr.append(name);
-        for (const value of trendData
-            ? [format(row.value), row.count]
-            : state.c.role === 'ku'
-              ? [format(row.value), row.count]
-              : [row.final, row.submitted, row.returned, row.not_started])
-            tr.append(node('td', value, 'numeric'));
-        body.append(tr);
-    }
-    if (!body.childElementCount) {
-        const tr = node('tr'),
-            td = node('td', 'Belum ada data pada periode ini.', 'empty');
-        td.colSpan = headings.length;
-        tr.append(td);
-        body.append(tr);
-    }
-    table.append(head, body);
-    $('[data-dashboard-data-table]').replaceChildren(table);
-    paginate(body, 'dashboard-data', {
-        token: `${kind}:${state.s.cycleKey}:${state.page}`,
+    const render =
+        p.level === 'unit'
+            ? (row) =>
+                  areaRow(row, area, link('persetujuan', { unit: row.id, status: 'all' }))
+            : (row) => {
+                  const tr = node('tr'),
+                      name = cell(null, 'Nama'),
+                      statusCell = cell(null, 'Status'),
+                      action = cell(null, ''),
+                      open = node('a', ['returned', 'not_started'].includes(row.status) ? 'Isi nilai' : 'Lihat', 'link');
+                  name.append(node('strong', row.name), node('small', row.position));
+                  const pill = node('span');
+                  badge(pill, STATUSES[row.status].badge);
+                  statusCell.append(pill);
+                  open.href = link(
+                      ['returned', 'not_started'].includes(row.status) ? 'nilai' : 'pengajuan',
+                      { person: row.person },
+                  );
+                  action.append(open);
+                  tr.append(
+                      name,
+                      statusCell,
+                      cell(fmt(row.score), 'Nilai', 'numeric'),
+                      cell(row.category || '–', 'Kategori'),
+                      action,
+                  );
+                  return tr;
+              };
+    paginate(body, `dashboard-progress-${c.role}`, {
+        token: d.month,
+        records: p.rows,
+        renderRow: render,
     });
 }
-export function renderRoleDashboard(c, s, d, link) {
-    const root = $('[data-role-dashboard]');
-    if (!root) return;
-    const keys = Array.from(
-        { length: +s.cycleKey.slice(5) },
-        (_, i) => `${s.cycleKey.slice(0, 4)}-${String(i + 1).padStart(2, '0')}`,
-    );
-    const state = {
-        c,
-        s,
-        d,
-        link,
-        rows: comparisonRows(c, d),
-        page: 0,
-        history: keys.map((key) => {
-            const values = finals(s, c, key);
-            const total = s.people(
-                c.role === 'ku' ? 'member' : 'all',
-                key,
-            ).length;
-            const scheduled = s.data.cycles.some((cycle) => cycle.id === key);
-            return {
-                key,
-                value: average(values),
-                count: values.length,
-                total,
-                completion:
-                    scheduled && total ? (values.length / total) * 100 : null,
-            };
+
+function activities(state) {
+    const list = $('[data-dashboard-activities]');
+    if (!list) return;
+    const rows = state.d.activities || [];
+    if (!rows.length) {
+        emptyItem(list, 'Belum ada aktivitas tercatat.');
+        return;
+    }
+    list.replaceChildren(
+        ...rows.map((entry) => {
+            const li = node('li', null, 'dashboard-activity');
+            li.append(
+                node('strong', activityLabel(entry.action)),
+                node('span', activitySubject(entry)),
+                node('small', `${entry.who} · ${dateTime(entry.at)} WIB`),
+            );
+            return li;
         }),
-    };
-    root.dashboardState = state;
-    root.querySelectorAll('[data-dashboard-data]').forEach((button) => {
+    );
+}
+
+function renderCharts(state) {
+    trend(state);
+    categories(state);
+    performance(state);
+}
+function render(root, state) {
+    const { c, d, link } = state;
+    $('[data-dashboard-month]').textContent = labelCycle(d.month);
+    $('[data-dashboard-report]').href = ROLES[c.role].report(link);
+    $('[data-dashboard-empty]').hidden = Boolean(d.cycle);
+    root.dataset.empty = String(!d.cycle);
+    if (!d.cycle) {
+        blank(root, 'Belum ada periode penilaian.');
+        return;
+    }
+    cards(state);
+    completion(state);
+    renderCharts(state);
+    agenda(state);
+    tasks(state);
+    indicators(state);
+    progress(state);
+    activities(state);
+    $$('[data-dashboard-toggle]', root).forEach((button) => {
         button.disabled = false;
     });
-    $('[data-dashboard-report]').href =
-        c.role === 'ku'
-            ? link('riwayat')
-            : link('dashboard', { detail: 'laporan' });
-    $('[data-dashboard-all]').href = link(
-        { ku: 'nilai', kd: 'persetujuan', hc: 'aktivitas' }[c.role],
-    );
-    $('[data-dashboard-headline]').textContent =
-        `${labelCycle(s.cycleKey)} · ${c.role === 'ku' ? 'Staf dalam unit Anda' : c.role === 'kd' ? 'Staf dan Kepala Unit dalam divisi Anda' : 'Seluruh staf dan Kepala Unit'}`;
-    metrics($('[data-dashboard-metrics]'), state);
-    const redraw = () => {
-        trend($('[data-dashboard-trend]'), root.dashboardState);
-        comparison($('[data-dashboard-comparison]'), root.dashboardState);
-        categories($('[data-dashboard-categories]'), root.dashboardState);
-        if (c.role === 'hc')
-            lowKpis($('[data-dashboard-low-kpi]'), root.dashboardState);
-    };
-    redraw();
-    tasks($('[data-dashboard-tasks]'), state);
-    agenda(state);
-    findings(state);
-    if (!root.dataset.bound) {
-        root.dataset.bound = 'true';
-        root.addEventListener('click', (event) => {
-            const category = event.target.closest('[data-dashboard-category]');
-            if (category) {
-                chartData(
-                    root.dashboardState,
-                    'categories',
-                    category.dataset.dashboardCategory,
-                );
-                open('dashboard-data-dialog');
-                return;
-            }
-            const dataButton = event.target.closest('[data-dashboard-data]');
-            if (dataButton) {
-                chartData(
-                    root.dashboardState,
-                    dataButton.dataset.dashboardData,
-                );
-                return;
-            }
-            const button = event.target.closest(
-                '[data-dashboard-prev],[data-dashboard-next]',
+}
+function blank(root, message) {
+    for (const host of $$('[data-dashboard-chart]', root)) emptyChart(host, message);
+    fitPerformance($('[data-dashboard-chart="performance"]', root), 0);
+    for (const list of $$('[data-dashboard-tasks],[data-dashboard-indicators],[data-dashboard-activities]', root))
+        emptyItem(list, message);
+    for (const host of $$('[data-dashboard-deadline],[data-dashboard-progress],[data-dashboard-cards]', root))
+        host.replaceChildren(node('p', message, 'dashboard-empty'));
+    for (const host of $$('[data-dashboard-stack],[data-dashboard-stack-legend],[data-dashboard-category-legend],[data-dashboard-donut-center],[data-dashboard-schedule],[data-dashboard-table]', root))
+        host.replaceChildren();
+    $('[data-dashboard-completion-figure]').textContent = '–';
+    $('[data-dashboard-cycle-status]').textContent = '–';
+    $('[data-dashboard-performance-caption]').textContent = '';
+}
+
+export function initDashboard(c, s, link) {
+    const root = $('[data-role-dashboard]');
+    if (!root) return;
+    let sequence = 0,
+        controller,
+        timer;
+    async function load() {
+        const current = ++sequence;
+        controller?.abort();
+        controller = new AbortController();
+        root.dataset.state = 'loading';
+        root.setAttribute('aria-busy', 'true');
+        $('[data-dashboard-error]').hidden = true;
+        try {
+            const { data } = await c.api.request(
+                '/data/dashboard?' + new URLSearchParams({ cycle: s.cycleKey }),
+                'GET',
+                null,
+                { signal: controller.signal },
             );
-            if (!button) return;
-            root.dashboardState.page += button.hasAttribute(
-                'data-dashboard-next',
-            )
-                ? 1
-                : -1;
-            comparison($('[data-dashboard-comparison]'), root.dashboardState);
-        });
-        new MutationObserver(redraw).observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['data-theme'],
-        });
+            if (current !== sequence) return;
+            root.dashboardState = { c, d: data, link };
+            render(root, root.dashboardState);
+            root.dataset.state = 'ready';
+        } catch (e) {
+            if (current !== sequence || e.name === 'AbortError') return;
+            root.dataset.state = 'error';
+            $('[data-dashboard-error]').hidden = false;
+            blank(root, 'Data belum tersedia.');
+        } finally {
+            if (current === sequence) root.setAttribute('aria-busy', 'false');
+        }
     }
+    root.addEventListener('click', (event) => {
+        if (event.target.closest('[data-dashboard-reload]')) {
+            load();
+            return;
+        }
+        const toggle = event.target.closest('[data-dashboard-toggle]');
+        if (!toggle) return;
+        const key = toggle.dataset.dashboardToggle,
+            showTable = toggle.getAttribute('aria-pressed') !== 'true';
+        toggle.setAttribute('aria-pressed', String(showTable));
+        toggle.textContent = showTable ? 'Tampilkan grafik' : 'Data grafik';
+        $(`[data-dashboard-table="${key}"]`).hidden = !showTable;
+        toggle
+            .closest('.dashboard-panel')
+            .classList.toggle('dashboard-show-table', showTable);
+    });
+    document.addEventListener('flow-updated', () => {
+        clearTimeout(timer);
+        timer = setTimeout(load, 180);
+    });
+    new MutationObserver(() => {
+        if (root.dashboardState?.d.cycle) renderCharts(root.dashboardState);
+    }).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+    });
+    setInterval(() => {
+        if (root.dashboardState?.d.cycle) agenda(root.dashboardState);
+    }, 60000);
+    load();
 }

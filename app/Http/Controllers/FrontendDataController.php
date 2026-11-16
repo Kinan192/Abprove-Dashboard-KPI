@@ -21,16 +21,15 @@ class FrontendDataController extends Controller
 
     public function __construct(private ScopedRecords $records) {}
 
+    /** Small reference lists for filters. People and accounts are paged by `/members`, `/heads` and the workspace. */
     public function lookups(Request $r)
     {
         $ctx = $r->attributes->get('access_context');
         $result = ['units' => app(ReportingController::class)->team($r)->getData(true)['data'],
-            'positions' => DB::table('positions')->when($ctx->role !== 'super_hc', fn ($q) => $q->whereIn('id', $this->records->members($ctx)->pluck('e.position_id')))->orderBy('name')->get()];
+            'positions' => DB::table('positions')->select('id', 'code', 'name', 'is_active')
+                ->when($ctx->role !== 'super_hc', fn ($q) => $q->whereIn('id', $this->records->members($ctx)->select('e.position_id')))->orderBy('name')->get()];
         if ($ctx->role === 'super_hc') {
-            $result['divisions'] = DB::table('divisions')->orderBy('name')->get();
-            $result['users'] = DB::table('users')->select('id', 'name', 'email', 'login_nip', 'role_key', 'is_active')->orderBy('name')->get();
-            $result['employees'] = DB::table('employees')->orderBy('full_name')->get();
-            $result['assignments'] = DB::table('scope_assignments')->whereNull('revoked_at')->get();
+            $result['divisions'] = DB::table('divisions')->select('id', 'code', 'name', 'is_active')->orderBy('name')->get();
         }
 
         return response()->json(['data' => $result]);
@@ -79,10 +78,13 @@ class FrontendDataController extends Controller
             $p = $periods->get($key);
             $trend[] = ['month' => $key, 'average' => $p ? bcadd($p->average, '0', 6) : null, 'count' => $p ? $p->count : 0];
         }
-        $current = (clone $q)->where('assessments.cycle_id', $cycle->id);
         $groups = (clone $current)->selectRaw('kpi_template_id,template_name_snapshot,assessment_kind,COUNT(*) as count,AVG(total_score_raw) as average')->groupBy('kpi_template_id', 'template_name_snapshot', 'assessment_kind')->get();
+        // One ranking query for every group instead of one query per group.
+        $rankings = (clone $current)->toBase()->orderBy('kpi_template_id')->orderBy('assessment_kind')->orderByDesc('total_score_raw')->orderBy('assessments.id')
+            ->get(['assessments.id', 'kpi_template_id', 'assessment_kind', 'employee_name_snapshot', 'total_score_raw'])
+            ->groupBy(fn ($a) => $a->kpi_template_id.'|'.$a->assessment_kind);
         foreach ($groups as $g) {
-            $g->ranking = (clone $current)->where('kpi_template_id', $g->kpi_template_id)->where('assessment_kind', $g->assessment_kind)->orderByDesc('total_score_raw')->orderBy('assessments.id')->get(['assessments.id', 'employee_name_snapshot', 'total_score_raw']);
+            $g->ranking = ($rankings[$g->kpi_template_id.'|'.$g->assessment_kind] ?? collect())->map(fn ($a) => ['id' => $a->id, 'employee_name_snapshot' => $a->employee_name_snapshot, 'total_score_raw' => $a->total_score_raw])->values();
         }
         $matrix = (clone $q)->whereBetween('c.assessment_month', [$month->subMonths(11)->format('Y-m-d'), $month->format('Y-m-d')])->select('assessments.id', 'assessment_kind', 'employee_id', 'subject_user_id', 'employee_name_snapshot', 'unit_name_snapshot', 'total_score_raw', 'c.assessment_month')->orderBy('employee_name_snapshot')->orderBy('c.assessment_month')->paginate(25, ['*'], 'matrix_page');
 

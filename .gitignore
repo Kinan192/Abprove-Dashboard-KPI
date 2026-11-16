@@ -17,8 +17,4 @@
 /storage/framework/views/*
 !/storage/framework/views/.gitkeep
 *.log
-/.phpunit.cache/
-/.phpunit.result.cache
-/test-results/
-/playwright-report/
 /public/hot

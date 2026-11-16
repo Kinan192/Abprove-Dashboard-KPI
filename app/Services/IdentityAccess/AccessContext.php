@@ -21,6 +21,7 @@ final readonly class AccessContext
     public function home(): string
     {
         return match ($this->role) {
+            'admin' => '/admin/accounts',
             'super_hc' => '/hc/dashboard',
             'kepala_divisi' => '/division/dashboard',
             'kepala_unit' => '/unit/dashboard',

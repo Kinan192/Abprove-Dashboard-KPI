@@ -22,7 +22,7 @@ class ScopeResolver
                 $j->on('d.id', '=', DB::raw('COALESCE(s.division_id, u.division_id)'));
             })
             ->where('s.user_id', $user->id)->whereNull('s.revoked_at')->where('s.assigned_at', '<=', now()->format('Y-m-d H:i:s.u'))
-            ->where(fn ($q) => $q->where('s.role_key', 'super_hc')->orWhere(fn ($q) => $q
+            ->where(fn ($q) => $q->whereIn('s.role_key', ['admin', 'super_hc'])->orWhere(fn ($q) => $q
                 ->where('d.is_active', true)->where(fn ($q) => $q->whereNull('s.unit_id')->orWhere('u.is_active', true))))
             ->select('s.*', 'd.id as resolved_division_id')->orderBy('s.id');
 

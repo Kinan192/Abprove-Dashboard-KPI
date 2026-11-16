@@ -1,5 +1,0 @@
-@extends('layouts.app')
-@section('content')
-<div class="page-content page-stack workspace-v4"><div class="toolbar"><p class="text-sm text-muted">Riwayat tindakan dan perubahan data. Catatan aktivitas tidak dapat diubah atau dihapus.</p></div><div class="toolbar"><input class="field max-w-sm" data-activity-search type="search" placeholder="Cari tindakan, nama, atau objek" aria-label="Cari aktivitas"><select class="field w-auto!" data-activity-filter aria-label="Filter tindakan"><option value="">Semua tindakan</option></select></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Waktu (WIB)</th><th>Pelaku</th><th>Tindakan</th><th>Objek / alasan</th><th>Rincian</th></tr></thead><tbody data-flow-activities></tbody></table></div></div>
-@push('dialogs')<x-abprove.dialog id="activity-dialog" title="Rincian perubahan"><div data-activity-detail></div><x-slot:footer><button class="btn" data-dialog-close type="button">Tutup</button></x-slot:footer></x-abprove.dialog>@endpush
-@endsection

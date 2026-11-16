@@ -5,104 +5,62 @@ namespace App\Support;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Single stored KPI workspace document (periods, KPI patterns and pattern assignments) with optimistic revisions.
+ */
 class KpiWorkspaceDocument
 {
-    public function initial(): array
+    private const SCOPE = 'hc';
+
+    /** @return array{id: int, revision: int, data: array} */
+    public function load(bool $lock = false): array
     {
-        if ($this->demoUnits()->isNotEmpty()) {
-            $demoUnits = $this->demoUnits();
-            $demoDivisions = DB::table('divisions')->where('code', 'like', 'DEMO-%')->pluck('id');
-            $units = DB::table('units')->where('is_active', true)->whereIn('id', $demoUnits)->orderBy('id')->get(['id', 'name', 'division_id']);
-            $divisionNames = DB::table('divisions')->where('is_active', true)->whereIn('id', $demoDivisions)->pluck('name', 'id');
-        } else {
-            $units = DB::table('units')->where('is_active', true)->orderBy('id')->get(['id', 'name', 'division_id']);
-            $divisionNames = DB::table('divisions')->where('is_active', true)->pluck('name', 'id');
+        $query = fn () => DB::table('kpi_workspace_documents')->where('scope_key', self::SCOPE);
+        if (! $query()->exists()) {
+            DB::table('kpi_workspace_documents')->insertOrIgnore([
+                'scope_key' => self::SCOPE,
+                'revision' => 0,
+                'data' => json_encode($this->initial(), JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
-        $demo = $this->demoUnits()->isNotEmpty();
+        $row = ($lock ? $query()->lockForUpdate() : $query())->firstOrFail();
 
-        $people = [];
-        $unitDivision = $units->pluck('division_id', 'id');
-
-        $staff = DB::table('employees as e')
-            ->join('employee_placements as p', 'p.employee_id', '=', 'e.id')
-            ->where('e.is_active', true)
-            ->when($demo, fn ($q) => $q->whereIn('p.unit_id', $units->pluck('id')))
-            ->where('p.effective_from', '<=', now('Asia/Jakarta')->toDateString())
-            ->where(fn ($q) => $q->whereNull('p.effective_until')->orWhere('p.effective_until', '>=', now('Asia/Jakarta')->toDateString()))
-            ->orderBy('e.id')
-            ->get(['e.id', 'e.full_name', 'e.nip', 'p.unit_id', 'p.division_id']);
-        foreach ($staff as $row) {
-            $people[] = [
-                'id' => 'staff-'.$row->id,
-                'name' => $row->full_name,
-                'nip' => $row->nip,
-                'type' => 'staff',
-                'unitId' => (string) $row->unit_id,
-                'divisionId' => (string) $row->division_id,
-            ];
-        }
-
-        $assignments = DB::table('scope_assignments as s')
-            ->join('users as u', 'u.id', '=', 's.user_id')
-            ->whereNull('s.revoked_at')
-            ->where('u.is_active', true)
-            ->when($demo, fn ($q) => $q->where(fn ($q) => $q->whereIn('s.unit_id', $units->pluck('id'))->orWhereIn('s.division_id', $divisionNames->keys())))
-            ->orderBy('s.id')
-            ->get(['s.role_key', 's.unit_id', 's.division_id', 'u.id', 'u.name', 'u.login_nip']);
-        foreach ($assignments as $row) {
-            if ($row->role_key === 'kepala_unit' && $row->unit_id) {
-                $people[] = [
-                    'id' => 'head-'.$row->id,
-                    'name' => $row->name,
-                    'nip' => $row->login_nip,
-                    'type' => 'unit_head',
-                    'unitId' => (string) $row->unit_id,
-                    'divisionId' => (string) ($unitDivision[$row->unit_id] ?? ''),
-                ];
-            }
-            if ($row->role_key === 'kepala_divisi' && $row->division_id) {
-                $people[] = [
-                    'id' => 'head-'.$row->id,
-                    'name' => $row->name,
-                    'nip' => $row->login_nip,
-                    'type' => 'division_head',
-                    'unitId' => '',
-                    'divisionId' => (string) $row->division_id,
-                ];
-            }
-        }
-
-        $month = now('Asia/Jakarta')->format('Y-m');
-        $periods = [[
-            'id' => $month,
-            'name' => 'Penilaian '.CarbonImmutable::parse($month.'-01')->locale('id')->isoFormat('MMMM YYYY'),
-            'status' => 'planned',
-            'opens' => now('Asia/Jakarta')->startOfMonth()->format('Y-m-d\TH:i'),
-            'submission' => now('Asia/Jakarta')->addDays(5)->format('Y-m-d\TH:i'),
-            'approval' => now('Asia/Jakarta')->addDays(8)->format('Y-m-d\TH:i'),
-            'closes' => now('Asia/Jakarta')->addDays(10)->format('Y-m-d\TH:i'),
-            'categories' => ['sb' => 90, 'b' => 80, 'c' => 70],
-        ]];
-
-        return [
-            'version' => 1,
-            'revision' => 0,
-            'kpis' => [],
-            'assessments' => [],
-            'audit' => [],
-            'units' => $units->map(fn ($u) => [
-                'id' => (string) $u->id,
-                'name' => $u->name,
-                'divisionId' => (string) $u->division_id,
-                'divisionName' => $divisionNames[$u->division_id] ?? '',
-            ])->values()->all(),
-            'people' => $people,
-            'periods' => $periods,
-        ];
+        return ['id' => (int) $row->id, 'revision' => (int) $row->revision, 'data' => json_decode($row->data, true, 512, JSON_THROW_ON_ERROR)];
     }
 
-    private function demoUnits()
+    public function write(int $id, int $revision, array $data, int $userId): int
     {
-        return DB::table('units')->where('code', 'like', 'DEMO-%')->pluck('id');
+        DB::table('kpi_workspace_documents')->where('id', $id)->update([
+            'revision' => $revision,
+            'data' => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            'updated_by' => $userId,
+            'updated_at' => now(),
+        ]);
+
+        return $revision;
+    }
+
+    private function initial(): array
+    {
+        $now = CarbonImmutable::now('Asia/Jakarta');
+        $month = $now->format('Y-m');
+
+        return [
+            'version' => 2,
+            'periods' => [[
+                'id' => $month,
+                'name' => 'Penilaian '.CarbonImmutable::parse($month.'-01')->locale('id')->isoFormat('MMMM YYYY'),
+                'status' => 'planned',
+                'opens' => $now->startOfMonth()->format('Y-m-d\TH:i'),
+                'submission' => $now->addDays(5)->format('Y-m-d\TH:i'),
+                'approval' => $now->addDays(8)->format('Y-m-d\TH:i'),
+                'closes' => $now->addDays(10)->format('Y-m-d\TH:i'),
+                'categories' => ['sb' => 90, 'b' => 80, 'c' => 70],
+            ]],
+            'patterns' => [],
+            'patternAssignments' => [],
+        ];
     }
 }

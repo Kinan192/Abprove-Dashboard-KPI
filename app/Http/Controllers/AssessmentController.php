@@ -3,15 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Assessment\AssessmentRequest;
-use App\Models\AuditEvent;
 use App\Queries\ScopedRecords;
 use App\Services\Assessment\AssessmentService;
 use App\Services\IdentityAccess\MutationRunner;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class AssessmentController extends Controller
 {
+    private const TIMELINE_LIMIT = 100;
+
     public function __construct(private AssessmentService $service, private MutationRunner $mutations, private ScopedRecords $records) {}
 
     public function index(Request $r)
@@ -48,11 +51,15 @@ class AssessmentController extends Controller
         return response()->json(['data' => $this->service->form($r->attributes->get('access_context'), $data)]);
     }
 
+    /** Latest decision events of one visible assessment in the review dialog shape. */
     public function timeline(Request $r, int $assessment)
     {
-        $this->records->assessments($r->attributes->get('access_context'))->whereKey($assessment)->firstOrFail();
+        abort_unless($this->records->assessments($r->attributes->get('access_context'))->toBase()->where('id', $assessment)->exists(), 404);
 
-        return response()->json(AuditEvent::where('assessment_id', $assessment)->orderByDesc('id')->paginate(25));
+        return response()->json(['data' => DB::table('audit_events as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_user_id')
+            ->where('a.assessment_id', $assessment)->orderByDesc('a.recorded_at')->orderByDesc('a.id')->limit(self::TIMELINE_LIMIT)
+            ->get(['a.action', 'u.name as who', 'a.recorded_at', 'a.reason'])
+            ->map(fn ($e) => ['action' => $e->action, 'who' => $e->who, 'at' => CarbonImmutable::parse($e->recorded_at, 'UTC')->format('Y-m-d\TH:i:s\Z'), 'reason' => $e->reason])]);
     }
 
     public function store(AssessmentRequest $r)

@@ -1,0 +1,28 @@
+@extends('layouts.app')
+@section('content')
+<div class="page-content page-stack admin-page" data-admin-reminders>
+    <div class="toolbar"><div class="compact-heading"><h2 class="lead">Pengingat email</h2><p class="mt-2 text-sm text-muted">Kirim email pengingat pengisian dan persetujuan nilai KPI melalui SMTP. Penerima dihitung dari progres penilaian terbaru.</p></div><a class="btn" href="{{ $vm->link('log') }}#email">Riwayat pengiriman</a></div>
+    @php($mailer = config('mail.default'))
+    @if(! in_array($mailer, ['smtp', 'ses', 'ses-v2', 'postmark', 'resend', 'sendmail', 'failover', 'roundrobin'], true))
+        <p class="notice notice-warning" role="status">Mailer saat ini <strong>{{ $mailer }}</strong>: email tidak dikirim ke kotak masuk. Isi MAIL_MAILER=smtp beserta MAIL_HOST, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD dan MAIL_FROM_ADDRESS di .env.</p>
+    @endif
+    <form id="reminder-form" class="card card-pad admin-reminder-form" method="post" novalidate>
+        <div class="admin-reminder-grid">
+            <x-abprove.flow-input name="cycle_id" label="Periode penilaian" type="select" :required="true"/>
+            <x-abprove.flow-input name="target" label="Penerima" type="select" :required="true">
+                <option value="unit_heads_pending">Kepala Unit yang belum selesai mengajukan</option>
+                <option value="division_heads_pending">Kepala Divisi dengan persetujuan/penilaian tertunda</option>
+                <option value="all_heads">Semua Kepala Unit dan Kepala Divisi aktif</option>
+            </x-abprove.flow-input>
+        </div>
+        <x-abprove.flow-input name="subject" label="Subjek email" :required="true" maxlength="190"/>
+        <x-abprove.flow-input name="message" label="Pesan" type="textarea" :required="true" maxlength="2000" hint="Rincian jumlah pekerjaan dan batas waktu ditambahkan otomatis per penerima."/>
+        <p data-form-error hidden class="notice notice-error" role="alert"></p>
+    </form>
+    <section class="card table-card">
+        <div class="card-toolbar"><div><h3 class="section-title">Daftar penerima</h3><p class="text-xs text-muted" data-recipient-summary>Pilih periode dan penerima.</p></div><label class="flex items-center gap-2 text-sm"><input type="checkbox" class="size-4 accent-primary" data-recipient-all>Pilih semua yang bisa dikirimi</label></div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th class="w-10"><span class="sr-only">Pilih</span></th><th>Nama</th><th>Role</th><th>Area</th><th>Pekerjaan tertunda</th><th>Batas waktu (WIB)</th><th>Email</th></tr></thead><tbody data-recipient-rows></tbody></table></div>
+        <div class="dialog-footer"><button class="btn btn-primary" type="button" data-reminder-send disabled><x-abprove.icon name="bell"/>Kirim ke <span data-selected-count>0</span> penerima</button></div>
+    </section>
+</div>
+@endsection

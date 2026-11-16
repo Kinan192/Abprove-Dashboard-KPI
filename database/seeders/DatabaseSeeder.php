@@ -8,6 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(LocalDemoSeeder::class);
+        $this->command?->info('Tidak ada data contoh yang ditanam. Buat Super HC pertama dengan php artisan kpi:create-admin.');
     }
 }

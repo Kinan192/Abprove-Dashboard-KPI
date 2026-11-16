@@ -21,6 +21,7 @@ $paths = [
  'plus' => 'M12 5v14 M5 12h14', 'back' => 'M19 12H5 M11 6l-6 6 6 6', 'trash' => 'M3 6h18 M8 6V3h8v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7',
  'user' => 'M20 21v-2a6 6 0 0 0-6-6h-4a6 6 0 0 0-6 6v2 M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
  'download' => 'M12 3v12 M6 9l6 6 6-6 M3 16v5h18v-5', 'refresh' => 'M21 3v6h-6 M3 21v-6h6 M5 8a8 8 0 0 1 13-3l3 4 M3 15l3 4a8 8 0 0 0 13-3',
+ 'calendar' => 'M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4',
 ];
 @endphp
 <svg {{ $attributes->class(['icon']) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ $paths[$name] ?? $paths['grid'] }}"/></svg>

@@ -1,2 +1,0 @@
-@props(['config'])
-<nav class="tabs" aria-label="Pengguna dan struktur"><a class="tab {{ $config['page']==='users'?'active':'' }}" href="/hc/organization/users">Pengguna</a><a class="tab {{ $config['page']==='employees'?'active':'' }}" href="/hc/organization/employees">Karyawan</a><a class="tab {{ $config['page']==='organization'?'active':'' }}" href="/hc/organization">Divisi & Tim</a><a class="tab {{ $config['page']==='positions'?'active':'' }}" href="/hc/organization/positions">Jabatan</a></nav>

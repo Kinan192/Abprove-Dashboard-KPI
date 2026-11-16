@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\LoginEvent;
 use App\Models\User;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\BetterAuth;
@@ -28,6 +29,11 @@ class AuthenticatedSessionController extends Controller
         return response()->json(['csrf_token' => $r->session()->token(), 'login_url' => '/login']);
     }
 
+    public function forgot()
+    {
+        return view('auth.login', ['review' => false, 'forgot' => true]);
+    }
+
     public function store(LoginRequest $r, ScopeResolver $scopes, AuditWriter $audit, BetterAuth $auth)
     {
         $id = trim($r->validated('identifier'));
@@ -35,14 +41,16 @@ class AuthenticatedSessionController extends Controller
         $user = $matches->count() === 1 ? $matches->first() : null;
         $result = $auth->call($r, '/sign-in/email', ['email' => $user?->email ?? 'unknown@invalid.test', 'password' => $r->validated('password'), 'rememberMe' => $r->boolean('remember')]);
         if (! $result->successful() || ! $user || ! $user->is_active || (string) $result->json('user.id') !== (string) $user->id) {
+            LoginEvent::record($r, 'failed', $id, $user?->id);
             throw ValidationException::withMessages(['identifier' => 'Identitas atau kata sandi tidak sesuai.']);
         }
-        $ctx = DB::transaction(function () use ($user, $scopes, $audit) {
+        $ctx = DB::transaction(function () use ($r, $id, $user, $scopes, $audit) {
             $fresh = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
             $ctx = $scopes->resolve($fresh, true);
             $fresh->last_login_at = now();
             $fresh->save();
             $audit->record($ctx, 'user', $fresh->id, 'login', null, ['id' => $fresh->id]);
+            LoginEvent::record($r, 'login', $id, $fresh->id);
 
             return $ctx;
         });
@@ -66,6 +74,9 @@ class AuthenticatedSessionController extends Controller
     public function destroy(Request $r)
     {
         $auth = app(BetterAuth::class);
+        if ($user = $r->user()) {
+            LoginEvent::record($r, 'logout', $user->email ?? $user->login_nip ?? (string) $user->id, $user->id);
+        }
         $auth->call($r, '/sign-out', []);
         $auth->expire($r);
         Auth::forgetGuards();

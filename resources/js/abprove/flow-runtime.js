@@ -1,15 +1,6 @@
-import {
-    $,
-    $$,
-    node,
-    text,
-    labelCycle,
-    dateTime,
-    field,
-    error,
-} from './flow-dom';
-import { toast } from './ui';
+import { $, $$, node, text, labelCycle, dateTime } from './flow-dom';
 import { paginate } from './pagination';
+import { initProfile } from './profile';
 export function initFlowRuntime(c, s) {
     const link = (page, extra = {}) => {
         const base = c.links[page];
@@ -17,8 +8,6 @@ export function initFlowRuntime(c, s) {
         const url = new URL(base, location.origin);
         url.searchParams.delete('month');
         url.searchParams.set('cycle', s.cycleKey);
-        const account = new URLSearchParams(location.search).get('account');
-        if (c.review && account) url.searchParams.set('account', account);
         for (const [k, v] of Object.entries(extra)) url.searchParams.set(k, v);
         return url.href;
     };
@@ -31,7 +20,7 @@ export function initFlowRuntime(c, s) {
     function render() {
         if (!s.actor) return;
         const profile = s.data.profiles[s.actor.id];
-        const name = profile?.name || (!c.review ? c.actor.nama : s.actor.name);
+        const name = profile?.name || c.actor.nama;
         $$('[data-profile-name],[data-actor-name]').forEach(
             (e) => (e.textContent = name),
         );
@@ -157,126 +146,15 @@ export function initFlowRuntime(c, s) {
     }
     $('[data-flow-search]')?.addEventListener('input', render);
     document.addEventListener('flow-updated', render);
-    const profileForm = $('[data-local-form="profile"]');
-    if (profileForm) {
-        const profile = s.data.profiles[s.actor.id] || {
+    initProfile({
+        api: s.api,
+        profile: s.data.profiles[s.actor.id] || {
             name: s.actor.name,
             email: s.actor.email,
-        };
-        for (const [k, v] of Object.entries(profile))
-            if (field(profileForm, k)) field(profileForm, k).value = v;
-    }
-    document.addEventListener('submit', async (e) => {
-        const form = e.target.closest('[data-local-form]');
-        if (!form) return;
-        e.preventDefault();
-        if (!form.reportValidity()) return;
-        const v = Object.fromEntries(new FormData(form));
-        if (s.live)
-            return s.api.perform(form, async () => {
-                let payload;
-                if (form.dataset.localForm === 'profile')
-                    payload = {
-                        name: v.name,
-                        email: v.email,
-                        phone: v.phone || null,
-                    };
-                if (form.dataset.localForm === 'password') {
-                    if (v.new_password !== v.confirmation)
-                        throw new Error('Konfirmasi kata sandi belum sama.');
-                    payload = {
-                        current_password: v.current_password,
-                        password: v.new_password,
-                        password_confirmation: v.confirmation,
-                    };
-                }
-                if (!payload) return;
-                await s.api.request('/profile', 'POST', payload);
-                if (
-                    form.dataset.localForm === 'password' ||
-                    (payload.email && payload.email !== s.actor.email)
-                ) {
-                    toast('Data keamanan akun diubah. Silakan masuk kembali.');
-                    location.assign('/login');
-                    return;
-                }
-                await s.refresh();
-                toast('Profil berhasil diperbarui.');
-            });
-        if (form.dataset.localForm === 'profile') {
-            s.data.profiles[s.actor.id] = {
-                name: v.name,
-                email: v.email,
-                phone: v.phone,
-            };
-            s.save('Ubah profil lokal', v.name);
-            toast('Profil diperbarui pada simulasi.');
-        }
-        if (form.dataset.localForm === 'password') {
-            if (v.new_password !== v.confirmation)
-                return error(form, 'Konfirmasi kata sandi belum sama.');
-            form.reset();
-            toast('Validasi sesuai. Kata sandi tidak diubah pada server.');
-        }
+        },
+        actorEmail: s.actor.email,
+        refresh: () => s.refresh(),
     });
-    $('[data-avatar-file]')?.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (
-            !['image/png', 'image/jpeg', 'image/webp'].includes(file.type) ||
-            file.size > 2 * 1024 * 1024
-        )
-            return toast('Gunakan PNG/JPG/WebP maksimal 2 MB.', true);
-        if (s.live)
-            return s.api.perform(null, async () => {
-                const fd = new FormData();
-                fd.append('photo', file);
-                await s.api.request('/profile', 'POST', fd);
-                const img = node('img');
-                img.src = s.api.prefix + '/profile/photo?t=' + Date.now();
-                img.alt = 'Foto profil';
-                img.className = 'size-full rounded-full object-cover';
-                $('[data-profile-avatar]').replaceChildren(img);
-                await s.refresh();
-                toast('Foto profil berhasil disimpan.');
-            });
-        const img = node('img');
-        img.src = URL.createObjectURL(file);
-        img.alt = 'Pratinjau foto profil';
-        img.className = 'size-full rounded-full object-cover';
-        img.onload = () => URL.revokeObjectURL(img.src);
-        $('[data-profile-avatar]').replaceChildren(img);
-    });
-    $('[data-profile-notification]')?.addEventListener('change', (e) => {
-        if (s.live)
-            return s.api.perform(null, async () => {
-                try {
-                    await s.api.request('/profile', 'POST', {
-                        email_notifications: e.target.checked,
-                    });
-                    await s.refresh();
-                    toast('Preferensi berhasil disimpan.');
-                } catch (err) {
-                    e.target.checked = !e.target.checked;
-                    throw err;
-                }
-            });
-        s.data.profiles[s.actor.id] ||= {};
-        s.data.profiles[s.actor.id].notification = e.target.checked;
-        s.save('Preferensi notifikasi', 'Disimpan lokal');
-    });
-    if (s.live) {
-        const profile = s.data.profiles[s.actor.id];
-        const check = $('[data-profile-notification]');
-        if (check) check.checked = !!profile?.notification;
-        if (profile?.hasPhoto && $('[data-profile-avatar]')) {
-            const img = node('img');
-            img.src = s.api.prefix + '/profile/photo';
-            img.alt = 'Foto profil';
-            img.className = 'size-full rounded-full object-cover';
-            $('[data-profile-avatar]').replaceChildren(img);
-        }
-    }
     render();
     return link;
 }

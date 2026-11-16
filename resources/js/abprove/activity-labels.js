@@ -10,6 +10,7 @@ const resources = {
     profile: 'profil',
     assessment: 'penilaian',
 };
+const verbs = { created: 'Menambah', updated: 'Mengubah', deleted: 'Menghapus' };
 const exact = {
     'assessment.approve':'Menyetujui penilaian Final', 'assessment.return':'Mengembalikan penilaian', 'assessment.resubmit':'Mengajukan ulang penilaian',
     login: 'Masuk ke sistem',
@@ -27,11 +28,17 @@ const exact = {
     'cycle.deleted': 'Menghapus periode',
     'employee.placed': 'Menempatkan staf',
     'employee.transferred': 'Memindahkan staf',
-    'head.assigned': 'Mengganti penanggung jawab',
+    'head.assigned': 'Menetapkan penanggung jawab',
+    'head.replaced': 'Mengganti kepala area',
+    'head.moved': 'Memindahkan kepala ke area lain',
+    'head.swapped': 'Menukar kepala dua area',
+    'head.released': 'Melepas kepala dengan pengganti',
     'head.deactivated': 'Menonaktifkan penanggung jawab',
     'profile.updated': 'Memperbarui profil',
     'notifications.read': 'Membaca notifikasi',
     'reminder.recorded': 'Mencatat pengingat',
+    'reminder.emailed': 'Mengirim email pengingat',
+    'users.password_reset': 'Mengatur ulang kata sandi akun',
     'scope.revoked': 'Mencabut penugasan',
     'hc.granted': 'Memberikan akses Super HC',
 };
@@ -39,12 +46,24 @@ export function activityLabel(action) {
     if (exact[action]) return exact[action];
     const [resource, verb] = action.split('.');
     return (
-        ({ created: 'Menambah', updated: 'Mengubah', deleted: 'Menghapus' }[
-            verb
-        ] || 'Memperbarui') +
+        (verbs[verb] || 'Memperbarui') +
         ' ' +
         (resources[resource] || action.replaceAll('.', ' '))
     );
+}
+/** Filter options for server-side action filters (prefix match); one option per label. */
+export function activityActions() {
+    const keys = [
+        ...Object.keys(exact),
+        ...['users', 'positions', 'divisions', 'units', 'employees'].flatMap(
+            (resource) => Object.keys(verbs).map((verb) => `${resource}.${verb}`),
+        ),
+    ];
+    const seen = new Set();
+    return keys
+        .map((id) => ({ id, name: activityLabel(id) }))
+        .filter(({ name }) => !seen.has(name) && seen.add(name))
+        .sort((a, b) => a.name.localeCompare(b.name, 'id'));
 }
 export function activitySubject(activity) {
     if(activity.action==='login') return 'Login berhasil.';

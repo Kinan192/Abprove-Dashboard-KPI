@@ -14,7 +14,7 @@ import {
 import { open, close, confirm, toast } from './ui';
 import { paginate, reveal } from './pagination';
 import { activityLabel } from './activity-labels';
-import { calculate } from '../design-review/kpi-periode/model.js';
+import { calculate } from '../kpi-workspace/model.js';
 import {
     totalValues,
     categorize,
@@ -26,7 +26,7 @@ export function initFlowAssessments(c, s, link) {
         working,
         dirty = false,
         reviewed,
-        reviewCycle = s.cycleKey,
+        reviewSequence = 0,
         peopleTab = 'all',
         statusTab =
             $('[data-flow-status-select]')?.value ||
@@ -542,15 +542,28 @@ export function initFlowAssessments(c, s, link) {
                     ).length),
         );
     }
-    function review(id, key = s.cycleKey) {
+    /**
+     * Opens one person-month. Months outside the page window are loaded first; earlier months are
+     * reached only through Final results, so their Final rows are enough.
+     */
+    async function review(id, key = s.cycleKey) {
+        const sequence = ++reviewSequence;
+        try {
+            await s.ensureMonths([key], { finalOnly: key !== s.cycleKey });
+            if (c.role === 'kd')
+                await s.ensureMonths([previousMonth(key)], { finalOnly: true });
+        } catch (error) {
+            return toast(error.message, true);
+        }
+        if (sequence !== reviewSequence) return;
         const p = s.person(id, key);
         if (!p) return;
         reviewed = id;
-        reviewCycle = key;
+        const assessment = s.assessment(id, key);
         const sheet = renderScore(
             $('[data-review-mount]'),
             p,
-            s.assessment(id, key),
+            assessment,
             true,
             key,
         );
@@ -561,8 +574,8 @@ export function initFlowAssessments(c, s, link) {
         );
         const hist = $('[data-review-mount] [data-review-history]');
         if (hist) {
-            $('[data-review-mount] [data-history-tab]').hidden = false;
-            const assessment = s.assessment(id, key);
+            const tab = $('[data-review-mount] [data-history-tab]');
+            tab.hidden = false;
             text(
                 sheet,
                 '[data-review-decision-state]',
@@ -574,55 +587,86 @@ export function initFlowAssessments(c, s, link) {
                         ? 'Pengajuan dikembalikan untuk diperbaiki.'
                         : 'Belum ada pengajuan atau keputusan.',
             );
-            hist.replaceChildren();
-            for (const h of [...(assessment.history || [])].sort(
-                (a, b) => Date.parse(a.at) - Date.parse(b.at),
-            )) {
-                const entry = node('li'),
-                    title = node(
-                        'strong',
-                        {
-                            Diajukan: 'Mengajukan penilaian',
-                            Dikembalikan: 'Mengembalikan penilaian',
-                            Final: 'Menetapkan Final',
-                        }[h.action] || activityLabel(h.action),
-                    );
-                entry.append(
-                    title,
-                    node(
-                        'p',
-                        `${h.who || 'Sistem'} · ${dateTime(h.at)} WIB`,
-                        'text-muted mt-1',
-                    ),
-                );
-                if (h.reason)
-                    entry.append(
-                        node(
-                            'p',
-                            `${/return|Dikembalikan/.test(h.action) ? 'Alasan pengembalian' : 'Catatan peristiwa'}: ${h.reason}`,
-                            'decision-note mt-2',
-                        ),
-                    );
-                hist.append(entry);
-            }
-            if (!hist.childElementCount)
-                hist.append(
-                    node('li', 'Belum ada aktivitas penilaian.', 'empty'),
-                );
-            paginate(hist, 'review-history', { token: id + key, size: 3 });
+            hist.replaceChildren(
+                node('li', 'Buka untuk memuat jejak keputusan.', 'empty'),
+            );
+            // The sheet is rebuilt per review, so the first opening of this tab loads its timeline.
+            tab.addEventListener(
+                'toggle',
+                () => timeline(hist, assessment, id + key),
+                { once: true },
+            );
         }
         const allowed =
             !!sheet &&
             c.role === 'kd' &&
             p.type === 'member' &&
             key === s.cycleKey &&
-            s.assessment(id, key).status === 'Diajukan' &&
+            assessment.status === 'Diajukan' &&
             !s.canWrite();
         for (const action of ['return', 'final']) {
             const b = $(`[data-flow-action="${action}"]`);
             if (b) b.hidden = !allowed;
         }
         open('review-dialog');
+    }
+    /** Decision timeline of the reviewed assessment, read from the server on demand. */
+    async function timeline(hist, assessment, token) {
+        hist.replaceChildren(
+            node(
+                'li',
+                assessment.id
+                    ? 'Memuat jejak keputusan…'
+                    : 'Belum ada aktivitas penilaian.',
+                'empty',
+            ),
+        );
+        if (!assessment.id) return;
+        let events;
+        try {
+            events = (
+                await s.api.request(`/assessments/${assessment.id}/timeline`)
+            ).data;
+        } catch (error) {
+            if (hist.isConnected)
+                hist.replaceChildren(node('li', error.message, 'empty'));
+            return;
+        }
+        if (!hist.isConnected) return;
+        hist.replaceChildren();
+        for (const h of events.toSorted(
+            (a, b) => Date.parse(a.at) - Date.parse(b.at),
+        )) {
+            const entry = node('li'),
+                title = node(
+                    'strong',
+                    {
+                        Diajukan: 'Mengajukan penilaian',
+                        Dikembalikan: 'Mengembalikan penilaian',
+                        Final: 'Menetapkan Final',
+                    }[h.action] || activityLabel(h.action),
+                );
+            entry.append(
+                title,
+                node(
+                    'p',
+                    `${h.who || 'Sistem'} · ${dateTime(h.at)} WIB`,
+                    'text-muted mt-1',
+                ),
+            );
+            if (h.reason)
+                entry.append(
+                    node(
+                        'p',
+                        `${/return|Dikembalikan/.test(h.action) ? 'Alasan pengembalian' : 'Catatan peristiwa'}: ${h.reason}`,
+                        'decision-note mt-2',
+                    ),
+                );
+            hist.append(entry);
+        }
+        if (!hist.childElementCount)
+            hist.append(node('li', 'Belum ada aktivitas penilaian.', 'empty'));
+        paginate(hist, 'review-history', { token, size: 3 });
     }
     async function decide(ids, returned = false) {
         if (c.role !== 'kd') return;
@@ -651,60 +695,35 @@ export function initFlowAssessments(c, s, link) {
             },
         );
         if (!answer) return;
-        if (s.live)
-            return s.api.perform(null, async () => {
-                if (!returned && rows.length > 1)
-                    await s.api.request('/approvals/bulk', 'POST', {
-                        assessments: rows.map((p) => ({
-                            id: s.assessment(p.id).id,
-                            lock_version: s.assessment(p.id).lockVersion,
-                        })),
-                    });
-                else
-                    for (const p of rows) {
-                        const a = s.assessment(p.id);
-                        await s.api.request(
-                            '/assessments/' +
-                                a.id +
-                                '/' +
-                                (returned ? 'return' : 'approve'),
-                            'POST',
-                            {
-                                lock_version: a.lockVersion,
-                                ...(returned ? { reason: answer } : {}),
-                            },
-                        );
-                    }
-                selections.clear();
-                await s.refresh();
-                close('review-dialog');
-                sync();
-                toast('Keputusan berhasil disimpan.');
-            });
-        for (const p of rows) {
-            const before = structuredClone(s.assessment(p.id)),
-                a = s.data.assessments[`${p.id}|${s.cycleKey}`];
-            a.status = returned ? 'Dikembalikan' : 'Final';
-            a.reason = returned ? answer : '';
-            if (!returned)
-                a.category = categorize(s.total(p.id), s.cycle().categories);
-            a.history.push({
-                action: a.status,
-                who: s.actor.name,
-                at: new Date().toISOString(),
-                reason: a.reason,
-            });
-            s.save(
-                a.status,
-                `${p.name}${a.reason ? ' · ' + a.reason : ''}`,
-                before,
-                a,
-            );
-        }
-        selections.clear();
-        close('review-dialog');
-        sync();
-        toast('Keputusan tercatat pada simulasi.');
+        return s.api.perform(null, async () => {
+            if (!returned && rows.length > 1)
+                await s.api.request('/approvals/bulk', 'POST', {
+                    assessments: rows.map((p) => ({
+                        id: s.assessment(p.id).id,
+                        lock_version: s.assessment(p.id).lockVersion,
+                    })),
+                });
+            else
+                for (const p of rows) {
+                    const a = s.assessment(p.id);
+                    await s.api.request(
+                        '/assessments/' +
+                            a.id +
+                            '/' +
+                            (returned ? 'return' : 'approve'),
+                        'POST',
+                        {
+                            lock_version: a.lockVersion,
+                            ...(returned ? { reason: answer } : {}),
+                        },
+                    );
+                }
+            selections.clear();
+            await s.refresh();
+            close('review-dialog');
+            sync();
+            toast('Keputusan berhasil disimpan.');
+        });
     }
     function sync() {
         updateUnitFilter();
@@ -884,6 +903,11 @@ export function initFlowAssessments(c, s, link) {
         const p = s.person(selected);
         if (!p) return;
         if (action === 'copy-previous' && editable(p)) {
+            try {
+                await s.ensureMonths([previousMonth(s.cycleKey)]);
+            } catch (error) {
+                return toast(error.message, true);
+            }
             const before = s.assessment(p.id, previousMonth(s.cycleKey)),
                 target = s.template(p);
             if (!before.snapshot)
@@ -946,77 +970,44 @@ export function initFlowAssessments(c, s, link) {
                 ))
             )
                 return;
-            const before = structuredClone(s.assessment(p.id)),
-                a = {
-                    status: c.role === 'ku' ? 'Diajukan' : 'Final',
-                    values: structuredClone(working.values),
-                    positive: working.positive || '',
-                    negative: working.negative || '',
-                    reason: '',
-                    snapshot: structuredClone(k),
-                    scope: { unitId: p.unitId, divisionId: p.divisionId },
-                    history: [
-                        ...(before.history || []),
-                        {
-                            action: c.role === 'ku' ? 'Diajukan' : 'Final',
-                            who: s.actor.name,
-                            at: new Date().toISOString(),
-                        },
-                    ],
-                    category:
-                        c.role === 'kd'
-                            ? categorize(total, s.cycle().categories)
-                            : null,
+            return s.api.perform(root, async () => {
+                const current = s.assessment(p.id);
+                const payload = {
+                    scores: k.items.map((item, i) => ({
+                        source_kpi_item_id: +item.id,
+                        ...(item.config?.method === 'formula'
+                            ? { inputs: working.inputs?.[i] || {} }
+                            : { score: +working.values[i] }),
+                    })),
+                    positive_finding: working.positive || '',
+                    negative_finding: working.negative || '',
                 };
-            if (s.live)
-                return s.api.perform(root, async () => {
-                    const current = s.assessment(p.id);
-                    const payload = {
-                        scores: k.items.map((item, i) => ({
-                            source_kpi_item_id: +item.id,
-                            ...(item.config?.method === 'formula'
-                                ? { inputs: working.inputs?.[i] || {} }
-                                : { score: +working.values[i] }),
-                        })),
-                        positive_finding: working.positive || '',
-                        negative_finding: working.negative || '',
-                    };
-                    if (current.status === 'Dikembalikan') {
-                        payload.lock_version = current.lockVersion;
-                        await s.api.request(
-                            '/assessments/' + current.id + '/resubmit',
-                            'POST',
-                            payload,
-                        );
-                    } else {
-                        payload.cycle_id = s.cycle().dbId;
-                        payload[
-                            p.type === 'member'
-                                ? 'employee_id'
-                                : 'subject_user_id'
-                        ] = p.dbId;
-                        await s.api.request('/assessments', 'POST', payload);
-                    }
-                    dirty = false;
-                    working = null;
-                    await s.refresh();
-                    sync();
-                    toast(
-                        c.role === 'ku'
-                            ? 'Penilaian diajukan ke Kepala Divisi.'
-                            : 'Nilai Kepala Unit sudah Final.',
+                if (current.status === 'Dikembalikan') {
+                    payload.lock_version = current.lockVersion;
+                    await s.api.request(
+                        '/assessments/' + current.id + '/resubmit',
+                        'POST',
+                        payload,
                     );
-                });
-            s.data.assessments[`${p.id}|${s.cycleKey}`] = a;
-            dirty = false;
-            working = null;
-            s.save(a.status, p.name, before, a);
-            sync();
-            toast(
-                c.role === 'ku'
-                    ? 'Penilaian diajukan. Lanjutkan ke staf berikutnya.'
-                    : 'Nilai Kepala Unit sudah Final.',
-            );
+                } else {
+                    payload.cycle_id = s.cycle().dbId;
+                    payload[
+                        p.type === 'member'
+                            ? 'employee_id'
+                            : 'subject_user_id'
+                    ] = p.dbId;
+                    await s.api.request('/assessments', 'POST', payload);
+                }
+                dirty = false;
+                working = null;
+                await s.refresh();
+                sync();
+                toast(
+                    c.role === 'ku'
+                        ? 'Penilaian diajukan ke Kepala Divisi.'
+                        : 'Nilai Kepala Unit sudah Final.',
+                );
+            });
         }
         if (
             action === 'cancel-submission' &&
@@ -1030,29 +1021,19 @@ export function initFlowAssessments(c, s, link) {
                 ))
             )
                 return;
-            if (s.live)
-                return s.api.perform(null, async () => {
-                    const a = s.assessment(p.id);
-                    await s.api.request(
-                        '/assessments/' + a.id + '/withdraw',
-                        'POST',
-                        { lock_version: a.lockVersion },
-                    );
-                    dirty = false;
-                    working = null;
-                    await s.refresh();
-                    sync();
-                    toast('Pengajuan dibatalkan. Silakan isi ulang.');
-                });
-            const before = structuredClone(s.assessment(p.id));
-            delete s.data.assessments[`${p.id}|${s.cycleKey}`];
-            dirty = false;
-            working = null;
-            s.save('Batalkan pengajuan', p.name, before, null);
-            sync();
-            toast(
-                'Pengajuan dibatalkan. Tidak ada nilai sementara yang disimpan.',
-            );
+            return s.api.perform(null, async () => {
+                const a = s.assessment(p.id);
+                await s.api.request(
+                    '/assessments/' + a.id + '/withdraw',
+                    'POST',
+                    { lock_version: a.lockVersion },
+                );
+                dirty = false;
+                working = null;
+                await s.refresh();
+                sync();
+                toast('Pengajuan dibatalkan. Silakan isi ulang.');
+            });
         }
     });
     document.addEventListener('keydown', (e) => {
@@ -1108,12 +1089,6 @@ export function initFlowAssessments(c, s, link) {
         $('[data-filter="unit"]').value = qs.get('unit');
     document.addEventListener('flow-updated', sync);
     sync();
-    if (c.state === 'review')
-        review(
-            s
-                .people('member')
-                .find((p) => s.assessment(p.id).status === 'Diajukan')?.id,
-        );
     if (qs.get('person') && !$('[data-flow-editor]')) review(qs.get('person'));
     return { filtered, review, sync, getStatus: () => statusTab };
 }

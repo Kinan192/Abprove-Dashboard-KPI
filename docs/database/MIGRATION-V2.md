@@ -2,13 +2,13 @@
 
 ## Status
 
-Schema target baru sudah tersedia. Database aplikasi lama tidak dikosongkan, diimpor ulang, atau dikonversi selama perancangan. Source layout yang disetujui tersimpan pada archive/frontend/2026-11-10-approved-layout. Source backend lama tersimpan pada archive/backend/2026-11-10-before-domain-v2.
+Schema target tersedia melalui migrasi Laravel. Pembersihan source tidak mengosongkan, mengimpor ulang, atau mengonversi database aplikasi.
 
 ## Database kosong
 
 Backend v2 perlu migration yang memasang schema target pada database baru/kosong. Baseline migration 000001-000004 adalah jejak lama dan tidak diubah. Bila migration jembatan mendeteksi data domain existing, hentikan sebelum DDL. MySQL melakukan implicit commit pada DDL, sehingga rollback transaksi bukan jaminan pemulihan schema.
 
-Untuk pengujian, gunakan MySQL terisolasi melalui tools/testing/validate_schema_v2.py. Tidak ada nama database Laragon existing pada SQL target; file tidak menjalankan DROP DATABASE/CREATE DATABASE.
+Gunakan database salinan/kosong untuk memeriksa pemasangan. SQL target tidak menjalankan DROP DATABASE/CREATE DATABASE.
 
 ## Database lama berisi data
 
@@ -37,12 +37,12 @@ Source backend v2 siap, sedangkan database kpi_kinerja_dev yang lama masih beris
 ```powershell
 php artisan config:clear
 php artisan migrate
-php artisan db:seed
+php artisan kpi:create-admin
 npm.cmd run build
 php artisan serve
 ```
 
-Seeder lokal membuat enam akun contoh dan struktur/KPI sesuai v2, tanpa mereset akun existing. Kredensial acak disimpan secara lokal pada storage/app/private/local-demo-accounts.json. Database baru merupakan lingkungan terpisah; data dari database lama tidak otomatis disalin. Gunakan kpi:create-admin bila menginginkan HC awal tanpa data contoh.
+Tidak ada seeder data contoh. `kpi:create-admin` membuat Super HC pertama secara interaktif tanpa kata sandi default. Data dari database lama tidak otomatis disalin; arahkan koneksi secara sengaja sebelum menjalankan migrasi.
 
 Pilih migration Laravel untuk aplikasi. File schema.mysql.sql adalah definisi fisik untuk review/validasi database kosong; jangan mengimpor SQL itu lalu menjalankan baseline migrations pada database yang sama.
 

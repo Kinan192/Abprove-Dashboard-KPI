@@ -6,6 +6,7 @@ use App\Exceptions\BusinessRule;
 use App\Models\AssessmentCycle;
 use App\Models\KpiItem;
 use App\Models\KpiTemplate;
+use App\Queries\ScopedRecords;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\AccessContext;
 use Carbon\CarbonImmutable;
@@ -16,7 +17,7 @@ use Illuminate\Validation\Rule;
 
 class KpiMasterService
 {
-    public function __construct(private AuditWriter $audit) {}
+    public function __construct(private AuditWriter $audit, private ScopedRecords $records) {}
 
     public function template(AccessContext $ctx, ?int $id, array $data): array
     {
@@ -110,20 +111,27 @@ class KpiMasterService
         return $result;
     }
 
-    private function readyForCycle(string $month): void
+    private function readyForCycle(AccessContext $ctx, string $month): void
     {
         if (AssessmentCycle::where('assessment_month', $month)->where('workspace_managed', true)->exists()) {
-            $publications = DB::table('kpi_workspace_publications')->where('assessment_month', $month)->get();
-            if ($publications->isEmpty() || $publications->contains(fn ($p) => $p->template_id === null)) {
-                throw new BusinessRule('SETUP_INCOMPLETE', 'Lengkapi KPI penerima dengan total bobot 100% sebelum mengaktifkan periode.', 422);
+            $published = DB::table('kpi_workspace_publications as p')->join('kpi_templates as t', 't.id', '=', 'p.template_id')
+                ->where('p.assessment_month', $month)->get(['p.person_key', 't.scope_level', 't.scope_key'])->keyBy('person_key');
+            $staff = $this->records->members($ctx, false, $month)->pluck('e.id');
+            $missing = $staff->reject(fn ($id) => isset($published['staff-'.$id]))->count();
+            if ($staff->isEmpty() || $missing) {
+                throw new BusinessRule('SETUP_INCOMPLETE', $staff->isEmpty() ? 'Belum ada staf aktif pada bulan ini.' : "{$missing} dari {$staff->count()} staf belum memiliki pola KPI dengan total bobot 100%. Terapkan pola sebelum membuka periode.", 422);
             }
-            foreach (KpiTemplate::whereIn('id', $publications->pluck('template_id'))->get() as $template) {
-                $division = $template->scope_level === 'unit' ? DB::table('units')->where('id', $template->scope_key)->value('division_id') : $template->scope_key;
-                $head = fn ($role, $field, $id) => DB::table('scope_assignments as s')->join('users as u', 'u.id', '=', 's.user_id')->where('s.role_key', $role)->where('s.'.$field, $id)->whereNull('s.revoked_at')->where('u.is_active', true)->whereColumn('u.role_key', 's.role_key')->exists();
-                if (! $head('kepala_divisi', 'division_id', $division) || ($template->scope_level === 'unit' && ! $head('kepala_unit', 'unit_id', $template->scope_key))) {
-                    throw new BusinessRule('SETUP_INCOMPLETE', 'Lengkapi Kepala Unit dan Kepala Divisi aktif untuk penerima KPI.', 422);
-                }
+            $units = $published->where('scope_level', 'unit')->pluck('scope_key')->map(fn ($id) => (int) $id)->unique();
+            $divisions = $published->where('scope_level', 'division')->pluck('scope_key')->merge(DB::table('units')->whereIn('id', $units)->pluck('division_id'))->map(fn ($id) => (int) $id)->unique();
+            $heads = DB::table('scope_assignments as s')->join('users as u', 'u.id', '=', 's.user_id')->whereNull('s.revoked_at')->where('u.is_active', true)->whereColumn('u.role_key', 's.role_key')
+                ->where(fn ($q) => $q->where(fn ($q) => $q->where('s.role_key', 'kepala_unit')->whereIn('s.unit_id', $units))->orWhere(fn ($q) => $q->where('s.role_key', 'kepala_divisi')->whereIn('s.division_id', $divisions)))
+                ->get(['s.role_key', 's.unit_id', 's.division_id']);
+            $areas = DB::table('units')->whereIn('id', $units->diff($heads->where('role_key', 'kepala_unit')->pluck('unit_id')->map(fn ($id) => (int) $id)))->pluck('name')
+                ->merge(DB::table('divisions')->whereIn('id', $divisions->diff($heads->where('role_key', 'kepala_divisi')->pluck('division_id')->map(fn ($id) => (int) $id)))->pluck('name'));
+            if ($areas->isNotEmpty()) {
+                throw new BusinessRule('SETUP_INCOMPLETE', 'Lengkapi Kepala Unit/Kepala Divisi aktif untuk: '.$areas->take(10)->implode(', ').'.', 422);
             }
+
             return;
         }
         $units = DB::table('units')->where('is_active', true)->orderBy('id')->lockForUpdate()->get();
@@ -153,7 +161,7 @@ class KpiMasterService
             throw new BusinessRule('CYCLE_CLOSED', 'Periode ditutup tidak dibuka ulang.');
         }
         if ($data['status'] === 'open') {
-            $this->readyForCycle($data['assessment_month']);
+            $this->readyForCycle($ctx, $data['assessment_month']);
         }
         $categories = collect($data['categories'])->sort(fn ($a, $b) => bccomp((string) $a['lower_bound'], (string) $b['lower_bound'], 6))->values();
         $expected = '0';
@@ -192,6 +200,9 @@ class KpiMasterService
     public function close(AccessContext $ctx, int $id): array
     {
         $cycle = AssessmentCycle::whereKey($id)->lockForUpdate()->firstOrFail();
+        if (DB::table('assessments')->where('cycle_id', $id)->where('status', '<>', 'final')->exists()) {
+            throw new BusinessRule('CYCLE_IN_USE', 'Masih ada penilaian yang belum Final. Selesaikan keputusan Kepala Divisi sebelum menutup periode.', 422);
+        }
         $before = $cycle->toArray();
         $cycle->status = 'closed';
         $cycle->save();

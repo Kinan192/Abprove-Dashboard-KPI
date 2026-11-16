@@ -2,7 +2,7 @@ import { initPanels } from './abprove/pagination';
 import { initTableTools } from './abprove/table-tools';
 import markUrl from '../images/abprove-mark.svg';
 import { $, initUI, toast } from './abprove/ui';
-import { createFlowStore } from './abprove/flow-store';
+import { createFlowStore, workspaceQuery } from './abprove/flow-store';
 import { initFlowRuntime } from './abprove/flow-runtime';
 import { initFlowAssessments } from './abprove/flow-assessments';
 
@@ -22,7 +22,7 @@ document.documentElement.dataset.brandAsset = markUrl;
 const element = $('#kpi-config'),
     config = element ? JSON.parse(element.textContent) : null;
 let activeStore;
-if (config && !config.review) {
+if (config) {
     window.addEventListener('pagehide', (event) => {
         if (event.persisted)
             document.documentElement.dataset.restoringSession = 'true';
@@ -52,48 +52,50 @@ if (config && !config.review) {
         }
     });
 }
-initUI(config);
+initUI();
 initPanels();
 initTableTools();
-if ($('#audit-screens'))
-    import('./abprove/audit').then(({ initAudit }) => initAudit());
 async function start() {
+    if (config?.role === 'adm') {
+        config.api = createApi(config);
+        const { initAdmin } = await import('./admin/index.js');
+        initAdmin(config);
+        document.documentElement.dataset.frontendReady = 'true';
+        return;
+    }
     if (config) {
         const features = Promise.all([
-            $('[data-org-body],[data-flow-activities],#transfer-form')
+            $('[data-org-body],[data-flow-activities]')
                 ? import('./abprove/flow-org')
                 : null,
-            $('[data-kpi-editor],#cycle-form,[data-kpi-import]')
+            $('[data-kpi-editor],[data-kpi-import]')
                 ? import('./abprove/flow-kpi')
                 : null,
             $('[data-insights-root]') ? import('./abprove/insights') : null,
             $('[data-goal-prototype]')
-                ? import('./design-review/kpi-periode/index.js')
+                ? import('./kpi-workspace/index.js')
                 : null,
+            $('[data-role-dashboard]') ? import('./abprove/dashboard') : null,
         ]);
-        if (!config.review) {
+        {
             config.api = createApi(config);
             const root = document.querySelector('main');
             root?.setAttribute('aria-busy', 'true');
             try {
-                const cycle = new URLSearchParams(location.search).get('cycle');
-                const query = new URLSearchParams({
-                    compact: '1',
-                    page: config.page,
-                });
-                if (cycle) query.set('cycle', cycle);
-                if (config.kpiWorkspace)
-                    for (const key of ['accounts', 'positions', 'divisions', 'units', 'staff', 'heads', 'cycles', 'profiles', 'notifications'])
-                        query.append('only[]', key);
+                // The page profile decides the sections and the month window the server loads.
+                const query = workspaceQuery(
+                    config.workspaceProfile,
+                    new URLSearchParams(location.search).get('cycle'),
+                    config.sections,
+                );
                 if (config.api.reportRequested())
                     query.set('include_insights', '1');
                 const [result] = await Promise.all([
                     config.api.request('/data/workspace?' + query),
                     features,
                 ]);
-                config.workspace = config.kpiWorkspace
-                    ? { kpis: [], assessments: {}, activities: [], ...result.data }
-                    : result.data;
+                config.workspace = result.data;
+                config.workspaceWindow = result.window.assessments;
                 config.selectedCycle = result.cycle;
                 config.actor.key = result.actorId;
                 config.initialInsights = result.insights;
@@ -119,9 +121,10 @@ async function start() {
         }
         const store = createFlowStore(config);
         activeStore = store;
-        const [organization, kpi, insights, goalPrototype] = await features;
+        const [organization, kpi, insights, kpiWorkspace, dashboard] =
+            await features;
         try {
-            await goalPrototype?.prepareGoalShell(config, store);
+            await kpiWorkspace?.prepareKpiWorkspace(config, store);
         } catch (e) {
             const host = document.querySelector('[data-skp-content]');
             if (host) {
@@ -135,54 +138,20 @@ async function start() {
             return;
         }
         const link = initFlowRuntime(config, store);
-        if (goalPrototype) {
-            goalPrototype.initGoalPrototype(config, store);
+        if (kpiWorkspace) {
+            kpiWorkspace.initKpiWorkspace(config, store);
             document.documentElement.dataset.frontendReady = 'true';
             return;
         }
+        dashboard?.initDashboard(config, store, link);
         const assessments = initFlowAssessments(config, store, link);
         organization?.initOrganization(config, store, link);
         kpi?.initKpi(config, store);
-        kpi?.initCycles(config, store);
         initFlowReports(config, store, assessments, link);
         insights?.initInsights(config, store, link);
         document.documentElement.dataset.frontendReady = 'true';
     } else {
-        $('[data-local-form="forgot"]')?.addEventListener('submit', (event) => {
-            event.preventDefault();
-            $('[data-forgot-form]').hidden = true;
-            $('[data-forgot-sent]').hidden = false;
-        });
-        const form = $('[data-review-login]');
-        form?.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const accounts = JSON.parse($('#review-accounts').textContent),
-                identifier = form.elements.identifier.value
-                    .trim()
-                    .toLowerCase(),
-                password = form.elements.password.value;
-            const account = accounts.find(
-                (a) =>
-                    a.email.toLowerCase() === identifier ||
-                    a.nip === identifier,
-            );
-            const first = account?.nama
-                .replace(/^(dr\.|apt\.|ns\.)\s*/i, '')
-                .split(' ')[0];
-            if (!account || password !== `${first}#2026`) {
-                $('[data-login-error]').hidden = false;
-                $('[data-login-error]').textContent =
-                    'Email/NIP atau kata sandi contoh tidak cocok.';
-                return;
-            }
-            const button = $('[data-login-submit]');
-            button.disabled = true;
-            button.textContent = 'Membuka dashboard…';
-            location.assign(
-                `/design-review/${account.role}/dashboard?account=${encodeURIComponent(account.key)}`,
-            );
-        });
-        $('form[action$="/login"]:not([data-review-login])')?.addEventListener(
+        $('form[action$="/login"]')?.addEventListener(
             'submit',
             () => {
                 const button = $('[data-login-submit]');

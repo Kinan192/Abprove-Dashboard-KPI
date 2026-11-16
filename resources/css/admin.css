@@ -1,0 +1,68 @@
+/* Admin pages: accounts, logs, reminder emails. Builds on shared table/card/status styles. */
+.admin-page .table-tools {
+    flex-wrap: wrap;
+}
+
+.admin-stats {
+    color: var(--color-muted);
+    font-size: 13px;
+}
+
+.admin-row-actions {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 4px;
+    white-space: nowrap;
+}
+.admin-ellipsis {
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-changed td {
+    background: color-mix(in srgb, var(--color-warning, #f59e0b) 12%, transparent);
+}
+
+.admin-reminder-form {
+    display: grid;
+    gap: 16px;
+}
+
+.admin-reminder-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.admin-page tbody[aria-busy='true'] {
+    opacity: 0.55;
+}
+
+/* Tables stack into cards at 900px and below: give row actions the full card
+   width and let them wrap so every action stays reachable. */
+@media (max-width: 900px) {
+    body[data-app-shell] .admin-page .data-table td:has(> .admin-row-actions) {
+        grid-column: 1 / -1;
+        text-align: left;
+    }
+    .admin-row-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 0 16px;
+        white-space: normal;
+    }
+    .admin-row-actions > button {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+    }
+}
+@media (max-width: 600px) {
+    .admin-ellipsis {
+        max-width: 140px;
+    }
+}

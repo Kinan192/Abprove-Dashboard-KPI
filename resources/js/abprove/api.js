@@ -1,7 +1,7 @@
 import { toast } from './ui';
 
 export function createApi(c) {
-    const prefix = { ku: '/unit', kd: '/division', hc: '/hc' }[c.role];
+    const prefix = { ku: '/unit', kd: '/division', hc: '/hc', adm: '/admin' }[c.role];
     let pending = 0,
         writing = false;
     let workspaceUpdates = [],
@@ -37,7 +37,7 @@ export function createApi(c) {
                 .content,
         };
         if (method !== 'GET') {
-            headers['X-KPI-Workspace'] = c.page;
+            headers['X-KPI-Workspace'] = c.workspaceProfile;
             if (c.selectedCycle) headers['X-KPI-Cycle'] = c.selectedCycle;
             if (reportRequested()) headers['X-KPI-Insights'] = '1';
             if (form) {

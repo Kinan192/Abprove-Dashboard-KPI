@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\SuperHc;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CycleRequest;
+use App\Http\Requests\KpiMaster\CycleRequest;
 use App\Http\Requests\RequestIdRequest;
 use App\Models\AssessmentCycle;
 use App\Services\IdentityAccess\MutationRunner;

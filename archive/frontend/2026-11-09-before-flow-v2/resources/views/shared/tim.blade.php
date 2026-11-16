@@ -1,2 +1,0 @@
-@extends('layouts.app')
-@section('content')<div class="page-content page-stack"><div><h2 class="lead">{{ $vm->role==='ku'?'Anggota unit':'Tim divisi' }}</h2><p class="mt-2 text-muted">Kepala unit dan anggota dalam cakupan tampilan contoh.</p></div>@include('shared.unit-progress')<div class="toolbar"><label class="w-full max-w-sm"><span class="sr-only">Cari anggota</span><input class="field" type="search" placeholder="Cari nama atau NIP" data-list-filter="search"></label></div>@include('shared.assessment-list')</div>@include('shared.review-templates')@endsection

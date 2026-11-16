@@ -1,0 +1,695 @@
+@import './kpi-workspace-base.css';
+@reference './app.css';
+
+/* Toolbar: five-step flow + period picker */
+.skp-toolbar {
+    @apply flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl border border-line bg-paper p-1.5;
+}
+.skp-steps {
+    @apply min-w-0 flex-[1_1_640px];
+}
+.skp-steps ol {
+    @apply m-0 grid list-none grid-cols-5 gap-1 p-0;
+}
+.skp-steps a {
+    @apply flex h-full min-h-[52px] min-w-0 items-center gap-2.5 rounded-[10px] px-3 py-2 text-muted transition-colors hover:bg-subtle hover:text-ink;
+}
+.skp-step-no {
+    @apply grid size-7 shrink-0 place-items-center rounded-full border border-line bg-paper text-[12px] font-semibold tabular-nums;
+}
+.skp-step-copy {
+    @apply grid min-w-0;
+}
+.skp-step-copy b {
+    @apply text-[13px] leading-[18px] font-semibold text-ink;
+}
+.skp-step-copy small {
+    @apply text-[11.5px] leading-4 text-muted;
+}
+.skp-steps a.active {
+    @apply bg-accent-soft;
+}
+.skp-steps a.active .skp-step-no {
+    @apply border-transparent bg-primary text-white;
+}
+.skp-steps a.active .skp-step-copy b {
+    @apply text-accent;
+}
+.fx-period-picker {
+    @apply ml-auto flex items-center gap-2 px-2 py-1;
+}
+.fx-period-picker > label {
+    @apply text-[12.5px] font-semibold text-muted;
+}
+.fx-period-picker .field {
+    @apply min-h-10 w-auto max-w-[340px] min-w-[220px] py-2;
+}
+
+/* Progress primitives (readiness, weight totals) */
+.skp-prototype progress {
+    @apply h-2 w-full min-w-0 flex-1 overflow-hidden rounded-full border-0 bg-subtle;
+    appearance: none;
+}
+.skp-prototype progress::-webkit-progress-bar {
+    border-radius: 999px;
+    background: var(--color-subtle);
+}
+.skp-prototype progress::-webkit-progress-value {
+    border-radius: 999px;
+    background: var(--color-warning);
+}
+.skp-prototype progress::-moz-progress-bar {
+    border-radius: 999px;
+    background: var(--color-warning);
+}
+.skp-prototype .ready progress::-webkit-progress-value {
+    background: var(--color-primary);
+}
+.skp-prototype .ready progress::-moz-progress-bar {
+    background: var(--color-primary);
+}
+.skp-prototype meter {
+    @apply block h-2 w-full rounded-full border-0 bg-subtle;
+    -moz-appearance: none;
+}
+.skp-prototype meter::-webkit-meter-bar {
+    height: 8px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-subtle);
+}
+.skp-prototype meter::-webkit-meter-optimum-value {
+    border-radius: 999px;
+    background: var(--color-primary);
+}
+.skp-prototype meter::-webkit-meter-suboptimum-value,
+.skp-prototype meter::-webkit-meter-even-less-good-value {
+    border-radius: 999px;
+    background: var(--color-warning);
+}
+.skp-prototype meter::-moz-meter-bar {
+    border-radius: 999px;
+    background: var(--color-warning);
+}
+.skp-prototype meter:-moz-meter-optimum::-moz-meter-bar {
+    background: var(--color-primary);
+}
+.skp-weight-meter {
+    @apply mt-1.5 max-w-[140px];
+}
+
+/* Readiness of the selected period */
+.skp-readiness {
+    @apply grid items-center gap-x-6 gap-y-3 rounded-xl border border-line bg-paper px-5 py-4 text-[13px];
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 220px) auto;
+}
+.skp-readiness-copy strong {
+    @apply block text-[14px] leading-5 font-semibold;
+}
+.skp-readiness-copy span {
+    @apply mt-1 block leading-5 text-muted;
+}
+.skp-readiness-copy b {
+    @apply font-semibold text-warning;
+}
+.skp-readiness-meter {
+    @apply flex items-center gap-3;
+}
+.skp-readiness-meter > span {
+    @apply text-[13px] font-semibold text-ink tabular-nums;
+}
+.skp-readiness-actions {
+    @apply flex flex-wrap items-center justify-end gap-2;
+}
+
+/* Cards & panels */
+.skp-panel {
+    @apply min-w-0 p-5;
+}
+.skp-panel h2,
+.skp-panel > summary {
+    @apply text-[15px] leading-6 font-semibold;
+}
+.skp-panel > .gp-help {
+    @apply mt-1 max-w-[760px] text-[12.5px] leading-5;
+}
+details.skp-panel {
+    @apply p-0;
+}
+details.skp-panel > summary {
+    @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 py-3;
+}
+details.skp-panel > summary::-webkit-details-marker {
+    display: none;
+}
+details.skp-panel > summary::after,
+.fx-settings > summary::after {
+    @apply size-2 shrink-0 -translate-y-0.5 rotate-45 border-r-[1.5px] border-b-[1.5px] border-muted transition-transform;
+    content: '';
+}
+details.skp-panel[open] > summary::after,
+.fx-settings[open] > summary::after {
+    @apply translate-y-0.5 -rotate-[135deg];
+}
+details.skp-panel > :not(summary) {
+    @apply mx-5;
+}
+details.skp-panel > :last-child:not(summary) {
+    @apply mb-5;
+}
+details.skp-panel > .skp-copy {
+    @apply mt-0;
+}
+.skp-legacy {
+    @apply my-4 grid list-none gap-0 rounded-lg border border-line p-0;
+}
+.skp-legacy li {
+    @apply flex flex-wrap justify-between gap-2 border-b border-line px-3.5 py-2.5 text-[13px] last:border-b-0;
+}
+.skp-legacy span {
+    @apply text-muted;
+}
+.skp-copy {
+    @apply mt-3 flex flex-wrap items-end gap-3;
+}
+.skp-copy > label {
+    @apply max-w-[360px] min-w-[240px] flex-1;
+}
+.skp-copy .label,
+.skp-apply-pick .label {
+    @apply mb-1.5 block text-[12.5px] font-semibold;
+}
+.skp-copy .btn {
+    @apply min-h-10;
+}
+
+/* Table cards */
+.skp-table-card {
+    @apply p-0;
+    /* clip keeps the rounded corners without breaking sticky selection bars */
+    overflow: clip;
+}
+.skp-card-head {
+    @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4;
+}
+.skp-card-head h2 {
+    @apply text-[15px] leading-6 font-semibold;
+}
+.skp-card-head p {
+    @apply mt-0.5 text-[12.5px] leading-[18px] text-muted;
+}
+.skp-table-card > .table-tools {
+    @apply px-5 py-3.5;
+}
+.skp-table-card > .table-wrap {
+    @apply rounded-none border-0 border-t border-line;
+}
+.skp-table-card > .table-wrap:first-child {
+    @apply border-t-0;
+}
+.skp-table-card > .list-pagination {
+    @apply border-t border-line px-5 py-2.5;
+}
+.skp-table-card > [data-skp-summary='apply'] {
+    @apply sticky top-0 z-[4] border-t border-line bg-paper;
+}
+.skp-row-actions {
+    @apply flex flex-wrap items-center gap-1;
+}
+.skp-row-actions button,
+.skp-row-actions a {
+    @apply min-h-9;
+}
+body[data-app-shell] .skp-row-actions button.skp-link-danger {
+    @apply text-danger hover:bg-danger-soft;
+}
+
+/* Pattern & period forms */
+.skp-form-card {
+    @apply min-w-0 p-0;
+    /* clip (not hidden) so the sticky formula review keeps following the scroll */
+    overflow: clip;
+}
+.skp-form-card > .gp-note {
+    @apply mx-5 mt-4;
+}
+.fx-card-heading {
+    @apply flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4;
+}
+.fx-card-heading h2 {
+    @apply text-[16px] leading-6 font-semibold;
+}
+.fx-card-heading p {
+    @apply mt-0.5 text-[12.5px] leading-[18px] text-muted;
+}
+.fx-form-section {
+    @apply min-w-0 border-t border-line px-5 py-5;
+}
+.fx-form-section:first-child {
+    @apply border-t-0;
+}
+.fx-section-heading {
+    @apply mb-4 flex min-w-0 items-start gap-3;
+}
+.fx-section-heading > span {
+    @apply grid size-7 shrink-0 place-items-center rounded-full bg-accent-soft text-[12px] font-semibold text-accent;
+}
+.fx-section-heading h2 {
+    @apply m-0 text-[14.5px] leading-7 font-semibold;
+}
+.fx-section-heading p {
+    @apply text-[12.5px] leading-[18px] text-muted;
+}
+.fx-form-actions {
+    @apply flex flex-wrap items-center gap-3 border-t border-line px-5 py-4;
+}
+.fx-form-actions .gp-help {
+    @apply m-0;
+}
+#skp-period-form > .gp-note {
+    @apply mx-5 mb-4;
+}
+.skp-items-heading {
+    @apply mb-4 flex flex-wrap items-start justify-between gap-3;
+}
+.skp-items-heading .fx-section-heading {
+    @apply mb-0;
+}
+.skp-items th:first-child {
+    width: 52px;
+}
+.skp-items th:nth-child(2) {
+    width: 34%;
+}
+.skp-items th:nth-child(5) {
+    width: 128px;
+}
+.skp-items th:last-child {
+    width: 128px;
+}
+.skp-items tr.editing {
+    @apply bg-accent-soft;
+}
+.skp-items .gp-tag {
+    @apply mt-1.5;
+}
+.skp-weight-input {
+    @apply min-h-10 w-full text-right;
+    font-variant-numeric: tabular-nums;
+}
+.skp-form-error {
+    @apply mt-3;
+}
+.skp-savebar {
+    @apply sticky bottom-3 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-paper px-5 py-3;
+    box-shadow: 0 6px 20px rgb(15 23 42 / 0.06);
+}
+.skp-savebar > div:first-child {
+    @apply flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[13px];
+}
+.skp-savebar strong {
+    @apply text-[20px] leading-7 font-semibold text-ink tabular-nums;
+}
+.skp-savebar meter {
+    @apply w-40;
+}
+.skp-total-label {
+    @apply text-muted;
+}
+
+/* Apply to staff */
+.skp-apply-pick {
+    @apply grid items-start gap-x-6 gap-y-3;
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+}
+.skp-apply-pick select {
+    @apply min-h-10 w-full;
+}
+.skp-apply-pick > .gp-help,
+.skp-chosen {
+    @apply mt-0 pt-7;
+}
+.skp-chosen {
+    @apply flex flex-wrap content-start items-center gap-1.5;
+}
+.skp-chosen > span:not(.gp-tag) {
+    @apply rounded-md border border-line bg-subtle px-2 py-1 text-[12px] leading-4;
+}
+.skp-selection {
+    @apply flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-[13px];
+}
+.skp-selection p {
+    @apply text-muted;
+}
+.skp-selection b,
+.skp-result-line b {
+    @apply font-semibold text-ink tabular-nums;
+}
+.skp-selection .gp-actions {
+    @apply gap-2;
+}
+.skp-apply th:first-child {
+    width: 52px;
+}
+.skp-apply input[type='checkbox'] {
+    @apply size-[18px] cursor-pointer align-middle;
+    accent-color: var(--color-primary);
+}
+.skp-apply tr.selected {
+    @apply bg-accent-soft;
+}
+.skp-result-line {
+    @apply border-t border-line bg-subtle px-5 py-2.5 text-[12.5px] text-muted;
+}
+
+/* Weight check */
+.skp-matrix th:first-child {
+    width: 22%;
+}
+.skp-matrix th:nth-child(5) {
+    width: 150px;
+}
+.skp-matrix th:last-child {
+    width: 150px;
+}
+.skp-matrix .num {
+    @apply font-semibold;
+}
+
+/* Monitoring */
+.skp-prototype .skp-chartless {
+    @apply grid gap-3;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.skp-chartless div {
+    @apply min-w-0 rounded-xl border border-line bg-paper px-4 py-3.5;
+}
+.skp-chartless span {
+    @apply block text-[12.5px] leading-[18px] text-muted;
+}
+.skp-chartless strong {
+    @apply mt-1 block text-[24px] leading-[30px] font-semibold tabular-nums;
+}
+.skp-result-table th:first-child {
+    width: 30%;
+}
+.skp-result-table th:nth-child(3) {
+    width: 26%;
+}
+
+/* KPI formula editor */
+.fx-info-grid,
+.fx-target-grid,
+.fx-category-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+.fx-score-help {
+    @apply mt-4 rounded-lg bg-subtle px-3.5 py-2.5 text-[12.5px] leading-5;
+}
+.fx-score-help b {
+    @apply text-ink;
+}
+.fx-settings {
+    @apply mt-4 rounded-lg border border-line text-[12.5px] text-muted;
+}
+.fx-settings > summary {
+    @apply flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 px-3.5 font-semibold text-ink;
+}
+.fx-settings > summary::-webkit-details-marker {
+    display: none;
+}
+.fx-settings > :not(summary) {
+    @apply mx-3.5;
+}
+.fx-settings[open] {
+    @apply pb-3.5;
+}
+.fx-settings .gp-form-grid {
+    @apply mt-3;
+}
+.fx-builder {
+    @apply min-w-0;
+}
+.fx-builder > h3 {
+    @apply text-[13px] font-semibold;
+}
+.fx-builder > .gp-help {
+    @apply mt-1 mb-3;
+}
+.fx-formula-grid {
+    @apply grid items-start gap-6;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+.fx-variable {
+    @apply mb-2 grid items-center gap-2;
+    grid-template-columns: 32px minmax(120px, 1fr) 150px auto;
+}
+.fx-variable:has([data-fx-variable-fixed]) {
+    grid-template-columns: 32px minmax(110px, 1fr) 140px 100px auto;
+}
+.fx-variable > b {
+    @apply grid size-8 place-items-center rounded-lg bg-accent-soft text-[13px] font-semibold text-accent;
+}
+.fx-variable .field {
+    @apply h-10 min-h-10 min-w-0 px-3 py-2 text-[13px];
+}
+body[data-app-shell] .fx-variable button.link {
+    @apply inline-flex min-h-10 items-center rounded-md px-2 text-[12.5px] text-danger hover:bg-danger-soft;
+}
+.fx-add-variable {
+    @apply mt-2 mb-5;
+}
+.fx-tokens {
+    @apply my-3 grid gap-2;
+}
+.fx-token-group {
+    @apply flex flex-wrap items-center gap-1.5;
+}
+.fx-token-group > span {
+    @apply w-16 shrink-0 text-[11.5px] font-semibold text-muted;
+}
+.fx-token {
+    @apply inline-flex min-h-[34px] max-w-full items-center rounded-lg border border-line bg-paper px-2.5 py-1 text-[12.5px] font-medium whitespace-normal text-ink transition-colors hover:border-primary hover:text-accent;
+    overflow-wrap: anywhere;
+}
+#skp-kpi-form [name='formula'] {
+    @apply bg-subtle text-[14px];
+    font-family: ui-monospace, Consolas, monospace;
+}
+.fx-human {
+    @apply mt-3 rounded-lg border border-line bg-subtle px-3.5 py-2.5;
+}
+.fx-human > span {
+    @apply block text-[11.5px] font-semibold text-muted;
+}
+.fx-human > p {
+    @apply mt-0.5 text-[13px] leading-5 text-ink;
+    overflow-wrap: anywhere;
+}
+.fx-review {
+    @apply sticky top-3 rounded-xl border border-line bg-subtle p-4;
+}
+.fx-review-heading {
+    @apply mb-3 flex flex-wrap items-center justify-between gap-2;
+}
+.fx-review h3,
+.fx-test h3 {
+    @apply text-[13.5px] leading-5 font-semibold;
+}
+.fx-issue {
+    @apply mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-lg border border-line bg-paper px-3 py-2.5 text-[12.5px] leading-[18px];
+}
+.fx-issue.error {
+    @apply border-transparent bg-danger-soft text-danger;
+}
+.fx-issue.warning {
+    @apply border-transparent bg-warning-soft text-warning;
+}
+.fx-issue.success {
+    @apply border-transparent bg-success-soft text-success;
+}
+.fx-recommendations {
+    @apply mt-3 grid gap-2;
+}
+.fx-recommendations > div {
+    @apply grid items-center gap-x-3 gap-y-1 rounded-lg border border-line bg-paper px-3 py-2.5;
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+.fx-recommendations strong {
+    @apply col-start-1 text-[12.5px] font-semibold;
+}
+.fx-recommendations code {
+    @apply col-start-1 text-[12px] text-muted;
+    overflow-wrap: anywhere;
+}
+.fx-recommendations .btn {
+    @apply col-start-2 row-span-2 row-start-1 min-h-9;
+}
+.fx-test {
+    @apply mt-5 rounded-xl border border-line bg-paper p-4;
+}
+.fx-test > .gp-help {
+    @apply mt-1;
+}
+.fx-test-inputs {
+    @apply my-3 grid gap-3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.fx-test-inputs > label {
+    @apply text-[12px] text-muted;
+}
+.fx-test-inputs .field {
+    @apply mt-1.5 min-h-10 min-w-0;
+}
+.fx-test-stats {
+    @apply grid gap-2;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.fx-test-stats > div {
+    @apply rounded-lg bg-subtle px-3 py-2.5;
+}
+.fx-test-stats span {
+    @apply block text-[11.5px] text-muted;
+}
+.fx-test-stats strong {
+    @apply mt-1 block text-[17px] leading-6 font-semibold text-ink;
+    font-variant-numeric: tabular-nums;
+}
+.fx-formula-summary {
+    @apply block! overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+@media (max-width: 1100px) {
+    .fx-formula-grid {
+        grid-template-columns: 1fr;
+    }
+    .fx-review {
+        position: static;
+    }
+    .skp-prototype .skp-chartless {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+@media (max-width: 900px) {
+    .skp-readiness {
+        grid-template-columns: 1fr;
+    }
+    .skp-readiness-actions {
+        justify-content: flex-start;
+    }
+    .skp-apply-pick {
+        grid-template-columns: 1fr;
+    }
+    .skp-apply-pick > .gp-help,
+    .skp-chosen {
+        padding-top: 0;
+    }
+}
+@media (max-width: 600px) {
+    .skp-toolbar {
+        @apply rounded-xl p-1;
+    }
+    .skp-steps a {
+        @apply min-h-14 flex-col justify-center gap-1 px-1 py-2 text-center;
+    }
+    .skp-step-copy b {
+        @apply text-[11px] leading-[14px];
+    }
+    .skp-step-copy small {
+        display: none;
+    }
+    .fx-period-picker {
+        @apply ml-0 w-full px-1.5 pb-1.5;
+    }
+    .fx-period-picker .field {
+        @apply min-h-11 max-w-none min-w-0 flex-1;
+    }
+    .skp-panel,
+    details.skp-panel > summary,
+    .skp-card-head,
+    .skp-table-card > .table-tools,
+    .skp-selection,
+    .skp-result-line,
+    .skp-table-card > .list-pagination,
+    .fx-card-heading,
+    .fx-form-section,
+    .fx-form-actions,
+    .skp-readiness,
+    .skp-savebar {
+        @apply px-4;
+    }
+    details.skp-panel > :not(summary),
+    .skp-form-card > .gp-note,
+    #skp-period-form > .gp-note {
+        @apply mx-4;
+    }
+    .skp-copy > label {
+        @apply max-w-none min-w-0 basis-full;
+    }
+    .skp-copy .btn,
+    .skp-selection .gp-actions,
+    .skp-selection .gp-actions .btn {
+        @apply w-full;
+    }
+    .fx-info-grid,
+    .fx-target-grid,
+    .fx-category-grid,
+    .fx-test-stats,
+    .fx-test-inputs {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .fx-variable,
+    .fx-variable:has([data-fx-variable-fixed]) {
+        grid-template-columns: 32px minmax(0, 1fr) auto;
+    }
+    .fx-variable > select {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    .fx-variable > [data-fx-variable-fixed] {
+        grid-column: 2;
+        grid-row: 3;
+    }
+    .fx-variable .field {
+        @apply h-11 min-h-11;
+    }
+    .fx-token-group > span {
+        @apply w-full;
+    }
+    .fx-token,
+    .skp-row-actions button,
+    .skp-row-actions a,
+    .fx-recommendations .btn {
+        min-height: 44px;
+    }
+    .skp-prototype .skp-chartless {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .skp-savebar {
+        @apply bottom-2;
+    }
+    .skp-savebar > div:first-child,
+    .skp-savebar .gp-actions {
+        @apply w-full;
+    }
+    .skp-savebar meter {
+        width: 100%;
+    }
+    .skp-savebar .gp-actions .btn {
+        flex: 1;
+    }
+    body[data-app-shell] .data-table.gp-table.skp-apply tr {
+        grid-template-columns: 32px minmax(0, 1fr);
+    }
+    body[data-app-shell] .data-table.gp-table.skp-apply td {
+        grid-column: 2;
+    }
+    body[data-app-shell] .data-table.gp-table.skp-apply td:first-child {
+        grid-column: 1;
+        grid-row: 1 / span 4;
+    }
+    .skp-apply input[type='checkbox'] {
+        @apply size-[22px];
+    }
+}
