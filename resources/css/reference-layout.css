@@ -34,7 +34,9 @@ body[data-app-shell] [data-searchable-native] {
     z-index: 60;
     max-height: min(300px, 40vh);
     overflow-y: auto;
-    box-shadow: 0 8px 24px #0002;
+    padding: 4px;
+    border-radius: 12px;
+    box-shadow: 0 16px 40px -16px rgb(15 30 38 / 0.3);
 }
 .searchable-select-menu[popover] {
     position: fixed;
@@ -42,7 +44,8 @@ body[data-app-shell] [data-searchable-native] {
     margin: 0;
 }
 .searchable-select-option {
-    padding: 10px 12px;
+    padding: 9px 10px;
+    border-radius: 8px;
     font-size: 13px;
     cursor: pointer;
     overflow-wrap: anywhere;
@@ -80,7 +83,7 @@ body[data-app-shell] [data-flow-organization] .org-table td.empty {
 }
 .decision-timeline .decision-note {
     background: var(--color-subtle);
-    border-radius: 6px;
+    border-radius: 8px;
     padding: 8px 10px;
 }
 .decision-timeline > .empty {
@@ -139,12 +142,6 @@ body[data-app-shell] .compact-workspace .reference-heat td:first-child {
 .compact-workspace .reference-heat .reference-person small {
     margin-top: 0;
     line-height: 16px;
-}
-body[data-app-shell] .compact-workspace .reference-figures > div {
-    padding: 14px 16px;
-}
-body[data-app-shell] .compact-workspace .reference-figures .figure-value {
-    line-height: 34px;
 }
 body[data-app-shell] .compact-workspace .reference-heat td {
     font-size: 11px;
@@ -249,7 +246,7 @@ body[data-app-shell] .reference-kpi-table .icon-button {
 }
 .reference-setting-value {
     border: 1px solid var(--color-line);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 8px 12px;
     min-width: 150px;
     text-align: right;
@@ -305,15 +302,6 @@ body[data-app-shell] .reference-kpi-definition [data-kpi-editor] {
 body[data-role='ku'] [data-flow-editor] [data-previous] {
     display: none;
 }
-body[data-app-shell] .reference-score-total {
-    justify-content: flex-end;
-    gap: 14px;
-    padding: 24px 0;
-}
-body[data-app-shell] .reference-score-total [data-total] {
-    font-size: 36px;
-    line-height: 44px;
-}
 .reference-home-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 320px;
@@ -324,40 +312,14 @@ body[data-app-shell] .reference-score-total [data-total] {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 32px;
-    align-items: start;
+    align-items: stretch;
 }
-.reference-trend-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    gap: 32px;
-    align-items: start;
+.reference-report .reference-pair > .card {
+    display: flex;
+    flex-direction: column;
 }
-.reference-figures {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-.reference-figures > div {
-    min-width: 0;
-    padding: 18px 20px;
-    border-right: 1px solid var(--color-line);
-}
-.reference-figures > div:last-child {
-    border: 0;
-}
-.reference-figures .figure-label {
-    color: var(--color-muted);
-    font-size: 13px;
-}
-.reference-figures .figure-value {
-    margin: 2px 0 0;
-    font-size: 26px;
-    line-height: 39px;
-    font-weight: 650;
-}
-.reference-figures .figure-hint {
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 18px;
+.reference-report .reference-pair > .card > .reference-feed {
+    flex: 1;
 }
 .reference-return-count {
     padding: 4px 10px;
@@ -471,7 +433,7 @@ body[data-app-shell] .reference-score-total [data-total] {
     background: var(--color-warning);
 }
 .reference-bar .not-started {
-    background: #b8bdc6;
+    background: color-mix(in srgb, var(--color-muted) 45%, var(--color-line));
 }
 .reference-progress-caption {
     margin-top: 7px;
@@ -645,7 +607,7 @@ body[data-app-shell] .reference-home [data-home-progress].page-stack {
     flex-shrink: 0;
     display: grid;
     place-items: center;
-    border-radius: 6px;
+    border-radius: 8px;
     background: var(--color-info-soft);
     color: var(--color-info);
     font-size: 21px;
@@ -655,50 +617,32 @@ body[data-app-shell] .reference-home [data-home-progress].page-stack {
     background: var(--color-warning-soft);
     font-size: 16px;
 }
-.reference-chart {
-    padding: 16px 14px 10px;
+.reference-feed-icon.positive {
+    color: var(--color-success);
+    background: var(--color-success-soft);
 }
-.reference-chart svg {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-.reference-chart text {
-    fill: var(--color-muted);
-    font-family: inherit;
+.reference-feed-kind {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 0 7px;
+    border-radius: 999px;
     font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+}
+.reference-feed-kind.negative {
+    color: var(--color-warning);
+    background: var(--color-warning-soft);
+}
+.reference-feed-kind.positive {
+    color: var(--color-success);
+    background: var(--color-success-soft);
 }
 .reference-report-toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: start;
     gap: 10px;
-}
-.reference-report-toolbar .filter-toolbar {
-    flex: 1;
-    min-width: 0;
-}
-.reference-report-toolbar > select {
-    max-width: 210px;
-}
-.reference-report-toolbar .filter-fields {
-    gap: 8px;
-}
-.reference-report-toolbar .filter-fields .field {
-    max-width: 200px;
-}
-@media (min-width: 1251px) {
-    .reference-report-toolbar .filter-fields .field {
-        flex: 1;
-        min-width: 0;
-        width: 0 !important;
-    }
-    .reference-report-toolbar .filter-fields {
-        flex-wrap: nowrap;
-    }
-}
-.reference-unit-average {
-    margin-bottom: 18px;
 }
 .notification-badge {
     position: absolute;
@@ -721,34 +665,23 @@ body[data-app-shell] .reference-home [data-home-progress].page-stack {
     white-space: nowrap;
     box-sizing: content-box;
 }
-.reference-unit-average .reference-bar {
-    margin-top: 6px;
-    height: 5px;
-}
-.reference-unit-average .reference-bar span {
-    background: var(--color-info);
-}
-.reference-unit-average > div:first-child {
-    display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    font-size: 13px;
-}
-.reference-unit-average b {
+.reference-rank-position strong {
+    display: block;
     font-variant-numeric: tabular-nums;
 }
-.reference-range {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.reference-rank-position small {
+    display: block;
+    color: var(--color-muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+.reference-filter-hint {
     color: var(--color-muted);
     font-size: 12px;
+    font-weight: 400;
 }
-.reference-range select {
-    width: auto;
-}
-.reference-rank-filter {
-    max-width: 250px;
+[data-report-control-active] .reference-filter-hint {
+    color: var(--color-link);
 }
 body[data-app-shell] .reference-heat th,
 body[data-app-shell] .reference-heat td {
@@ -797,10 +730,6 @@ body[data-app-shell] .reference-heat td:first-child strong {
 }
 .section-tabs a {
     text-decoration: none;
-}
-.section-tabs .active {
-    background: var(--color-paper);
-    color: var(--color-ink);
 }
 .coverage-link {
     display: block;
@@ -987,16 +916,10 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
 .workspace-v4 .list-footer [data-list-count] {
     font-size: 12px;
 }
-.workspace-v4 [data-team-summary] {
-    padding: 12px 16px;
-}
 @media (max-width: 1250px) {
     .reference-home-grid {
         grid-template-columns: minmax(0, 1fr) 280px;
         gap: 20px;
-    }
-    .reference-trend-grid {
-        grid-template-columns: minmax(0, 1fr);
     }
 }
 @media (max-width: 1000px) {
@@ -1008,9 +931,6 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 20px;
-    }
-    .reference-figures > div {
-        padding: 16px;
     }
     .reference-kpi-definition .kpi-definition-meta {
         grid-template-columns: minmax(0, 1fr) 1fr;
@@ -1038,12 +958,7 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
         min-width: 0;
         max-width: 54%;
     }
-    body[data-app-shell] .reference-score-total [data-total] {
-        font-size: 30px;
-        line-height: 38px;
-    }
     .reference-home-grid > aside,
-    .reference-figures,
     .reference-kpi-definition .kpi-definition-meta {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -1052,15 +967,6 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     }
     .reference-home-grid > aside {
         grid-template-columns: minmax(0, 1fr);
-    }
-    .reference-figures > div:nth-child(2) {
-        border-right: 0;
-    }
-    .reference-figures > div {
-        padding: 14px;
-    }
-    .reference-figures .figure-value {
-        font-size: 26px;
     }
     .reference-return-card {
         flex-wrap: wrap;
@@ -1095,24 +1001,11 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     body[data-app-shell] .reference-heat .numeric {
         text-align: left;
     }
-    .reference-report-toolbar > select {
-        max-width: 100%;
-        flex: 1;
-    }
-    .reference-report-toolbar .filter-toolbar {
-        flex-basis: 100%;
-    }
     .reference-feed {
         padding: 0 12px;
     }
     body[data-app-shell] .reference-kpi-table td {
         padding: 0;
-    }
-    .reference-rank-filter {
-        max-width: 100%;
-    }
-    .reference-chart {
-        padding: 10px 4px;
     }
 }
 
@@ -1186,7 +1079,7 @@ body[data-app-shell] .workspace-v4 .reference-person span.block {
     margin: -6px 0 0;
     padding: 9px 12px;
     border: 1px solid var(--color-line);
-    border-radius: 8px;
+    border-radius: 10px;
     background: var(--color-subtle);
     color: var(--color-muted);
     font-size: 12px;

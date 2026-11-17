@@ -12,12 +12,11 @@ use Illuminate\Support\Facades\DB;
 /**
  * Compact dashboard for one assessment month in the caller's scope.
  * Every figure is aggregated in SQL; the roster of the month counts people without an assessment as "not_started".
+ * Kepala Unit gets no progress or task list: its staff work lives on the Isi nilai and Anggota Unit pages.
  */
 class DashboardSummary
 {
     public const STATUSES = ['not_started', 'submitted', 'returned', 'final'];
-
-    private const TREND_MONTHS = 12;
 
     private const TASK_LIMIT = 6;
 
@@ -30,45 +29,34 @@ class DashboardSummary
     public function build(AccessContext $ctx, ?string $month): array
     {
         $month ??= now('Asia/Jakarta')->format('Y-m');
-        $cycles = DB::table('assessment_cycles')->orderBy('assessment_month')
-            ->get(['id', 'assessment_month', 'status', 'opens_at', 'submission_due_at', 'approval_due_at', 'closes_at']);
-        $cycle = $cycles->firstWhere('assessment_month', $month.'-01') ?? $cycles->last();
+        $columns = ['id', 'assessment_month', 'status', 'opens_at', 'submission_due_at', 'approval_due_at', 'closes_at'];
+        $cycle = DB::table('assessment_cycles')->where('assessment_month', $month.'-01')->first($columns)
+            ?? DB::table('assessment_cycles')->orderByDesc('assessment_month')->first($columns);
         if (! $cycle) {
             return ['month' => $month, 'cycle' => null];
         }
         $kinds = $ctx->role === 'kepala_unit' ? ['member'] : ['member', 'unit_head'];
         $groups = $this->statusGroups($ctx, $cycle, $kinds);
-        $trend = $this->trend($ctx, $cycles, $cycle, $kinds);
-        $current = $trend[array_key_last($trend)];
-        $previous = $trend[array_key_last($trend) - 1];
-        $progress = match ($ctx->role) {
-            'super_hc' => $this->divisionProgress($groups),
-            'kepala_divisi' => $this->unitProgress($groups),
-            default => $this->staffProgress($ctx, $cycle),
-        };
-        $indicators = $this->indicators($ctx, $cycle);
+        $counts = $this->counts($groups);
+        $average = $this->scoped($ctx)->where('cycle_id', $cycle->id)->where('status', 'final')->avg('total_score_raw');
         $summary = [
             'month' => substr($cycle->assessment_month, 0, 7),
             'cycle' => $this->cycle($cycle),
-            'metrics' => $this->counts($groups) + [
-                'average' => $current['average'],
-                'completion' => $current['completion'],
+            'metrics' => $counts + [
+                'average' => $this->decimal($average),
+                'completion' => $counts['total'] ? round($counts['final'] * 100 / $counts['total'], 1) : null,
                 'kinds' => collect($kinds)->mapWithKeys(fn ($kind) => [$kind => $this->counts($groups->where('kind', $kind))])->all(),
-                'previous' => $previous['scheduled'] ? $previous : null,
             ],
-            'trend' => $trend,
             'categories' => $this->categories($ctx, $cycle),
-            'indicators' => $indicators,
-            'progress' => $progress,
-            'performance' => $this->performance($ctx, $cycle, $progress, $indicators),
-            'tasks' => match ($ctx->role) {
-                'super_hc' => $this->divisionTasks($progress['rows']),
-                'kepala_divisi' => $this->divisionHeadTasks($ctx, $cycle, $groups),
-                default => $this->unitTasks($progress['rows']),
-            },
+            'indicators' => $this->indicators($ctx, $cycle),
         ];
         if ($ctx->role === 'super_hc') {
+            $summary['progress'] = $this->divisionProgress($groups);
+            $summary['tasks'] = $this->divisionTasks($summary['progress']['rows']);
             $summary['activities'] = $this->activities();
+        } elseif ($ctx->role === 'kepala_divisi') {
+            $summary['progress'] = $this->unitProgress($groups);
+            $summary['tasks'] = $this->divisionHeadTasks($ctx, $cycle, $groups);
         }
 
         return $summary;
@@ -114,46 +102,6 @@ class DashboardSummary
         return ['total' => array_sum($counts)] + $counts;
     }
 
-    /** Rolling twelve months ending at the selected cycle: Final average and completion against each month's roster. */
-    private function trend(AccessContext $ctx, Collection $cycles, object $cycle, array $kinds): array
-    {
-        $end = CarbonImmutable::parse($cycle->assessment_month);
-        $months = array_map(fn ($i) => $end->subMonths($i)->format('Y-m-d'), range(self::TREND_MONTHS - 1, 0));
-        $window = $cycles->whereIn('assessment_month', $months)->keyBy('assessment_month');
-        $assessed = $this->scoped($ctx)->whereIn('cycle_id', $window->pluck('id'))
-            ->selectRaw("cycle_id, COUNT(*) as assessed, SUM(status = 'final') as final, AVG(CASE WHEN status = 'final' THEN total_score_raw END) as average")
-            ->groupBy('cycle_id')->get()->keyBy('cycle_id');
-        $missing = $this->missingTotals($ctx, $window, $kinds);
-
-        return array_map(function ($month) use ($window, $assessed, $missing) {
-            $cycle = $window->get($month);
-            $row = $cycle ? $assessed->get($cycle->id) : null;
-            $final = (int) ($row->final ?? 0);
-            $total = $cycle ? (int) ($row->assessed ?? 0) + ($missing[$cycle->id] ?? 0) : 0;
-
-            return ['month' => substr($month, 0, 7), 'scheduled' => $cycle !== null, 'average' => $this->decimal($row->average ?? null),
-                'final' => $final, 'total' => $total, 'completion' => $total ? round($final * 100 / $total, 1) : null];
-        }, $months);
-    }
-
-    /** One UNION ALL round trip for the unassessed roster of every cycle in the window. */
-    private function missingTotals(AccessContext $ctx, Collection $window, array $kinds): array
-    {
-        $union = null;
-        foreach ($window as $cycle) {
-            foreach ($kinds as $kind) {
-                $part = $this->missing($ctx, $kind, $cycle)->select([])->selectRaw('? as cycle_id, COUNT(*) as total', [$cycle->id]);
-                $union = $union ? $union->unionAll($part) : $part;
-            }
-        }
-        $totals = [];
-        foreach ($union?->get() ?? [] as $row) {
-            $totals[(int) $row->cycle_id] = ($totals[(int) $row->cycle_id] ?? 0) + (int) $row->total;
-        }
-
-        return $totals;
-    }
-
     private function cycle(object $cycle): array
     {
         $at = fn (string $value) => CarbonImmutable::parse($value, 'UTC')->toIso8601ZuluString();
@@ -186,28 +134,6 @@ class DashboardSummary
         return ['lowest' => $rank('asc'), 'highest' => $rank('desc')];
     }
 
-    /**
-     * Final average per comparison row: divisions (Super HC), units (Kepala Divisi), or the lowest KPIs (Kepala Unit).
-     * Areas come from the progress roster, so an area without any Final keeps a null average and a zero count.
-     */
-    private function performance(AccessContext $ctx, object $cycle, array $progress, array $indicators): array
-    {
-        if ($progress['level'] === 'person') {
-            return ['level' => 'indicator', 'rows' => array_map(fn ($row) => ['id' => $row['name'], 'name' => $row['name'],
-                'average' => $row['average'], 'total' => $row['total']], $indicators['lowest'])];
-        }
-        $column = $progress['level'] === 'division' ? 'division_id' : 'unit_id';
-        $final = $this->scoped($ctx)->where('cycle_id', $cycle->id)->where('status', 'final')
-            ->selectRaw("$column as area_id, AVG(total_score_raw) as average, COUNT(*) as total")
-            ->groupBy($column)->get()->keyBy('area_id');
-        $rows = collect($progress['rows'])->map(fn ($row) => ['id' => $row['id'], 'name' => $row['name'],
-            'average' => $this->decimal($final->get($row['id'])->average ?? null), 'total' => (int) ($final->get($row['id'])->total ?? 0)]);
-
-        return ['level' => $progress['level'], 'rows' => $rows
-            ->sort(fn ($a, $b) => [$a['average'] === null, $a['average'], $a['name']] <=> [$b['average'] === null, $b['average'], $b['name']])
-            ->values()->all()];
-    }
-
     private function divisionProgress(Collection $groups): array
     {
         $divisions = DB::table('divisions')->whereIn('id', $groups->pluck('division_id')->unique())->pluck('name', 'id');
@@ -237,32 +163,9 @@ class DashboardSummary
         return $rows->sort(fn ($a, $b) => [$a['final'] / max(1, $a['total']), $a['name']] <=> [$b['final'] / max(1, $b['total']), $b['name']])->values()->all();
     }
 
-    private function staffProgress(AccessContext $ctx, object $cycle): array
-    {
-        $assessed = $this->scoped($ctx)->where('cycle_id', $cycle->id)
-            ->get(['employee_id', 'employee_name_snapshot as name', 'position_name_snapshot as position', 'status', 'total_score_raw as score', 'category_label_snapshot as category'])
-            ->map(fn ($row) => ['person' => 'EMP-'.$row->employee_id, 'name' => $row->name, 'position' => $row->position, 'status' => $row->status,
-                'score' => $row->status === 'final' ? $this->decimal($row->score) : null, 'category' => $row->status === 'final' ? $row->category : null]);
-        $missing = $this->missing($ctx, 'member', $cycle)->select('e.id', 'e.full_name as name', 'j.name as position')->get()
-            ->map(fn ($row) => ['person' => 'EMP-'.$row->id, 'name' => $row->name, 'position' => $row->position, 'status' => 'not_started', 'score' => null, 'category' => null]);
-        $order = array_flip(['returned', 'not_started', 'submitted', 'final']);
-
-        return ['level' => 'person', 'rows' => $assessed->concat($missing)
-            ->sort(fn ($a, $b) => [$order[$a['status']], $a['name']] <=> [$order[$b['status']], $b['name']])->values()->all()];
-    }
-
     private function task(string $title, string $detail, ?string $status, string $page, array $params, string $action, ?string $at = null): array
     {
         return compact('title', 'detail', 'status', 'page', 'params', 'action', 'at');
-    }
-
-    /** Unit head: returned work first, then staff not yet scored. */
-    private function unitTasks(array $staff): array
-    {
-        $open = array_values(array_filter($staff, fn ($row) => in_array($row['status'], ['returned', 'not_started'], true)));
-
-        return ['total' => count($open), 'rows' => array_map(fn ($row) => $this->task($row['name'], $row['position'], $row['status'], 'nilai', ['person' => $row['person']],
-            $row['status'] === 'returned' ? 'Perbaiki' : 'Isi nilai'), array_slice($open, 0, self::TASK_LIMIT))];
     }
 
     /** Division head: unit heads awaiting a direct score, then the oldest staff submissions. */

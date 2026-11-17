@@ -87,6 +87,10 @@ export function initStructure(c, s) {
         primary.textContent = `Tambah ${config.noun}`;
         $('[data-quick-unit]').hidden = kind !== 'division';
         $('[data-staff-bulk]').hidden = kind !== 'staff';
+        $$('[data-org-count]', root).forEach((count) => {
+            count.textContent = s.data[KINDS[count.dataset.orgCount].set].filter((r) => r.active).length;
+            count.title = 'Jumlah data aktif';
+        });
         body.closest('table').querySelector('thead tr').replaceChildren(
             ...config.headers.map((label, i, all) => node('th', label, i === all.length - 1 ? 'numeric' : '')),
         );
@@ -117,24 +121,30 @@ export function initStructure(c, s) {
                 identity.append(who);
             } else identity.append(name);
             tr.append(identity);
+            const head = (id) => {
+                const name = s.account(id)?.name;
+                return node('td', name || 'Belum ditetapkan', name ? '' : r.active ? 'text-warning' : 'text-muted');
+            };
             const cells = {
                 division: () => {
                     const units = s.data.units.filter((u) => u.divisionId === r.id && u.active);
                     const staff = staffPerDivision.get(r.id) || 0;
-                    return [s.account(r.headId)?.name || 'Belum ditetapkan', `${units.length} unit · ${staff} staf aktif`];
+                    return [head(r.headId), node('td', `${units.length} unit · ${staff} staf aktif`, 'text-muted')];
                 },
-                unit: () => [s.account(r.headId)?.name || 'Belum ditetapkan', s.division(r.divisionId)?.name || '-'],
-                position: () => [`${s.data.staff.filter((p) => p.active && p.positionId === r.id).length} staf`],
+                unit: () => [head(r.headId), s.division(r.divisionId)?.name || '-'],
+                position: () => [node('td', `${s.data.staff.filter((p) => p.active && p.positionId === r.id).length} staf`, 'num')],
                 staff: () => {
                     const unit = s.unit(placementNow(s, r)?.unitId),
+                        kpi = unit && unitKpi(unit.id),
+                        assessor = s.account(unit?.headId)?.name,
                         next = scheduledPlacement(r),
                         where = node('td', unit?.name || 'Tanpa penempatan');
                     if (next) where.append(node('small', `→ ${s.unit(next.unitId)?.name || '-'} mulai ${monthLabel(next.from)}`, 'block text-xs text-muted'));
                     return [
                         position(r.positionId)?.name || '-',
                         where,
-                        node('td', unit ? unitKpi(unit.id)?.name || 'Belum disusun' : '-', 'text-xs'),
-                        node('td', s.account(unit?.headId)?.name || 'Belum ditetapkan', 'text-xs'),
+                        node('td', unit ? kpi?.name || 'Belum disusun' : '-', unit && !kpi ? 'text-xs text-warning' : 'text-xs'),
+                        node('td', assessor || 'Belum ditetapkan', assessor ? 'text-xs' : 'text-xs text-warning'),
                     ];
                 },
             }[kind]();
@@ -293,12 +303,15 @@ export function initStructure(c, s) {
     async function loadHistory(type, r) {
         const host = $('[data-org-history]');
         host.replaceChildren();
-        if (type === 'position') return;
         detailController?.abort();
-        detailController = new AbortController();
+        detailController = null;
+        if (type === 'position') return;
+        const controller = (detailController = new AbortController());
         host.append(node('p', 'Memuat riwayat…', 'text-sm text-muted'));
         try {
-            const { data } = await s.api.request(`/organization/${RESOURCES[type]}/${r.dbId || r.id}`, 'GET', null, { signal: detailController.signal });
+            const { data } = await s.api.request(`/organization/${RESOURCES[type]}/${r.dbId || r.id}`, 'GET', null, { signal: controller.signal });
+            // A newer detail (or closing the dialog) aborted this one; its late response must not overwrite the host.
+            if (controller.signal.aborted) return;
             const now = currentMonth();
             host.replaceChildren(
                 ...(type === 'staff'
@@ -325,8 +338,59 @@ export function initStructure(c, s) {
                       ]),
             );
         } catch (e) {
-            if (e.name !== 'AbortError') host.replaceChildren(node('p', e.message, 'notice notice-error'));
+            if (!controller.signal.aborted && e.name !== 'AbortError') host.replaceChildren(node('p', e.message, 'notice notice-error'));
         }
+    }
+
+    /** Units under a division (Divisi → Unit) from the loaded master list; inactive units stay listed with their status. */
+    function divisionUnits(division) {
+        const section = $('[data-org-division-units]'),
+            list = $('[data-org-division-units-list]', section);
+        list.replaceChildren();
+        section.hidden = !division;
+        if (!division) return;
+        const units = s.data.units
+            .filter((u) => u.divisionId === division.id)
+            .sort((a, b) => Number(b.active) - Number(a.active) || a.name.localeCompare(b.name, 'id'));
+        const ids = new Set(units.map((u) => u.id)),
+            staff = new Map();
+        // Current month only: active staff whose placement is in force now; future-only placements do not count.
+        const month = currentMonth();
+        for (const p of s.data.staff) {
+            const unitId = p.active ? s.placement(p, month)?.unitId : null;
+            if (ids.has(unitId)) staff.set(unitId, (staff.get(unitId) || 0) + 1);
+        }
+        const active = units.filter((u) => u.active).length;
+        text(section, '[data-org-division-units-meta]', units.length ? `${active} aktif · ${units.length - active} nonaktif` : '');
+        text(
+            section,
+            '[data-org-division-units-note]',
+            units.length
+                ? `Staf aktif dihitung dari penempatan ${monthLabel(currentMonth())}. Pilih Rincian untuk melihat kepala dan riwayat unit.`
+                : 'Belum ada unit di divisi ini. Gunakan Tambah unit untuk membuat unit di bawah divisi ini.',
+        );
+        list.hidden = !units.length;
+        list.append(
+            ...units.map((u) => {
+                const item = node('li', null, 'org-unit-item'),
+                    copy = node('div', null, 'org-unit-copy'),
+                    title = node('div', null, 'org-unit-title'),
+                    meta = node('p', null, 'org-unit-meta'),
+                    head = s.account(u.headId)?.name,
+                    view = node('button', 'Rincian', 'btn btn-small');
+                title.append(node('strong', u.name), badge(u.active));
+                meta.append(
+                    node('span', `Kepala Unit: ${head || 'Belum ditetapkan'}`, head || !u.active ? '' : 'text-warning'),
+                    node('span', `${staff.get(u.id) || 0} staf aktif`),
+                );
+                view.type = 'button';
+                view.dataset.divisionUnit = u.id;
+                view.setAttribute('aria-label', `Lihat rincian unit ${u.name}`);
+                copy.append(title, meta);
+                item.append(copy, view);
+                return item;
+            }),
+        );
     }
 
     function details(type, r) {
@@ -339,7 +403,9 @@ export function initStructure(c, s) {
         if (type === 'division') rows.push(['Kepala Divisi', s.account(r.headId)?.name || 'Belum ditetapkan'], ['Unit aktif', String(s.data.units.filter((u) => u.divisionId === r.id && u.active).length)]);
         if (type === 'position') rows.push(['Staf aktif', String(s.data.staff.filter((p) => p.active && p.positionId === r.id).length)]);
         $('[data-org-detail]').replaceChildren(...pairs(rows).children);
+        divisionUnits(type === 'division' ? r : null);
         text(document, '#org-detail-dialog-title', `Rincian ${KINDS[type].title}`);
+        $('#org-detail-dialog .dialog-body').scrollTop = 0;
         const actions = $('[data-org-detail-actions]'),
             button = (label, fn, cls = 'btn') => {
                 const b = node('button', label, cls);
@@ -350,7 +416,7 @@ export function initStructure(c, s) {
                 };
                 return b;
             };
-        actions.replaceChildren(button('Hapus', () => destroy(type, r)), button('Ubah data', () => edit(type, r.id)));
+        actions.replaceChildren(button('Hapus', () => destroy(type, r), 'btn btn-danger org-detail-delete'), button('Ubah data', () => edit(type, r.id)));
         if (r.active && (type === 'division' || type === 'unit')) actions.append(button('Ubah kepala…', () => heads.open(KINDS[type].set, r.id), 'btn btn-primary'));
         if (r.active && type === 'staff') actions.append(button('Mutasi…', () => transfers.open([r.id]), 'btn btn-primary'));
         loadHistory(type, r);
@@ -406,6 +472,15 @@ export function initStructure(c, s) {
         if (form.reportValidity()) save();
     });
     $('#org-detail-dialog').addEventListener('close', () => detailController?.abort());
+    // Opens the unit in place: the dialog stays open, so its async 'close' abort cannot cancel the new history request.
+    $('[data-org-division-units]').addEventListener('click', (event) => {
+        const unit = record('unit', event.target.closest('[data-division-unit]')?.dataset.divisionUnit);
+        if (!unit) return;
+        details('unit', unit);
+        const title = $('#org-detail-dialog-title');
+        title.tabIndex = -1;
+        title.focus();
+    });
     $('[data-org-search]').addEventListener('input', render);
     $('[data-org-active]').addEventListener('change', render);
     document.addEventListener('flow-updated', render);

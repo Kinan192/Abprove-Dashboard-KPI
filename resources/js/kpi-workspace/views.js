@@ -5,10 +5,12 @@ import {
     calculate,
     totals,
     totalWeight,
+    isComplete,
     kpiErrors,
     monthLabel,
     openBlock,
     filterPeople,
+    pillarSuggestions,
 } from './model.js';
 import {
     esc,
@@ -37,15 +39,15 @@ const STEPS = [
     ['monitor', '5', 'Monitoring', 'Pantau hasil'],
 ];
 const STEP_OF = { 'period-edit': 'periods', pattern: 'patterns', assessment: 'monitor' };
-/** Heading eyebrow: "Langkah n dari 5", optionally with the period month. */
-const step = (key, month = '') =>
-    `Langkah ${STEPS.find(([k]) => k === key)[1]} dari ${STEPS.length}${month ? ` · ${monthLabel(month)}` : ''}`;
 const nav = (ctx, screen, label, id = '', className = 'link') =>
     `<a href="${esc(ctx.url(screen, id))}" data-skp-nav="${screen}" data-id="${esc(id)}" class="${className}">${label}</a>`;
+/** Link to a screen of another period (month); `label` is plain text. */
+const cycleNav = (ctx, screen, label, cycle, className = 'link') =>
+    `<a href="${esc(ctx.url(screen, '', cycle))}" data-skp-nav="${screen}" data-cycle="${esc(cycle)}" class="${className}">${esc(label)}</a>`;
 const statusTag = (status) =>
     tag(
         STATUSES[status],
-        status === 'final' ? 'success' : status === 'returned' ? 'warning' : 'info',
+        status === 'final' ? 'success' : status === 'returned' ? 'warning' : status === 'submitted' ? 'info' : '',
     );
 const personCell = (p) =>
     `<strong>${esc(p.name)}</strong><small>${esc(p.nip)}${p.type === 'unit_head' ? ' · Kepala Unit' : ''}</small>`;
@@ -64,16 +66,22 @@ const totalTag = (pattern) =>
     );
 const closed = (ctx) => ctx.index.period?.status === 'closed';
 
+/** Compact segmented stage navigation; small counters only where real data exists. */
 export function stepNav(ctx, screen) {
     const active = STEP_OF[screen] || screen,
         r = ctx.index.readiness.staff,
         period = ctx.index.period;
-    const badges = {
-        periods: period ? PERIOD_STATUSES[period.status] : 'Belum dibuat',
-        patterns: `${ctx.index.patterns.size} pola`,
-        matrix: `${r.complete}/${r.eligible} staf`,
+    const counters = {
+        periods: period
+            ? [PERIOD_STATUSES[period.status], period.status === 'open' ? 'success' : period.status === 'planned' ? 'info' : '', 'Status periode']
+            : ['Belum dibuat', 'warning', 'Status periode'],
+        patterns: [String(ctx.index.patterns.size), '', 'Jumlah pola'],
+        matrix: [`${r.complete}/${r.eligible}`, r.eligible > 0 && r.complete === r.eligible ? 'success' : 'warning', 'Staf dengan pola 100%'],
     };
-    return `<nav class="skp-steps" aria-label="Tahapan KPI & Periode"><ol>${STEPS.map(([key, number, label, hint]) => `<li><a href="${esc(ctx.url(key))}" data-skp-nav="${key}" class="${key === active ? 'active' : ''}" ${key === active ? 'aria-current="page"' : ''}><span class="skp-step-no" aria-hidden="true">${number}</span><span class="skp-step-copy"><b>${label}</b><small>${esc(badges[key] || hint)}</small></span></a></li>`).join('')}</ol></nav>`;
+    return `<nav class="skp-steps" aria-label="Tahapan KPI & Periode"><ol>${STEPS.map(([key, number, label, hint]) => {
+        const counter = counters[key];
+        return `<li><a href="${esc(ctx.url(key))}" data-skp-nav="${key}" title="${esc(hint)}" class="${key === active ? 'active' : ''}" ${key === active ? 'aria-current="page"' : ''}><span class="skp-step-no" aria-hidden="true">${number}</span><span class="skp-step-label">${label}</span>${counter ? `<span class="skp-step-count ${counter[1]}"><span class="sr-only">${esc(counter[2])}: </span>${esc(counter[0])}</span>` : ''}</a></li>`;
+    }).join('')}</ol></nav>`;
 }
 export function periodPicker(ctx) {
     return `<div class="fx-period-picker"><label for="fx-page-period">Periode</label><select id="fx-page-period" class="field" data-skp-period-choice>${ctx.index.period ? '' : `<option value="" selected>${esc(monthLabel(ctx.index.month))} · belum dibuat</option>`}${ctx.data.periods
@@ -103,7 +111,7 @@ function noPeriod(ctx) {
 
 /* 1 · Periode */
 export function periods(ctx) {
-    return `${heading('Periode penilaian', 'Atur jadwal bulanan. Periode dibuka setelah seluruh staf eligible memiliki pola KPI 100%.', button('period-new', '+ Buat periode', '', 'btn btn-primary'), step('periods'))}${ctx.message ? note(ctx.message, 'success') : ''}<section class="card skp-table-card fx-period-list"><div class="skp-card-head"><div><h2>Daftar periode</h2><p>${ctx.data.periods.length} periode · terbaru di atas</p></div></div>${table('periods', ['Periode', 'Jadwal (WIB)', 'Kesiapan pola KPI', 'Status', 'Tindakan'], 'skp-periods')}</section>`;
+    return `${heading('Periode penilaian', 'Periode baru disimpan sebagai Direncanakan. Setelah seluruh staf eligible memakai pola KPI 100% (Pola KPI → Terapkan ke staf → Cek bobot), pilih Buka periode.', button('period-new', '+ Buat periode', '', 'btn btn-primary'))}${ctx.message ? note(ctx.message, 'success') : ''}<section class="card skp-table-card fx-period-list"><div class="skp-card-head"><div><h2>Daftar periode</h2><p>${ctx.data.periods.length} periode · terbaru di atas</p></div></div>${table('periods', ['Periode', 'Jadwal (WIB)', 'Kesiapan pola KPI', 'Status', 'Tindakan'], 'skp-periods')}</section>`;
 }
 function readinessCell(p) {
     if (p.status === 'closed') return '—';
@@ -115,16 +123,22 @@ function readinessCell(p) {
     return `${tag(`${r.complete}/${r.eligible} staf lengkap`, ok ? 'success' : 'warning')}${ok ? '' : `<small>${r.eligible - r.complete} staf belum punya pola 100%</small>`}`;
 }
 export function periodEdit(ctx) {
-    const old = ctx.data.periods.find((p) => p.id === ctx.periodEditing);
-    return `${heading(old ? 'Detail periode' : 'Buat periode', 'Atur jadwal, status dan kategori nilai dalam satu form.', button('nav', 'Kembali ke daftar', 'periods'), step('periods'))}${periodEditor(ctx.period, old)}`;
+    const old = ctx.data.periods.find((p) => p.id === ctx.periodEditing),
+        own = old ? ctx.data.patterns.filter((p) => p.periodId === old.id) : [];
+    const setup = old && {
+        patterns: own.length,
+        complete: own.filter((p) => isComplete(p.items)).length,
+        link: (screen, label) => cycleNav(ctx, screen, label, old.id, 'btn btn-small'),
+    };
+    return `${heading(old ? 'Detail periode' : 'Buat periode', old ? 'Atur jadwal, status dan kategori nilai dalam satu form.' : 'Periode baru disimpan sebagai Direncanakan, lalu disiapkan sebelum dibuka.', button('nav', 'Kembali ke daftar', 'periods'))}${periodEditor(ctx.period, old, setup)}`;
 }
 
 /* 2 · Pola KPI */
 export function patterns(ctx) {
     const period = ctx.index.period;
-    if (!period) return heading('Pola KPI', '', '', step('patterns')) + noPeriod(ctx);
+    if (!period) return heading('Pola KPI', '', '') + noPeriod(ctx);
     const readOnly = closed(ctx);
-    return `${heading('Pola KPI', 'Satu pola berisi daftar KPI dan bobot (wajib tepat 100%). Satu orang memakai satu pola per periode.', readOnly ? '' : button('pattern-new', '+ Buat pola', '', 'btn btn-primary'), step('patterns', period.id))}${readinessBar(ctx)}${ctx.message ? note(ctx.message, 'success') : ''}${readOnly ? note('Periode ditutup. Pola dan penugasan hanya dapat dibaca.') : `${legacyPanel(ctx)}${copyPanel(ctx)}`}<section class="card skp-table-card fx-kpi-list"><div class="skp-card-head"><div><h2>Daftar pola ${esc(monthLabel(period.id))}</h2><p>${ctx.index.patterns.size} pola · hanya pola dengan total bobot 100% yang dapat diterapkan</p></div></div>${table('patterns', ['Pola & jalur', 'KPI', 'Total bobot', 'Diterapkan ke', 'Tindakan'], 'skp-patterns')}</section>`;
+    return `${heading('Pola KPI', 'Satu pola berisi daftar KPI dan bobot (wajib tepat 100%). Satu orang memakai satu pola per periode.', readOnly ? '' : button('pattern-new', '+ Buat pola', '', 'btn btn-primary'))}${readinessBar(ctx)}${ctx.message ? note(ctx.message, 'success') : ''}${readOnly ? note('Periode ditutup. Pola dan penugasan hanya dapat dibaca.') : `${legacyPanel(ctx)}${copyPanel(ctx)}`}<section class="card skp-table-card fx-kpi-list"><div class="skp-card-head"><div><h2>Daftar pola ${esc(monthLabel(period.id))}</h2><p>${ctx.index.patterns.size} pola · hanya pola dengan total bobot 100% yang dapat diterapkan</p></div></div>${table('patterns', ['Pola & jalur', 'KPI', 'Total bobot', 'Diterapkan ke', 'Tindakan'], 'skp-patterns')}</section>`;
 }
 function legacyPanel(ctx) {
     const templates = ctx.data.legacyTemplates || [];
@@ -155,7 +169,18 @@ export function patternEdit(ctx) {
             return `<tr class="${ctx.kpiIndex === i ? 'editing' : ''}"><td data-label="No" class="num text-muted">${i + 1}</td><td data-label="KPI & formula"><strong>${esc(k.name)}</strong><small class="fx-formula-summary" title="${esc(humanFormula(k))}">${esc(humanFormula(k))}</small>${invalid ? tag('Perlu dilengkapi', 'warning') : ''}</td><td data-label="Pilar">${esc(k.pillar)}</td><td data-label="Target">${num(k.target, 4)} ${esc(k.unit)}<small>${k.direction === 'lower' ? 'Semakin rendah semakin baik' : 'Semakin tinggi semakin baik'}</small></td><td data-label="Bobot (%)"><input class="field skp-weight-input" type="number" min="0.0001" max="100" step="0.0001" inputmode="decimal" value="${esc(k.weight)}" data-skp-item-weight="${i}" aria-label="Bobot ${esc(k.name)}" ${readOnly ? 'disabled' : ''}></td><td data-label="Tindakan">${readOnly ? '' : `<div class="skp-row-actions">${button('kpi-edit', 'Ubah', i, 'link')}${button('kpi-remove', 'Hapus', i, 'link skp-link-danger')}</div>`}</td></tr>`;
         })
         .join('');
-    return `${heading(p.id ? `Pola: ${saved?.name || p.name}` : 'Buat pola KPI', `${monthLabel(p.periodId)} · ${count ? `diterapkan ke ${count} orang` : 'belum diterapkan'}`, button('nav', 'Kembali ke daftar pola', 'patterns'), step('patterns'))}${count && !readOnly ? note(`Pola ini dipakai ${count} orang. Perubahan berlaku untuk mereka semua, kecuali yang sudah dinilai (snapshot tetap).`, 'warning') : ''}<section class="card skp-form-card skp-pattern-card"><form id="skp-pattern-form" novalidate autocomplete="off"><section class="fx-form-section">${sectionHeading(1, 'Identitas pola', 'Nama pola dan jalur penilaian penerimanya.')}<div class="gp-form-grid">${field('patternName', 'Nama pola', p.name, { required: true, maxlength: 120, disabled: readOnly, help: 'Contoh: Bidan, Perawat Rawat Inap, Staf IT.' })}${field('targetRole', 'Jalur penerima', p.targetRole, { options: Object.entries(ROLES).map(([k, v]) => [k, k === 'staff' ? 'Staf (dinilai Kepala Unit, ACC Kepala Divisi)' : 'Kepala Unit (dinilai Kepala Divisi)']), placeholder: false, disabled: readOnly || count > 0, help: count ? 'Lepas penugasan pola terlebih dahulu untuk mengganti jalur.' : '' })}</div></section><section class="fx-form-section"><div class="skp-items-heading">${sectionHeading(2, 'Daftar KPI dalam pola', 'Atur bobot langsung di tabel; total wajib tepat 100%.')}${readOnly ? '' : button('kpi-new', '+ Tambah KPI', '', 'btn')}</div><div class="table-wrap"><table class="data-table gp-table skp-items"><thead><tr><th>No</th><th>KPI & formula</th><th>Pilar</th><th>Target</th><th>Bobot (%)</th><th>Tindakan</th></tr></thead><tbody>${items || `<tr><td colspan="6" class="empty">Belum ada KPI. Pilih + Tambah KPI.</td></tr>`}</tbody></table></div><p class="gp-field-error" data-gp-error="items" hidden></p><p class="gp-note error skp-form-error" data-form-error role="alert" hidden></p></section></form></section>${ctx.kpi ? editor(ctx.kpi, ctx.testValues, othersWeight(ctx), ctx.kpiIndex >= 0) : ''}<div class="skp-savebar"><div data-skp-pattern-total>${patternTotal(p.items)}</div>${readOnly ? '' : `<div class="gp-actions">${button('nav', 'Batal', 'patterns')}<button type="submit" class="btn btn-primary" form="skp-pattern-form">Simpan pola</button></div>`}</div>`;
+    const role = saved?.targetRole || p.targetRole,
+        other = role === 'staff' ? 'Kepala Unit' : 'Staf',
+        roleHelp = readOnly
+            ? 'Periode ditutup: jalur penerima dan isi pola hanya dapat dibaca.'
+            : count
+              ? `Terkunci karena pola ini sudah diterapkan ke ${count} ${ROLES[role].toLowerCase()}. Mengganti jalur di sini akan memindahkan penerima tersebut ke alur penilaian ${other}, sehingga tidak diizinkan.`
+              : 'Dapat dipilih selama pola belum diterapkan ke siapa pun. Staf dinilai Kepala Unit lalu di-ACC Kepala Divisi; Kepala Unit dinilai Kepala Divisi.';
+    const roleLock =
+        count && !readOnly
+            ? `<div class="skp-role-lock" role="note"><p><strong>Perlu jalur ${esc(other)}?</strong> Buat pola baru, atau duplikat pola ini (salinan versi tersimpan, belum diterapkan) lalu pilih jalurnya. ${count} penerima saat ini tetap memakai pola ini. Untuk memindahkan seseorang, terapkan pola lain kepadanya atau lepas polanya di Terapkan ke staf.</p><div class="gp-actions">${button('pattern-duplicate', 'Duplikat untuk jalur lain', p.id, 'btn btn-small')}${button('pattern-new', '+ Buat pola baru', '', 'btn btn-small')}${saved.complete ? button('pattern-apply', `Kelola ${count} penerima`, p.id, 'btn btn-small') : ''}</div></div>`
+            : '';
+    return `${heading(p.id ? `Pola: ${saved?.name || p.name}` : 'Buat pola KPI', `${monthLabel(p.periodId)} · ${count ? `diterapkan ke ${count} orang` : 'belum diterapkan'}`, button('nav', 'Kembali ke daftar pola', 'patterns'))}${count && !readOnly ? note(`Pola ini dipakai ${count} orang. Perubahan berlaku untuk mereka semua, kecuali yang sudah dinilai (snapshot tetap).`, 'warning') : ''}<section class="card skp-form-card skp-pattern-card"><form id="skp-pattern-form" novalidate autocomplete="off"><section class="fx-form-section">${sectionHeading(1, 'Identitas pola', 'Nama pola dan jalur penilaian penerimanya.')}<div class="gp-form-grid">${field('patternName', 'Nama pola', p.name, { required: true, maxlength: 120, disabled: readOnly, help: 'Contoh: Bidan, Perawat Rawat Inap, Staf IT.' })}${field('targetRole', readOnly || count ? 'Jalur penerima (terkunci)' : 'Jalur penerima', p.targetRole, { options: Object.keys(ROLES).map((k) => [k, k === 'staff' ? 'Staf (dinilai Kepala Unit, ACC Kepala Divisi)' : 'Kepala Unit (dinilai Kepala Divisi)']), placeholder: false, disabled: readOnly || count > 0, help: roleHelp })}</div>${roleLock}</section><section class="fx-form-section"><div class="skp-items-heading">${sectionHeading(2, 'Daftar KPI dalam pola', 'Atur bobot langsung di tabel; total wajib tepat 100%.')}${readOnly ? '' : button('kpi-new', '+ Tambah KPI', '', 'btn')}</div><div class="table-wrap"><table class="data-table gp-table skp-items"><thead><tr><th>No</th><th>KPI & formula</th><th>Pilar</th><th>Target</th><th>Bobot (%)</th><th>Tindakan</th></tr></thead><tbody>${items || `<tr><td colspan="6" class="empty">Belum ada KPI. Pilih + Tambah KPI.</td></tr>`}</tbody></table></div><p class="gp-field-error" data-gp-error="items" hidden></p><p class="gp-note error skp-form-error" data-form-error role="alert" hidden></p></section></form></section>${ctx.kpi ? editor(ctx.kpi, ctx.testValues, othersWeight(ctx), ctx.kpiIndex >= 0, pillarSuggestions(ctx.data, p.items, ctx.kpi.pillar)) : ''}<div class="skp-savebar"><div data-skp-pattern-total>${patternTotal(p.items)}</div>${readOnly ? '' : `<div class="gp-actions">${button('nav', 'Batal', 'patterns')}<button type="submit" class="btn btn-primary" form="skp-pattern-form">Simpan pola</button></div>`}</div>`;
 }
 export function othersWeight(ctx) {
     return totalWeight(ctx.pattern.items.filter((_, i) => i !== ctx.kpiIndex));
@@ -178,8 +203,8 @@ export function applyRows(ctx) {
 }
 export function apply(ctx) {
     const period = ctx.index.period;
-    if (!period) return heading('Terapkan pola', '', '', step('apply')) + noPeriod(ctx);
-    const head = heading('Terapkan pola ke staf', 'Pilih pola, saring staf (Divisi → Unit → Jabatan), centang, lalu terapkan.', '', step('apply', period.id));
+    if (!period) return heading('Terapkan pola', '', '') + noPeriod(ctx);
+    const head = heading('Terapkan pola ke staf', 'Pilih pola, saring staf (Divisi → Unit → Jabatan), centang, lalu terapkan.', '');
     if (closed(ctx)) return head + note('Periode ditutup. Penugasan pola hanya dapat dibaca di Cek bobot.');
     if (!ctx.index.patterns.size)
         return `${head}${empty('Belum ada pola KPI pada periode ini', 'Buat pola atau salin dari periode sebelumnya terlebih dahulu.', nav(ctx, 'patterns', 'Ke langkah 2 · Pola KPI', '', 'btn btn-primary'))}`;
@@ -210,17 +235,17 @@ function applySummary(ctx) {
     }
     const replaced = [...replacing.values()].reduce((n, v) => n + v, 0),
         holders = selected.filter((p) => ctx.index.assigned.has(p.id)).length;
-    return `<div class="skp-selection"><p><b>${rows.length}</b> orang sesuai filter · <b>${selected.length}</b> dipilih${chosen && replaced ? ` · <b>${replaced}</b> akan diganti polanya` : ''}</p><div class="gp-actions">${button('select-filtered', `Pilih semua hasil filter (${rows.length})`, '', 'btn btn-small', !rows.length)}${button('release', `Lepas pola (${holders})`, '', 'btn btn-small', !holders)}${button('apply', chosen ? `Terapkan ke ${selected.length} orang` : 'Pilih pola terlebih dahulu', '', 'btn btn-primary', !chosen || !selected.length)}</div></div>`;
+    return `<div class="skp-selection"><p><b>${rows.length}</b> orang sesuai filter · <b>${selected.length}</b> dipilih${chosen && replaced ? ` · <b>${replaced}</b> akan diganti polanya` : ''}</p><div class="gp-actions">${button('select-filtered', `Pilih semua hasil filter (${rows.length})`, '', 'btn btn-small', !rows.length)}${button('release', `Lepas pola (${holders})`, '', 'btn btn-small btn-danger', !holders)}${button('apply', chosen ? `Terapkan ke ${selected.length} orang` : 'Pilih pola terlebih dahulu', '', 'btn btn-small btn-primary', !chosen || !selected.length)}</div></div>`;
 }
 
 /* 4 · Cek bobot */
 const matrixRows = (ctx) => filterPeople(ctx.index, ctx.filter);
 export function matrix(ctx) {
     const period = ctx.index.period;
-    if (!period) return heading('Cek bobot', '', '', step('matrix')) + noPeriod(ctx);
+    if (!period) return heading('Cek bobot', '', '') + noPeriod(ctx);
     const { staff, unit_head: heads } = ctx.index.readiness;
     const used = [...ctx.index.patterns.values()].filter((p) => p.count).length;
-    return `${heading('Cek bobot per orang', 'Seluruh staf dan Kepala Unit eligible, termasuk yang belum memiliki pola (0%).', '', step('matrix', period.id))}<div class="gp-summary"><div><span>Staf lengkap 100%</span><strong>${staff.complete}/${staff.eligible}</strong></div><div><span>Staf belum punya pola</span><strong>${staff.eligible - staff.complete}</strong></div><div><span>Kepala Unit lengkap</span><strong>${heads.complete}/${heads.eligible}</strong></div><div><span>Pola dipakai</span><strong>${used}/${ctx.index.patterns.size}</strong></div></div><section class="card skp-table-card fx-kpi-list"><div class="table-tools">${filters(ctx, 'skp-matrix-filter', true, true)}<input class="field gp-search" type="search" data-skp-search aria-label="Cari nama atau NIP" placeholder="Cari nama atau NIP" value="${esc(ctx.filter.search)}"></div><div data-skp-summary="matrix">${matrixSummary(ctx)}</div>${table('matrix', ['Nama', 'Unit', 'Jabatan', 'Pola', 'Total bobot', 'Status'], 'skp-matrix')}</section>`;
+    return `${heading('Cek bobot per orang', 'Seluruh staf dan Kepala Unit eligible, termasuk yang belum memiliki pola (0%).', '')}<div class="gp-summary"><div class="tone-teal"><span>Staf lengkap 100%</span><strong>${staff.complete}/${staff.eligible}</strong></div><div class="${staff.eligible - staff.complete ? 'tone-amber' : 'tone-neutral'}"><span>Staf belum punya pola</span><strong>${staff.eligible - staff.complete}</strong></div><div class="tone-blue"><span>Kepala Unit lengkap</span><strong>${heads.complete}/${heads.eligible}</strong></div><div class="tone-neutral"><span>Pola dipakai</span><strong>${used}/${ctx.index.patterns.size}</strong></div></div><section class="card skp-table-card fx-kpi-list"><div class="table-tools">${filters(ctx, 'skp-matrix-filter', true, true)}<input class="field gp-search" type="search" data-skp-search aria-label="Cari nama atau NIP" placeholder="Cari nama atau NIP" value="${esc(ctx.filter.search)}"></div><div data-skp-summary="matrix">${matrixSummary(ctx)}</div>${table('matrix', ['Nama', 'Unit', 'Jabatan', 'Pola', 'Total bobot', 'Status'], 'skp-matrix')}</section>`;
 }
 function matrixSummary(ctx) {
     const rows = matrixRows(ctx),
@@ -272,15 +297,14 @@ export function monitor(ctx) {
         `<label>Unit<select class="field" data-skp-monitor-filter="unit"><option value="">Semua unit</option>${ctx.data.units.map((u) => `<option value="${esc(u.id)}" ${u.id === f.unit ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}</select></label><label>Jalur penilaian<select class="field" data-skp-monitor-filter="kind"><option value="">Staf & Kepala Unit</option>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${f.kind === k ? 'selected' : ''}>${v}</option>`).join('')}</select></label><label>Status<select class="field" data-skp-monitor-filter="status"><option value="">Semua status</option>${Object.entries(STATUSES).map(([k, v]) => `<option value="${k}" ${f.status === k ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>`,
         'Filter monitoring KPI',
     );
-    return `${heading('Monitoring KPI', 'Progres dan hasil penilaian. Super HC hanya memantau.', '', step('monitor', ctx.index.month))}<div data-skp-summary="monitor">${monitorSummary(ctx)}</div><section class="card skp-table-card"><div class="table-tools">${filter}<input class="field gp-search" type="search" aria-label="Cari monitoring KPI" data-skp-monitor-search placeholder="Cari nama atau NIP" value="${esc(f.search)}"></div>${table('monitor', ['Nama / jalur', 'Unit', 'Status', 'Total hasil', 'Tindakan'], 'skp-monitor')}</section>`;
+    return `${heading('Monitoring KPI', 'Progres dan hasil penilaian. Super HC hanya memantau.', '')}<div data-skp-summary="monitor">${monitorSummary(ctx)}</div><section class="card skp-table-card"><div class="table-tools">${filter}<input class="field gp-search" type="search" aria-label="Cari monitoring KPI" data-skp-monitor-search placeholder="Cari nama atau NIP" value="${esc(f.search)}"></div>${table('monitor', ['Nama / jalur', 'Unit', 'Status', 'Total hasil', 'Tindakan'], 'skp-monitor')}</section>`;
 }
+const STATUS_TONES = { not_started: 'tone-neutral', draft: 'tone-neutral', submitted: 'tone-blue', returned: 'tone-amber', final: 'tone-teal' };
 function monitorSummary(ctx) {
-    const rows = monitorRows(ctx);
-    return `<div class="skp-chartless">${Object.entries(STATUSES)
-        .map(
-            ([id, label]) =>
-                `<div><span>${label}</span><strong>${rows.filter((a) => a.status === id).length}</strong></div>`,
-        )
+    const counts = new Map();
+    for (const a of monitorRows(ctx)) counts.set(a.status, (counts.get(a.status) || 0) + 1);
+    return `<div class="gp-summary skp-status-summary">${Object.entries(STATUSES)
+        .map(([id, label]) => `<div class="${STATUS_TONES[id]}"><span>${label}</span><strong>${counts.get(id) || 0}</strong></div>`)
         .join('')}</div>`;
 }
 export function assessment(ctx, id) {
@@ -315,8 +339,18 @@ export const TABLES = {
     periods: {
         empty: 'Belum ada periode.',
         records: (ctx) => ctx.data.periods.toSorted((a, b) => b.id.localeCompare(a.id)),
-        row: (ctx, p) =>
-            `<tr><td data-label="Periode"><strong>${esc(p.name)}</strong><small>${esc(monthLabel(p.id))}</small></td><td data-label="Jadwal (WIB)">${date(p.opens)} – ${date(p.closes)}<small>Batas KU ${date(p.submission)} · ACC KD ${date(p.approval)}</small></td><td data-label="Kesiapan pola KPI">${readinessCell(p)}</td><td data-label="Status">${tag(PERIOD_STATUSES[p.status], p.status === 'open' ? 'success' : p.status === 'planned' ? 'info' : '')}</td><td data-label="Tindakan"><div class="skp-row-actions">${button('period', p.status === 'closed' ? 'Lihat' : 'Lihat / ubah', p.id, 'link')}${p.status === 'closed' ? '' : `<a class="link" data-skp-nav="patterns" href="${esc(ctx.url('patterns', '', p.id))}" data-cycle="${esc(p.id)}">Atur pola</a>`}${p.status === 'planned' ? button('period-open', 'Buka periode', p.id, 'link', !!openBlock(p)) : ''}</div></td></tr>`,
+        row: (ctx, p) => {
+            const block = p.status === 'planned' ? openBlock(p) : '',
+                missing = p.readiness?.staff ? p.readiness.staff.eligible - p.readiness.staff.complete : 0,
+                reasonId = `skp-open-block-${p.id}`;
+            const open =
+                p.status !== 'planned'
+                    ? ''
+                    : block
+                      ? `<button type="button" class="link" data-skp-action="period-open" data-id="${esc(p.id)}" disabled aria-describedby="${esc(reasonId)}">Buka periode</button>`
+                      : button('period-open', 'Buka periode', p.id, 'link');
+            return `<tr><td data-label="Periode"><strong>${esc(p.name)}</strong><small>${esc(monthLabel(p.id))}</small></td><td data-label="Jadwal (WIB)">${date(p.opens)} – ${date(p.closes)}<small>Batas KU ${date(p.submission)} · ACC KD ${date(p.approval)}</small></td><td data-label="Kesiapan pola KPI">${readinessCell(p)}</td><td data-label="Status">${tag(PERIOD_STATUSES[p.status], p.status === 'open' ? 'success' : p.status === 'planned' ? 'info' : '')}</td><td data-label="Tindakan"><div class="skp-row-actions">${button('period', p.status === 'closed' ? 'Lihat' : 'Lihat / ubah', p.id, 'link')}${p.status === 'closed' ? '' : `<a class="link" data-skp-nav="patterns" href="${esc(ctx.url('patterns', '', p.id))}" data-cycle="${esc(p.id)}">Atur pola</a>`}${open}</div>${block ? `<div class="skp-open-block"><small id="${esc(reasonId)}">Buka periode belum tersedia: ${esc(block)}</small>${missing > 0 ? button('show-missing', `Lihat ${missing} staf tanpa pola`, p.id, 'link') : ''}</div>` : ''}</td></tr>`;
+        },
     },
     patterns: {
         empty: 'Belum ada pola. Buat pola baru atau salin dari periode lain.',

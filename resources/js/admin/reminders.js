@@ -45,9 +45,14 @@ export async function initReminders(config) {
         $('[data-recipient-summary]').textContent = recipients.length
             ? `${recipients.length} penerima sesuai kriteria · ${deliverable} dapat dikirimi email.`
             : 'Tidak ada penerima: semua pekerjaan pada kriteria ini sudah selesai.';
+        const empty = node('tr');
+        const message = node('td', 'Tidak ada penerima untuk kriteria ini.', 'empty text-sm');
+        message.colSpan = 7;
+        empty.append(message);
         tbody.replaceChildren(
+            ...(recipients.length ? [] : [empty]),
             ...recipients.map((recipient) => {
-                const tr = node('tr');
+                const tr = node('tr', null, recipient.deliverable ? '' : 'admin-row-muted');
                 const pick = node('td');
                 const box = node('input');
                 Object.assign(box, { type: 'checkbox', value: recipient.user_id, checked: recipient.deliverable, disabled: !recipient.deliverable });
@@ -56,15 +61,15 @@ export async function initReminders(config) {
                 box.setAttribute('aria-label', `Pilih ${recipient.name}`);
                 pick.append(box);
                 const email = node('td');
-                email.append(node('span', recipient.email || 'Tanpa email', 'block'));
-                if (recipient.opted_out) email.append(node('span', 'Email pengingat dimatikan di profil', 'text-xs text-muted'));
+                email.append(node('span', recipient.email || 'Tanpa email', recipient.email ? 'block' : 'block text-muted'));
+                if (recipient.opted_out) email.append(node('span', 'Email pengingat dimatikan di profil', 'text-xs text-warning'));
                 tr.append(
                     pick,
-                    node('td', recipient.name),
+                    node('td', recipient.name, 'font-semibold'),
                     node('td', ROLE_LABELS[recipient.role]),
                     node('td', recipient.area || '-'),
-                    node('td', workload(recipient)),
-                    node('td', recipient.due_at || '-'),
+                    node('td', workload(recipient), 'text-[12.5px]'),
+                    node('td', recipient.due_at || '-', 'num'),
                     email,
                 );
                 return tr;

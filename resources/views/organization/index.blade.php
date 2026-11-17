@@ -3,7 +3,7 @@
 <div class="page-content page-stack workspace-v4" data-flow-organization><div class="toolbar"><div class="compact-heading"><h2 class="lead" data-org-title></h2><p class="mt-2 text-sm text-muted" data-org-description></p></div><div class="flex flex-wrap gap-2"><button class="btn" type="button" data-staff-bulk hidden>Mutasi staf massal</button><button class="btn" type="button" data-entity-new="unit" data-quick-unit>Tambah unit</button><button class="btn btn-primary" type="button" data-entity-new data-org-primary>Tambah</button></div></div>
 <div class="card table-card org-card">
 <div class="card-toolbar">
-<div class="seg w-fit" role="tablist" aria-label="Jenis data organisasi"><button class="active" type="button" role="tab" data-org-tab="division">Divisi</button><button type="button" role="tab" data-org-tab="unit">Unit</button><button type="button" role="tab" data-org-tab="position">Jabatan</button><button type="button" role="tab" data-org-tab="staff">Staf</button></div>
+<div class="seg w-fit org-tabs" role="tablist" aria-label="Jenis data organisasi"><button class="active" type="button" role="tab" data-org-tab="division">Divisi<span class="org-tab-count" data-org-count="division"></span></button><button type="button" role="tab" data-org-tab="unit">Unit<span class="org-tab-count" data-org-count="unit"></span></button><button type="button" role="tab" data-org-tab="position">Jabatan<span class="org-tab-count" data-org-count="position"></span></button><button type="button" role="tab" data-org-tab="staff">Staf<span class="org-tab-count" data-org-count="staff"></span></button></div>
 <div class="table-tools"><label class="inline-filter"><span>Status</span><select class="field" data-org-active aria-label="Status aktif"><option value="all">Semua status</option><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select></label><input class="field" type="search" data-org-search placeholder="Cari nama atau NIP" aria-label="Cari data organisasi"></div>
 </div>
 <div class="table-wrap"><table class="data-table org-table"><thead><tr><th>Nama / identitas</th><th>Penanggung jawab</th><th>Cakupan</th><th>Status</th><th class="numeric">Tindakan</th></tr></thead><tbody data-org-body></tbody></table></div>
@@ -90,9 +90,10 @@
 </x-abprove.dialog>
 
 <x-abprove.dialog id="org-detail-dialog" title="Rincian data" :drawer="true">
-<dl class="record-detail" data-org-detail></dl>
+<dl class="record-detail detail-summary" data-org-detail></dl>
+<section class="org-division-units" data-org-division-units aria-labelledby="org-division-units-title" hidden><div class="org-division-units-head"><h3 id="org-division-units-title">Unit di divisi ini</h3><span class="text-xs text-muted" data-org-division-units-meta></span></div><p class="text-xs text-muted" data-org-division-units-note></p><ul class="org-unit-list" data-org-division-units-list aria-labelledby="org-division-units-title"></ul></section>
 <section class="org-history" data-org-history aria-live="polite"></section>
-<x-slot:footer><button class="btn" type="button" data-dialog-close>Tutup</button><span data-org-detail-actions class="flex flex-wrap gap-3"></span></x-slot:footer>
+<x-slot:footer><button class="btn" type="button" data-dialog-close>Tutup</button><span data-org-detail-actions class="org-detail-actions"></span></x-slot:footer>
 </x-abprove.dialog>
 @endpush
 @endsection

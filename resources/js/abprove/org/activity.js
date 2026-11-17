@@ -67,7 +67,7 @@ export function initActivity(s) {
 
     function show(event) {
         const host = $('[data-activity-detail]'),
-            summary = node('dl', null, 'record-detail');
+            summary = node('dl', null, 'record-detail detail-summary');
         for (const [term, value] of [
             ['Tindakan', activityLabel(event.action)],
             ['Pelaku', `${event.actor_name || 'Sistem'}${event.actor_role ? ` · ${ROLE_LABELS[event.actor_role] || event.actor_role}` : ''}`],
@@ -79,9 +79,10 @@ export function initActivity(s) {
         const content = [summary];
         if (keys.length) {
             const table = node('table', null, 'data-table'),
+                columns = ['Data', 'Sebelum', 'Sesudah'],
                 head = node('tr'),
                 body = node('tbody');
-            head.append(node('th', 'Data'), node('th', 'Sebelum'), node('th', 'Sesudah'));
+            head.append(...columns.map((label) => node('th', label)));
             const thead = node('thead');
             thead.append(head);
             for (const key of keys) {
@@ -89,6 +90,7 @@ export function initActivity(s) {
                     after = event.after ? format(key, event.after[key]) : '-',
                     tr = node('tr');
                 tr.append(node('td', FIELDS[key]), node('td', before), node('td', after));
+                columns.forEach((label, i) => (tr.cells[i].dataset.label = label));
                 if (before !== after) tr.dataset.changed = '';
                 body.append(tr);
             }
@@ -108,16 +110,19 @@ export function initActivity(s) {
         key: 'activities',
         columns: 5,
         emptyText: 'Tidak ada aktivitas sesuai filter.',
+        onLoaded: (result) => {
+            $('[data-activity-count]', root).textContent = `${result.total} aktivitas`;
+        },
         renderRow(event) {
             const tr = node('tr'),
                 detail = node('td'),
-                button = node('button', 'Lihat', 'link');
+                button = node('button', 'Lihat', 'link v2-row-action');
             button.type = 'button';
             button.dataset.activityId = event.id;
             detail.append(button);
             tr.append(
-                node('td', when(event.recorded_at), 'text-xs'),
-                node('td', event.actor_name || 'Sistem'),
+                node('td', when(event.recorded_at), 'text-xs whitespace-nowrap'),
+                node('td', event.actor_name || 'Sistem', 'font-semibold'),
                 node('td', activityLabel(event.action)),
                 node('td', [event.summary, event.reason].filter(Boolean).join(' · ') || '-', 'finding-cell'),
                 detail,

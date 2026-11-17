@@ -32,7 +32,7 @@ function row(...cells) {
 const renderers = {
     audit: (event) => {
         const detail = node('td');
-        const button = node('button', 'Lihat', 'link');
+        const button = node('button', 'Lihat', 'link v2-row-action');
         button.type = 'button';
         button.dataset.auditOpen = event.id;
         detail.append(button);
@@ -45,15 +45,19 @@ const renderers = {
             detail,
         );
     },
-    login: (event) =>
-        row(
+    login: (event) => {
+        const account = node('td');
+        if (event.user_name) account.append(node('strong', event.user_name, 'block'), node('span', ROLE_LABELS[event.role_key] || '-', 'text-xs text-muted'));
+        else account.append(node('span', 'Tidak dikenal', 'text-muted'));
+        return row(
             when(event.occurred_at),
-            event.user_name ? `${event.user_name} · ${ROLE_LABELS[event.role_key] || ''}` : 'Tidak dikenal',
+            account,
             event.identifier,
             badge(...(LOGIN_EVENTS[event.event] || ['Belum', event.event])),
-            event.ip_address,
+            node('td', event.ip_address || '-', 'num'),
             node('td', event.user_agent || '-', 'admin-ellipsis'),
-        ),
+        );
+    },
     email: (mail) => {
         const state = badge(...(EMAIL_STATUS[mail.status] || ['Belum', mail.status]));
         if (mail.error) state.title = mail.error;
@@ -83,6 +87,9 @@ export function initLogs(config) {
                 columns: 6,
                 emptyText: 'Belum ada log yang cocok dengan filter.',
                 renderRow: renderers[type],
+                onLoaded: (result) => {
+                    $('[data-log-count]', panel).textContent = `${result.total} entri`;
+                },
             }),
         );
     }
@@ -100,21 +107,32 @@ export function initLogs(config) {
         const { data } = await config.api.request(`/data/logs/audit/${detailButton.dataset.auditOpen}`);
         const keys = [...new Set([...Object.keys(data.before || {}), ...Object.keys(data.after || {})])];
         const host = $('[data-audit-detail]');
-        const heading = node('p', `${activityLabel(data.action)} · ${data.actor_name || 'Sistem'} · ${when(data.recorded_at)}`, 'text-sm text-muted mb-3');
-        const table = node('table', null, 'data-table');
+        const summary = node('dl', null, 'record-detail detail-summary');
+        for (const [term, value] of [
+            ['Tindakan', activityLabel(data.action)],
+            ['Pelaku', data.actor_name || 'Sistem'],
+            ['Waktu (WIB)', when(data.recorded_at)],
+        ])
+            summary.append(node('dt', term), node('dd', value));
+        const table = node('table', null, 'data-table admin-diff');
+        const columns = ['Kolom', 'Sebelum', 'Sesudah'];
+        const thead = node('thead');
         const head = node('tr');
-        head.append(node('th', 'Kolom'), node('th', 'Sebelum'), node('th', 'Sesudah'));
-        table.append(head);
+        head.append(...columns.map((label) => node('th', label)));
+        thead.append(head);
+        const tbody = node('tbody');
         for (const key of keys) {
             const before = describe(data.before?.[key]);
             const after = describe(data.after?.[key]);
             const tr = row(key, before, after);
+            columns.forEach((label, i) => (tr.cells[i].dataset.label = label));
             if (before !== after) tr.classList.add('admin-changed');
-            table.append(tr);
+            tbody.append(tr);
         }
-        const wrap = node('div', null, 'table-wrap');
+        table.append(thead, tbody);
+        const wrap = node('div', null, 'table-wrap mt-4');
         wrap.append(table);
-        host.replaceChildren(heading, keys.length ? wrap : node('p', 'Tidak ada data perubahan.', 'empty text-sm'));
+        host.replaceChildren(summary, keys.length ? wrap : node('p', 'Tidak ada data perubahan.', 'empty mt-4 text-sm'));
         if (data.reason) host.append(node('p', `Alasan: ${data.reason}`, 'notice mt-3 text-sm'));
         open('audit-detail-dialog');
     });

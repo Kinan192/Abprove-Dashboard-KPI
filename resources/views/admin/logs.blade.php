@@ -5,8 +5,9 @@
     <div class="toolbar"><div class="compact-heading"><h2 class="lead">Log sistem</h2><p class="mt-2 text-sm text-muted">Seluruh log hanya dapat dibaca. Waktu ditampilkan dalam WIB.</p></div></div>
     <x-abprove.tabs :items="['audit'=>'Aktivitas','login'=>'Login & keluar','email'=>'Email pengingat']" active="audit" label="Jenis log"/>
     @foreach(['audit'=>['Waktu','Pelaku','Role','Tindakan','Objek / alasan','Rincian'],'login'=>['Waktu','Akun','Identitas yang dipakai','Kejadian','Alamat IP','Perangkat'],'email'=>['Dibuat','Penerima','Periode','Subjek','Status','Dikirim oleh']] as $type=>$columns)
-    <section class="card table-card" data-panel="{{ $type }}" data-log-panel="{{ $type }}" @unless($loop->first) hidden @endunless>
+    <section class="card table-card admin-card" data-panel="{{ $type }}" data-log-panel="{{ $type }}" @unless($loop->first) hidden @endunless>
         <div class="card-toolbar">
+            <div class="admin-card-title"><h3 class="section-title">{{ ['audit'=>'Aktivitas pengguna','login'=>'Riwayat login & keluar','email'=>'Email pengingat'][$type] }}</h3><span class="admin-count" data-log-count aria-live="polite"></span></div>
             <div class="table-tools">
                 @if($type==='login')
                     <label class="inline-filter"><span>Kejadian</span><select class="field" data-filter="event"><option value="">Semua</option><option value="login">Login berhasil</option><option value="failed">Login gagal</option><option value="logout">Keluar</option></select></label>
@@ -19,7 +20,7 @@
                 <input class="field" type="search" data-filter="search" placeholder="{{ ['audit'=>'Cari pelaku, tindakan atau alasan','login'=>'Cari akun, identitas atau IP','email'=>'Cari penerima atau subjek'][$type] }}" aria-label="Cari log">
             </div>
         </div>
-        <div class="table-wrap"><table class="data-table"><thead><tr>@foreach($columns as $column)<th>{{ $column }}</th>@endforeach</tr></thead><tbody data-log-rows></tbody></table></div>
+        <div class="table-wrap"><table class="data-table admin-table admin-log-table"><thead><tr>@foreach($columns as $column)<th>{{ $column }}</th>@endforeach</tr></thead><tbody data-log-rows></tbody></table></div>
         <div data-log-pager></div>
     </section>
     @endforeach

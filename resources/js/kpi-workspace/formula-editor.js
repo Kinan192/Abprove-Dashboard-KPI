@@ -2,7 +2,7 @@ import {
     humanFormula,
     diagnose,
     recommendations,
-    UNITS,
+    satuanOptions,
 } from './formula-config.js';
 import { calculate } from './model.js';
 import { esc, field, note, tag, num, button, sectionHeading } from './markup.js';
@@ -61,10 +61,13 @@ export function formulaTokens(k) {
         )
         .join('');
 }
-/** KPI editor of one pattern item. `others` is the weight of the remaining items in the pattern. */
-export function editor(k, test, others, editing) {
-    const information = `<section class="fx-form-section">${sectionHeading(1, 'Informasi KPI', 'Nama indikator dan pilar yang menaunginya.')}<div class="fx-info-grid gp-form-grid">${field('name', 'Nama KPI', k.name, { required: true, wide: true, maxlength: 150 })}${field('pillar', 'Pilar', k.pillar, { required: true, list: 'skp-pillars', maxlength: 64 })}</div></section>`;
-    const target = `<section class="fx-form-section">${sectionHeading(2, 'Target, polaritas & bobot', 'Tentukan arah capaian yang baik dan porsi KPI ini dalam pola.')}<div class="fx-target-grid gp-form-grid">${field('unit', 'Satuan', k.unit, { options: [...new Set([k.unit, ...UNITS])].filter(Boolean).map((u) => [u, u]), placeholder: false })}${field(
+/**
+ * KPI editor of one pattern item. `others` is the weight of the remaining items in the
+ * pattern; `pillars` are the pillar suggestions offered by the Pilar input's datalist.
+ */
+export function editor(k, test, others, editing, pillars = []) {
+    const information = `<section class="fx-form-section">${sectionHeading(1, 'Informasi KPI', 'Nama indikator dan pilar yang menaunginya.')}<div class="fx-info-grid gp-form-grid">${field('name', 'Nama KPI', k.name, { required: true, wide: true, maxlength: 150 })}${field('pillar', 'Pilar', k.pillar, { required: true, list: 'skp-pillars', maxlength: 64, placeholder: 'Ketik atau pilih pilar', help: 'Pilih saran (pilar bawaan dan pilar yang sudah dipakai) atau ketik nama pilar baru. Saran disaring sesuai teks yang sudah terisi; kosongkan kolom untuk melihat semua. Pilar baru langsung disarankan untuk KPI berikutnya di pola ini dan tersimpan permanen setelah Simpan pola.' })}<datalist id="skp-pillars">${pillars.map((p) => `<option value="${esc(p)}"></option>`).join('')}</datalist></div></section>`;
+    const target = `<section class="fx-form-section">${sectionHeading(2, 'Target, polaritas & bobot', 'Tentukan arah capaian yang baik dan porsi KPI ini dalam pola.')}<div class="fx-target-grid gp-form-grid">${field('unit', 'Satuan', k.unit, { options: satuanOptions(k.unit), placeholder: false, help: 'Satuan realisasi dan target, dikelompokkan menurut jenis ukuran.' })}${field(
         'direction',
         'Polaritas',
         k.direction,

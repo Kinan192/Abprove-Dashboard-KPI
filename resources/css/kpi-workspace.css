@@ -1,45 +1,46 @@
 @import './kpi-workspace-base.css';
 @reference './app.css';
 
-/* Toolbar: five-step flow + period picker */
+/* Toolbar: compact segmented stage navigation + period picker */
 .skp-toolbar {
-    @apply flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl border border-line bg-paper p-1.5;
+    @apply flex min-w-0 flex-wrap items-center justify-between gap-3;
 }
 .skp-steps {
-    @apply min-w-0 flex-[1_1_640px];
+    @apply max-w-full min-w-0;
 }
 .skp-steps ol {
-    @apply m-0 grid list-none grid-cols-5 gap-1 p-0;
+    @apply m-0 inline-flex max-w-full list-none flex-wrap gap-1 rounded-xl border border-line bg-subtle p-1;
 }
 .skp-steps a {
-    @apply flex h-full min-h-[52px] min-w-0 items-center gap-2.5 rounded-[10px] px-3 py-2 text-muted transition-colors hover:bg-subtle hover:text-ink;
+    @apply inline-flex min-h-9 items-center gap-2 rounded-[9px] px-3 py-1 text-[13px] font-medium whitespace-nowrap text-muted no-underline transition-[background-color,color,box-shadow] hover:bg-paper/60 hover:text-ink;
 }
 .skp-step-no {
-    @apply grid size-7 shrink-0 place-items-center rounded-full border border-line bg-paper text-[12px] font-semibold tabular-nums;
-}
-.skp-step-copy {
-    @apply grid min-w-0;
-}
-.skp-step-copy b {
-    @apply text-[13px] leading-[18px] font-semibold text-ink;
-}
-.skp-step-copy small {
-    @apply text-[11.5px] leading-4 text-muted;
+    @apply text-[11.5px] font-semibold text-muted tabular-nums;
 }
 .skp-steps a.active {
-    @apply bg-accent-soft;
+    @apply bg-paper font-semibold text-link shadow-[0_1px_3px_rgb(23_43_54/0.12),0_0_0_1px_rgb(23_43_54/0.04)] hover:bg-paper;
 }
 .skp-steps a.active .skp-step-no {
-    @apply border-transparent bg-primary text-white;
+    @apply text-link;
 }
-.skp-steps a.active .skp-step-copy b {
-    @apply text-accent;
+/* Small counter beside a stage label, tinted only when it carries a state. */
+.skp-step-count {
+    @apply inline-flex min-w-[22px] items-center justify-center rounded-md border border-line bg-paper px-1.5 text-[11px] leading-[18px] font-semibold text-muted tabular-nums;
+}
+.skp-step-count.success {
+    @apply border-success/30 text-success;
+}
+.skp-step-count.warning {
+    @apply border-warning/30 text-warning;
+}
+.skp-step-count.info {
+    @apply border-info/30 text-info;
 }
 .fx-period-picker {
-    @apply ml-auto flex items-center gap-2 px-2 py-1;
+    @apply ml-auto flex items-center gap-2;
 }
 .fx-period-picker > label {
-    @apply text-[12.5px] font-semibold text-muted;
+    @apply text-[12.5px] font-semibold whitespace-nowrap text-muted;
 }
 .fx-period-picker .field {
     @apply min-h-10 w-auto max-w-[340px] min-w-[220px] py-2;
@@ -100,7 +101,7 @@
 
 /* Readiness of the selected period */
 .skp-readiness {
-    @apply grid items-center gap-x-6 gap-y-3 rounded-xl border border-line bg-paper px-5 py-4 text-[13px];
+    @apply grid items-center gap-x-6 gap-y-3 rounded-2xl border border-line bg-paper px-5 py-4 text-[13px] shadow-[0_1px_2px_rgb(23_43_54/0.04)];
     grid-template-columns: minmax(0, 1fr) minmax(140px, 220px) auto;
 }
 .skp-readiness-copy strong {
@@ -199,7 +200,7 @@ details.skp-panel > .skp-copy {
     @apply mt-0.5 text-[12.5px] leading-[18px] text-muted;
 }
 .skp-table-card > .table-tools {
-    @apply px-5 py-3.5;
+    @apply px-5 py-3;
 }
 .skp-table-card > .table-wrap {
     @apply rounded-none border-0 border-t border-line;
@@ -220,8 +221,35 @@ details.skp-panel > .skp-copy {
 .skp-row-actions a {
     @apply min-h-9;
 }
-body[data-app-shell] .skp-row-actions button.skp-link-danger {
-    @apply text-danger hover:bg-danger-soft;
+body[data-app-shell] .skp-row-actions .skp-link-danger {
+    @apply ml-2 text-danger hover:bg-danger-soft hover:text-danger;
+}
+/* Desktop tables keep each row's action group on one line (pattern list, period
+   list, pattern KPI items); the list tables scroll locally when the card is narrow. */
+@media (min-width: 901px) {
+    body[data-app-shell] .gp-table.skp-patterns,
+    body[data-app-shell] .gp-table.skp-periods {
+        min-width: 960px;
+    }
+    .gp-table .skp-row-actions {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+}
+.skp-patterns th:nth-child(3) {
+    width: 190px;
+}
+.skp-patterns th:nth-child(4) {
+    width: 140px;
+}
+.skp-patterns th:last-child {
+    width: 310px;
+}
+.skp-periods th:nth-child(4) {
+    width: 120px;
+}
+.skp-periods th:last-child {
+    width: 310px;
 }
 
 /* Pattern & period forms */
@@ -252,7 +280,7 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
     @apply mb-4 flex min-w-0 items-start gap-3;
 }
 .fx-section-heading > span {
-    @apply grid size-7 shrink-0 place-items-center rounded-full bg-accent-soft text-[12px] font-semibold text-accent;
+    @apply mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-line bg-subtle text-[11.5px] font-semibold text-muted tabular-nums;
 }
 .fx-section-heading h2 {
     @apply m-0 text-[14.5px] leading-7 font-semibold;
@@ -268,6 +296,65 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
 }
 #skp-period-form > .gp-note {
     @apply mx-5 mb-4;
+}
+/* Activation checklist of a new / planned period */
+.fx-period-setup {
+    @apply mx-5 mt-4 rounded-xl border border-line bg-subtle px-4 py-4;
+}
+.fx-period-setup-head {
+    @apply flex flex-wrap items-center justify-between gap-2;
+}
+.fx-period-setup-head h3 {
+    @apply m-0 text-[14px] leading-6 font-semibold;
+}
+.fx-period-setup-reason {
+    @apply mt-2 rounded-lg bg-warning-soft px-3 py-2 text-[13px] leading-5 text-warning;
+}
+.fx-period-setup-reason.ready {
+    @apply bg-success-soft text-success;
+}
+.fx-setup-steps {
+    @apply mt-3 grid list-none gap-2 p-0;
+}
+.fx-setup-steps li {
+    @apply flex items-start gap-3 rounded-lg border border-line bg-paper px-3 py-2.5;
+}
+.fx-setup-steps li.current {
+    @apply border-primary;
+}
+.fx-setup-steps li.todo {
+    @apply opacity-80;
+}
+.fx-setup-no {
+    @apply mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border border-line bg-subtle text-[11.5px] font-semibold text-muted tabular-nums;
+}
+.fx-setup-steps li.done .fx-setup-no {
+    @apply border-success bg-success-soft text-success;
+}
+.fx-setup-steps li.current .fx-setup-no {
+    @apply border-primary text-ink;
+}
+.fx-setup-steps strong {
+    @apply block text-[13px] leading-5 font-semibold;
+}
+.fx-setup-steps p {
+    @apply mt-0.5 text-[12.5px] leading-[18px] text-muted;
+}
+.fx-setup-action {
+    @apply mt-2 flex flex-wrap gap-2;
+}
+.skp-open-block {
+    @apply mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] leading-[18px] whitespace-normal text-warning;
+}
+.skp-open-block small {
+    @apply block max-w-[300px];
+}
+/* Locked recipient route of an assigned pattern */
+.skp-role-lock {
+    @apply mt-4 rounded-xl border border-line bg-subtle px-4 py-3 text-[13px] leading-5;
+}
+.skp-role-lock .gp-actions {
+    @apply mt-2.5 flex flex-wrap gap-2;
 }
 .skp-items-heading {
     @apply mb-4 flex flex-wrap items-start justify-between gap-3;
@@ -285,7 +372,7 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
     width: 128px;
 }
 .skp-items th:last-child {
-    width: 128px;
+    width: 168px;
 }
 .skp-items tr.editing {
     @apply bg-accent-soft;
@@ -301,8 +388,8 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
     @apply mt-3;
 }
 .skp-savebar {
-    @apply sticky bottom-3 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-paper px-5 py-3;
-    box-shadow: 0 6px 20px rgb(15 23 42 / 0.06);
+    @apply sticky bottom-3 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-5 py-3;
+    box-shadow: 0 12px 32px -16px rgb(15 30 38 / 0.28);
 }
 .skp-savebar > div:first-child {
     @apply flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[13px];
@@ -376,19 +463,9 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
     @apply font-semibold;
 }
 
-/* Monitoring */
-.skp-prototype .skp-chartless {
-    @apply grid gap-3;
+/* Monitoring: per-status counters reuse the pastel summary tiles. */
+.gp-summary.skp-status-summary {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-.skp-chartless div {
-    @apply min-w-0 rounded-xl border border-line bg-paper px-4 py-3.5;
-}
-.skp-chartless span {
-    @apply block text-[12.5px] leading-[18px] text-muted;
-}
-.skp-chartless strong {
-    @apply mt-1 block text-[24px] leading-[30px] font-semibold tabular-nums;
 }
 .skp-result-table th:first-child {
     width: 30%;
@@ -405,13 +482,13 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
     gap: 16px;
 }
 .fx-score-help {
-    @apply mt-4 rounded-lg bg-subtle px-3.5 py-2.5 text-[12.5px] leading-5;
+    @apply mt-4 rounded-[10px] bg-subtle px-3.5 py-2.5 text-[12.5px] leading-5;
 }
 .fx-score-help b {
     @apply text-ink;
 }
 .fx-settings {
-    @apply mt-4 rounded-lg border border-line text-[12.5px] text-muted;
+    @apply mt-4 rounded-xl border border-line text-[12.5px] text-muted;
 }
 .fx-settings > summary {
     @apply flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 px-3.5 font-semibold text-ink;
@@ -442,35 +519,36 @@ body[data-app-shell] .skp-row-actions button.skp-link-danger {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
 }
 .fx-variable {
-    @apply mb-2 grid items-center gap-2;
+    @apply mb-2 grid items-center gap-2 rounded-xl border border-line bg-subtle p-2;
     grid-template-columns: 32px minmax(120px, 1fr) 150px auto;
 }
 .fx-variable:has([data-fx-variable-fixed]) {
     grid-template-columns: 32px minmax(110px, 1fr) 140px 100px auto;
 }
 .fx-variable > b {
-    @apply grid size-8 place-items-center rounded-lg bg-accent-soft text-[13px] font-semibold text-accent;
+    @apply grid size-8 place-items-center rounded-[9px] bg-accent-soft text-[13px] font-semibold text-link;
+    font-family: ui-monospace, Consolas, monospace;
 }
 .fx-variable .field {
     @apply h-10 min-h-10 min-w-0 px-3 py-2 text-[13px];
 }
 body[data-app-shell] .fx-variable button.link {
-    @apply inline-flex min-h-10 items-center rounded-md px-2 text-[12.5px] text-danger hover:bg-danger-soft;
+    @apply inline-flex min-h-10 items-center rounded-[10px] px-2.5 text-[12.5px] font-semibold text-danger hover:bg-danger-soft hover:text-danger hover:no-underline;
 }
 .fx-add-variable {
     @apply mt-2 mb-5;
 }
 .fx-tokens {
-    @apply my-3 grid gap-2;
+    @apply my-3 grid gap-2.5 rounded-xl border border-line bg-subtle p-3;
 }
 .fx-token-group {
     @apply flex flex-wrap items-center gap-1.5;
 }
 .fx-token-group > span {
-    @apply w-16 shrink-0 text-[11.5px] font-semibold text-muted;
+    @apply w-16 shrink-0 text-[11.5px] font-semibold tracking-[0.02em] text-muted uppercase;
 }
 .fx-token {
-    @apply inline-flex min-h-[34px] max-w-full items-center rounded-lg border border-line bg-paper px-2.5 py-1 text-[12.5px] font-medium whitespace-normal text-ink transition-colors hover:border-primary hover:text-accent;
+    @apply inline-flex min-h-[34px] max-w-full items-center rounded-[9px] border border-line bg-paper px-2.5 py-1 text-[12.5px] font-medium whitespace-normal text-ink shadow-[0_1px_2px_rgb(23_43_54/0.04)] transition-colors hover:border-primary/50 hover:bg-accent-soft hover:text-link;
     overflow-wrap: anywhere;
 }
 #skp-kpi-form [name='formula'] {
@@ -478,7 +556,7 @@ body[data-app-shell] .fx-variable button.link {
     font-family: ui-monospace, Consolas, monospace;
 }
 .fx-human {
-    @apply mt-3 rounded-lg border border-line bg-subtle px-3.5 py-2.5;
+    @apply mt-3 rounded-[10px] border border-line bg-paper px-3.5 py-2.5;
 }
 .fx-human > span {
     @apply block text-[11.5px] font-semibold text-muted;
@@ -488,7 +566,7 @@ body[data-app-shell] .fx-variable button.link {
     overflow-wrap: anywhere;
 }
 .fx-review {
-    @apply sticky top-3 rounded-xl border border-line bg-subtle p-4;
+    @apply sticky top-3 rounded-2xl border border-line bg-subtle p-4;
 }
 .fx-review-heading {
     @apply mb-3 flex flex-wrap items-center justify-between gap-2;
@@ -498,7 +576,7 @@ body[data-app-shell] .fx-variable button.link {
     @apply text-[13.5px] leading-5 font-semibold;
 }
 .fx-issue {
-    @apply mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-lg border border-line bg-paper px-3 py-2.5 text-[12.5px] leading-[18px];
+    @apply mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-[10px] border border-line bg-paper px-3 py-2.5 text-[12.5px] leading-[18px];
 }
 .fx-issue.error {
     @apply border-transparent bg-danger-soft text-danger;
@@ -513,7 +591,7 @@ body[data-app-shell] .fx-variable button.link {
     @apply mt-3 grid gap-2;
 }
 .fx-recommendations > div {
-    @apply grid items-center gap-x-3 gap-y-1 rounded-lg border border-line bg-paper px-3 py-2.5;
+    @apply grid items-center gap-x-3 gap-y-1 rounded-[10px] border border-line bg-paper px-3 py-2.5;
     grid-template-columns: minmax(0, 1fr) auto;
 }
 .fx-recommendations strong {
@@ -521,13 +599,14 @@ body[data-app-shell] .fx-variable button.link {
 }
 .fx-recommendations code {
     @apply col-start-1 text-[12px] text-muted;
+    font-family: ui-monospace, Consolas, monospace;
     overflow-wrap: anywhere;
 }
 .fx-recommendations .btn {
     @apply col-start-2 row-span-2 row-start-1 min-h-9;
 }
 .fx-test {
-    @apply mt-5 rounded-xl border border-line bg-paper p-4;
+    @apply mt-5 rounded-2xl border border-line bg-paper p-4;
 }
 .fx-test > .gp-help {
     @apply mt-1;
@@ -547,7 +626,10 @@ body[data-app-shell] .fx-variable button.link {
     grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 .fx-test-stats > div {
-    @apply rounded-lg bg-subtle px-3 py-2.5;
+    @apply rounded-xl bg-subtle px-3 py-2.5;
+}
+.fx-test-stats > div:nth-child(2) {
+    @apply bg-accent-soft;
 }
 .fx-test-stats span {
     @apply block text-[11.5px] text-muted;
@@ -567,7 +649,7 @@ body[data-app-shell] .fx-variable button.link {
     .fx-review {
         position: static;
     }
-    .skp-prototype .skp-chartless {
+    .gp-summary.skp-status-summary {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
@@ -587,20 +669,18 @@ body[data-app-shell] .fx-variable button.link {
     }
 }
 @media (max-width: 600px) {
-    .skp-toolbar {
-        @apply rounded-xl p-1;
+    .skp-steps,
+    .skp-steps ol {
+        @apply w-full;
+    }
+    .skp-steps li {
+        @apply flex-auto;
     }
     .skp-steps a {
-        @apply min-h-14 flex-col justify-center gap-1 px-1 py-2 text-center;
-    }
-    .skp-step-copy b {
-        @apply text-[11px] leading-[14px];
-    }
-    .skp-step-copy small {
-        display: none;
+        @apply min-h-11 w-full justify-center gap-1.5 px-2.5;
     }
     .fx-period-picker {
-        @apply ml-0 w-full px-1.5 pb-1.5;
+        @apply ml-0 w-full;
     }
     .fx-period-picker .field {
         @apply min-h-11 max-w-none min-w-0 flex-1;
@@ -663,7 +743,7 @@ body[data-app-shell] .fx-variable button.link {
     .fx-recommendations .btn {
         min-height: 44px;
     }
-    .skp-prototype .skp-chartless {
+    .gp-summary.skp-status-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .skp-savebar {

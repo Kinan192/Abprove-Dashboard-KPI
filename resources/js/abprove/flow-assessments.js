@@ -200,9 +200,21 @@ export function initFlowAssessments(c, s, link) {
                     label.append(field);
                     cell.append(label);
                 }
-                const result = calculate(item.config, a.inputs[i]);
-                if (!readOnly) a.values[i] = result.score;
-                const summary = node('p', result.message || `Nilai otomatis: ${number(a.values[i])}`, 'text-xs text-muted');
+                // Input guidance belongs to editable sheets; read-only sheets report the stored value.
+                let message;
+                if (readOnly)
+                    message =
+                        a.values[i] == null || a.values[i] === ''
+                            ? 'Belum ada nilai.'
+                            : `Nilai otomatis: ${number(a.values[i])}`;
+                else {
+                    const result = calculate(item.config, a.inputs[i]);
+                    a.values[i] = result.score;
+                    message =
+                        result.message ||
+                        `Nilai otomatis: ${number(a.values[i])}`;
+                }
+                const summary = node('p', message, 'text-xs text-muted');
                 summary.dataset.measurementResult = i;
                 cell.append(summary);
             }
@@ -355,6 +367,7 @@ export function initFlowAssessments(c, s, link) {
             const button = clone('flow-person-button', rail);
             button.dataset.personPick = p.id;
             button.classList.toggle('selected', p.id === selected);
+            if (p.id === selected) button.setAttribute('aria-current', 'true');
             text(button, '[data-name]', p.name);
             text(button, '[data-initials]', initials(p.name));
             status($('[data-status]', button), s.assessment(p.id).status);
@@ -856,9 +869,10 @@ export function initFlowAssessments(c, s, link) {
         const tab = e.target.closest('[data-people-filter]');
         if (tab) {
             peopleTab = tab.dataset.peopleFilter;
-            $$('[data-people-filter]').forEach((b) =>
-                b.classList.toggle('active', b === tab),
-            );
+            $$('[data-people-filter]').forEach((b) => {
+                b.classList.toggle('active', b === tab);
+                b.setAttribute('aria-pressed', String(b === tab));
+            });
             editor();
         }
         const st = e.target.closest('[data-flow-status]');
@@ -1078,7 +1092,7 @@ export function initFlowAssessments(c, s, link) {
               })
             : divisions;
     optionList($('[data-filter="division"]'), divisionOptions, 'Semua divisi');
-    optionList($('[data-filter="unit"]'), s.scopedUnits(), 'Semua unit');
+    optionList($('[data-filter="unit"]'), s.scopedUnits(), c.role === 'kd' ? 'Semua unit dalam divisi' : 'Semua unit');
     if (c.page === 'persetujuan' && $('[data-filter="type"]'))
         $('[data-filter="type"]').value = 'member';
     const qs = new URLSearchParams(location.search);

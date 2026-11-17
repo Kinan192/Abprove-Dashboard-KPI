@@ -33,8 +33,6 @@ const format = (value, digits = 1) =>
               minimumFractionDigits: digits,
               maximumFractionDigits: digits,
           }).format(value);
-const text = (selector, value) =>
-    $$(selector).forEach((el) => (el.textContent = value ?? '-'));
 const cell = (value, cls = '') => node('td', value, cls);
 const yearKeys = (key) =>
     Array.from(
@@ -83,20 +81,6 @@ function table(
     headings.forEach((h) => tr.append(node('th', h)));
     head.append(tr);
     t.append(head, body);
-    const widths = cls.includes('reference-progress-table')
-        ? ['34%', 'auto', '130px']
-        : cls.includes('reference-ranking-table')
-          ? ['10%', '48%', '18%', '24%']
-          : null;
-    if (widths) {
-        const columns = node('colgroup');
-        for (const width of widths) {
-            const column = node('col');
-            column.style.width = width;
-            columns.append(column);
-        }
-        t.prepend(columns);
-    }
     wrap.append(t);
     root.append(wrap);
     if (!renderRow) rows.forEach((r) => body.append(r));
@@ -114,19 +98,6 @@ function table(
         renderRow,
     });
     return body;
-}
-function figures(root, rows) {
-    if (!root) return;
-    root.replaceChildren();
-    for (const [label, value, hint, cls = ''] of rows) {
-        const div = node('div');
-        div.append(
-            node('p', label, 'figure-label'),
-            node('p', value, `figure-value num ${cls}`),
-            node('p', hint, 'figure-hint'),
-        );
-        root.append(div);
-    }
 }
 function bar(row) {
     const el = node('div', null, 'reference-bar');
@@ -196,30 +167,56 @@ function progress(root, rows, s, link, role, key, size = 5) {
         'reference-progress-table',
     );
 }
-function feed(root, rows, key, pager = 'staff-findings', limit = 10) {
+/** Findings feed views; negative entries always come first. */
+const FINDINGS = {
+    negative: {
+        title: 'Temuan negatif',
+        empty: 'Tidak ada temuan negatif pada filter ini.',
+    },
+    positive: {
+        title: 'Temuan positif',
+        empty: 'Tidak ada temuan positif pada filter ini.',
+    },
+    all: {
+        title: 'Semua temuan',
+        empty: 'Belum ada temuan dari penilaian Final pada filter ini.',
+    },
+};
+const findingsView = () => {
+    const value = $('[data-report-findings]')?.value;
+    return FINDINGS[value] ? value : 'negative';
+};
+function feed(root, rows, key, view) {
     if (!root) return;
     root.replaceChildren();
-    const entries = rows.flatMap((r) =>
-        [
-            ['positive', r.positive],
-            ['negative', r.negative],
-        ]
-            .filter(([, value]) => value)
-            .map(([kind, value]) => ({ r, kind, value })),
+    $$('[data-findings-kind-title]').forEach(
+        (el) => (el.textContent = FINDINGS[view].title),
     );
+    const entries = ['negative', 'positive']
+        .filter((kind) => view === 'all' || kind === view)
+        .flatMap((kind) =>
+            rows
+                .filter((r) => String(r[kind] ?? '').trim())
+                .map((r) => ({ r, kind, value: r[kind] })),
+        );
     const renderRow = ({ r, kind, value }) => {
-        const row = node('div', null, 'reference-feed-item'),
+        const negative = kind === 'negative',
+            row = node('div', null, 'reference-feed-item'),
             body = node('div', null, 'reference-feed-body'),
-            title = node('div');
-        row.append(
+            title = node('div'),
+            icon = node(
+                'span',
+                negative ? '!' : '+',
+                `reference-feed-icon ${kind}`,
+            );
+        icon.setAttribute('aria-hidden', 'true');
+        row.dataset.findingKind = kind;
+        title.append(
             node(
                 'span',
-                kind === 'positive' ? '+' : '!',
-                'reference-feed-icon' +
-                    (kind === 'negative' ? ' negative' : ''),
+                negative ? 'Negatif' : 'Positif',
+                `reference-feed-kind ${kind}`,
             ),
-        );
-        title.append(
             review(r, key),
             node(
                 'span',
@@ -228,109 +225,16 @@ function feed(root, rows, key, pager = 'staff-findings', limit = 10) {
             ),
         );
         body.append(title, node('p', value));
-        row.append(body);
+        row.append(icon, body);
         return row;
     };
-    if (!entries.length) empty(root, 'Belum ada temuan dari penilaian Final.');
-    paginate(root, pager, {
-        size: limit,
-        token: key + rows.map((r) => r.personId).join(','),
+    if (!entries.length) empty(root, FINDINGS[view].empty);
+    paginate(root, 'staff-findings', {
+        size: 10,
+        token: JSON.stringify([key, view, rows.map((r) => r.personId)]),
         records: entries,
         renderRow,
     });
-}
-function lineChart(root, keys, values) {
-    if (!root) return;
-    root.replaceChildren();
-    const ns = 'http://www.w3.org/2000/svg',
-        el = (tag, attrs = {}) => {
-            const e = document.createElementNS(ns, tag);
-            for (const [k, v] of Object.entries(attrs))
-                e.setAttribute(k, String(v));
-            return e;
-        };
-    const svg = el('svg', {
-            viewBox: '0 0 800 210',
-            role: 'img',
-            'aria-label': 'Tren rata-rata nilai Final per bulan',
-        }),
-        valid = values.filter((v) => v !== null),
-        low = valid.length
-            ? Math.max(0, Math.floor((Math.min(...valid) - 10) / 10) * 10)
-            : 0;
-    const x = (i) => 42 + i * 66.8,
-        y = (v) => 174 - ((v - low) / (100 - low)) * 154;
-    for (let i = 0; i < 5; i++) {
-        const v = low + ((100 - low) / 4) * i,
-            py = y(v);
-        svg.append(
-            el('path', {
-                d: `M42 ${py}H778`,
-                stroke: 'var(--color-line)',
-                fill: 'none',
-            }),
-        );
-        const label = el('text', { x: 32, y: py + 4, 'text-anchor': 'end' });
-        label.textContent = format(v, 0);
-        svg.append(label);
-    }
-    let segment = [];
-    const flush = () => {
-        if (segment.length > 1) {
-            const points = segment.map(([i, v]) => `${x(i)},${y(v)}`).join(' ');
-            svg.append(
-                el('polygon', {
-                    points: `${x(segment[0][0])},174 ${points} ${x(segment.at(-1)[0])},174`,
-                    fill: 'var(--color-primary)',
-                    opacity: '.045',
-                }),
-                el('polyline', {
-                    points,
-                    fill: 'none',
-                    stroke: 'var(--color-primary)',
-                    'stroke-width': 2,
-                }),
-            );
-        }
-        segment = [];
-    };
-    values.forEach((v, i) => {
-        if (v == null) {
-            flush();
-            return;
-        }
-        segment.push([i, v]);
-    });
-    flush();
-    values.forEach((v, i) => {
-        if (v == null) return;
-        const dot = el('circle', {
-            cx: x(i),
-            cy: y(v),
-            r: i === values.findLastIndex((v) => v !== null) ? 4 : 3,
-            fill: 'var(--color-paper)',
-            stroke: 'var(--color-primary)',
-            'stroke-width': 2,
-        });
-        const title = el('title');
-        title.textContent = `${labelCycle(keys[i])}: ${number(v)}`;
-        dot.append(title);
-        svg.append(dot);
-    });
-    keys.forEach((k, i) => {
-        const label = el('text', { x: x(i), y: 198, 'text-anchor': 'middle' });
-        label.textContent = months[+k.slice(5) - 1];
-        svg.append(label);
-    });
-    root.append(svg);
-    if (!valid.length)
-        root.append(
-            node(
-                'p',
-                'Belum ada hasil Final pada tahun ini.',
-                'text-xs text-muted text-center py-2',
-            ),
-        );
 }
 function matches(p, f, s, key) {
     return (
@@ -361,6 +265,8 @@ function rangedKeys(s) {
             innerWidth <= 900
                 ? String(Math.floor((+s.cycleKey.slice(5) - 1) / 3))
                 : 'year';
+        // The filter badge and reset treat this screen-dependent range as the baseline.
+        select.dataset.filterDefault = select.value;
     }
     const q = select?.value ?? 'year';
     return q === 'year' ? all : all.slice(+q * 3, +q * 3 + 3);
@@ -395,61 +301,6 @@ function matrixCell(value, key, current, button) {
     td.append(el);
     return td;
 }
-function dashboardComparison(root, c, d, month, filters) {
-    if (!root) return;
-    root.replaceChildren();
-    const rows =
-        c.role === 'ku'
-            ? d.item_averages
-                  .filter((r) => r.kind === 'member' && r.average != null)
-                  .map((r) => ({
-                      name: r.name,
-                      average: +r.average,
-                      count: r.count,
-                  }))
-            : [
-                  ...Map.groupBy(d.scores, (r) =>
-                      c.role === 'hc' ? r.division_name : r.unit_name,
-                  ),
-              ].map(([name, scores]) => ({
-                  name,
-                  average: mean(scores.map((r) => +r.total)),
-                  count: scores.length,
-              }));
-    rows.sort((a, b) => a.average - b.average || a.name.localeCompare(b.name));
-    if (!rows.length)
-        empty(root, 'Belum ada nilai Final untuk perbandingan ini.');
-    paginate(root, 'dashboard-comparison', {
-        size: 5,
-        token: JSON.stringify([month, filters]),
-        records: rows,
-        renderRow: (r) => {
-            const row = node('div', null, 'dashboard-comparison-row'),
-                heading = node('div', null, 'dashboard-comparison-label'),
-                track = node('div', null, 'dashboard-comparison-track'),
-                fill = node('span');
-            row.setAttribute('role', 'img');
-            row.setAttribute(
-                'aria-label',
-                `${r.name}: rata-rata ${format(r.average)}, dari ${r.count} hasil Final`,
-            );
-            row.dataset.chartLabel = r.name;
-            row.dataset.chartValue = r.average;
-            heading.append(
-                node('span', r.name),
-                node('strong', format(r.average)),
-            );
-            fill.style.width = `${Math.max(0, Math.min(100, r.average))}%`;
-            track.append(fill);
-            row.append(
-                heading,
-                track,
-                node('small', `${r.count} hasil Final`, 'text-muted'),
-            );
-            return row;
-        },
-    });
-}
 function report(c, s, d, link, filters, panel) {
     const month = s.cycleKey,
         keys = yearKeys(month),
@@ -461,75 +312,7 @@ function report(c, s, d, link, filters, panel) {
         finals = (key) =>
             people(key).filter(
                 (p) => s.assessment(p.id, key).status === 'Final',
-            ),
-        m = d.metrics;
-    text('[data-reference-year]', month.slice(0, 4));
-    if (panel === 'summary') {
-        figures($('[data-reference-report-figures]'), [
-            [
-                'Rata-rata nilai Final',
-                format(m.average),
-                `${m.final} hasil Final periode terpilih`,
-                'text-info',
-            ],
-            [
-                c.role === 'hc' ? 'Sudah Final' : 'Belum dinilai',
-                c.role === 'hc' ? m.final : m.not_started,
-                c.role === 'ku' ? 'staf unit Anda' : 'staf dan Kepala Unit',
-            ],
-            ['Menunggu ACC', m.submitted, 'ditinjau Kepala Divisi'],
-            ['Dikembalikan', m.returned, 'perlu diperbaiki penilai'],
-        ]);
-        dashboardComparison(
-            $('[data-dashboard-comparison]'),
-            c,
-            d,
-            month,
-            filters,
-        );
-        lineChart(
-            $('[data-reference-trend]'),
-            keys,
-            keys.map((key) => mean(finals(key).map((p) => s.total(p.id, key)))),
-        );
-        const avgs = $('[data-reference-unit-averages]');
-        if (avgs) {
-            avgs.replaceChildren();
-            const groups = [
-                ...Map.groupBy(
-                    d.scores,
-                    (r) =>
-                        s.assessment(r.personId, month).scope?.unitId ||
-                        r.unit_name,
-                ).values(),
-            ];
-            const renderAverage = (rows) => {
-                const avg = mean(rows.map((r) => +r.total)),
-                    el = node('div', null, 'reference-unit-average'),
-                    caption = node('div'),
-                    bar = node('div', null, 'reference-bar'),
-                    fill = node('span');
-                caption.append(
-                    node('span', rows[0].unit_name),
-                    node('b', format(avg)),
-                );
-                fill.style.width = `${avg}%`;
-                bar.append(fill);
-                el.append(caption, bar);
-                return el;
-            };
-            if (!groups.length)
-                empty(avgs, 'Belum ada rata-rata Final per unit.');
-            if (c.role === 'hc')
-                paginate(avgs, 'unit-averages', {
-                    size: 5,
-                    token: JSON.stringify([month, filters]),
-                    records: groups,
-                    renderRow: renderAverage,
-                });
-            else groups.forEach((rows) => avgs.append(renderAverage(rows)));
-        }
-    }
+            );
     const kpiBody = $('[data-item-averages]');
     if (panel === 'kpi' && kpiBody) {
         const groups = new Map();
@@ -600,65 +383,85 @@ function report(c, s, d, link, filters, panel) {
             c.role,
             'unit-status',
         );
-    const rank = $('[data-ranking-v4]'),
-        select = $('[data-reference-rank-group]');
+    const rank = $('[data-ranking-v4]');
     if (panel === 'results' && rank) {
-        let groups = d.rankings;
-        if (select) {
-            const previous = select.value;
-            select.replaceChildren(
-                ...d.rankings.map(
-                    (g, i) =>
-                        new Option(
-                            `${g.area} · ${g.kind === 'member' ? 'Staf' : 'Kepala Unit'}`,
-                            String(i),
-                        ),
-                ),
+        // Positions come from the server per KPI group (template + kind); they are
+        // never merged into one cross-group rank, so every row names its group.
+        const kindLabel = (kind) => (kind === 'member' ? 'Staf' : 'Kepala Unit'),
+            groups = [...d.rankings].sort(
+                (a, b) =>
+                    String(a.area ?? '').localeCompare(String(b.area ?? ''), 'id') ||
+                    (a.kind === b.kind ? 0 : a.kind === 'member' ? -1 : 1),
+            ),
+            base = (g) => `${g.area} · ${kindLabel(g.kind)}`,
+            shared = new Set(
+                groups
+                    .map(base)
+                    .filter((label, i, all) => all.indexOf(label) !== i),
             );
-            if ([...select.options].some((o) => o.value === previous))
-                select.value = previous;
-            groups = d.rankings.slice(
-                +select.value || 0,
-                (+select.value || 0) + 1,
-            );
-        }
         const rows = groups.flatMap((group) =>
             group.rows.map((row, index) => ({
                 ...row,
                 position: index + 1,
-                groupLabel: `${group.area} · ${group.kind === 'member' ? 'Staf' : 'Kepala Unit'}`,
+                size: group.rows.length,
+                groupLabel: shared.has(base(group))
+                    ? `${base(group)} · ${group.name}`
+                    : base(group),
             })),
         );
-        table(
+        const body = table(
             rank,
-            ['Peringkat', 'Nama', 'Nilai', 'Kategori'],
+            [
+                'Peringkat dalam kelompok',
+                'Nama dan kelompok KPI',
+                'Nilai',
+                'Kategori',
+            ],
             rows,
             'ranking',
             10,
             'reference-ranking-table',
             {
-                token: JSON.stringify([month, filters, select?.value]),
+                token: JSON.stringify([month, filters]),
                 renderRow: (r) => {
                     const tr = node('tr'),
+                        position = cell(null, 'reference-rank-position'),
                         name = cell(null),
-                        b = review(r, month);
-                    b.replaceChildren(
-                        person(r, c.role === 'hc' ? r.groupLabel : r.unit_name),
+                        b = review(r, month),
+                        current = s.category(r.personId),
+                        category = cell(r.category, 'category');
+                    if (current?.label === r.category)
+                        category.dataset.category = current.key;
+                    position.setAttribute(
+                        'aria-label',
+                        `Peringkat ${r.position} dari ${r.size} di kelompok ${r.groupLabel}`,
                     );
+                    position.append(
+                        node('strong', `#${r.position}`),
+                        node('small', `dari ${r.size}`),
+                    );
+                    b.replaceChildren(person(r, `Kelompok: ${r.groupLabel}`));
                     name.append(b);
+                    tr.dataset.rankGroup = r.groupLabel;
                     tr.append(
-                        cell(r.position, 'text-muted'),
+                        position,
                         name,
                         cell(number(r.total), 'numeric font-semibold'),
-                        cell(r.category, 'text-success font-semibold'),
+                        category,
                     );
                     return tr;
                 },
             },
         );
+        const caption = node(
+            'caption',
+            'Peringkat dihitung terpisah di setiap kelompok KPI (unit atau divisi dan jenis penilaian); nomor peringkat tidak dibandingkan antarkelompok.',
+            'sr-only',
+        );
+        body?.parentElement.prepend(caption);
     }
     if (panel === 'results' || panel === 'findings')
-        feed($('[data-staff-findings]'), d.findings, month);
+        feed($('[data-staff-findings]'), d.findings, month, findingsView());
     if (panel === 'scores') staffScores(s, filters, visible);
 }
 
@@ -713,7 +516,7 @@ function staffScores(s, filters, visible) {
                 ),
             );
         });
-        tr.append(cell(format(average), 'numeric text-info font-semibold'));
+        tr.append(cell(format(average), 'numeric text-link font-semibold'));
         return tr;
     };
     if (!rows.length) {
@@ -730,6 +533,18 @@ function staffScores(s, filters, visible) {
         renderRow,
     });
 }
+/** Report-only Filter fields say whether they act on the open tab. */
+function reportControls(panel) {
+    $$('[data-report-control]').forEach((field) => {
+        const active = field.dataset.reportControl.split(',').includes(panel),
+            hint = $('[data-report-control-hint]', field);
+        field.toggleAttribute('data-report-control-active', active);
+        if (hint)
+            hint.textContent = active
+                ? 'Berlaku pada tab yang sedang dibuka.'
+                : `Berlaku pada tab ${field.dataset.reportControlLabel}.`;
+    });
+}
 export function renderReference(c, s, d, link, filters) {
     const root = $('[data-reference-layout]');
     if (!root) return;
@@ -743,24 +558,37 @@ export function renderReference(c, s, d, link, filters) {
             const tab = e.target.closest('[data-panel-tab]');
             if (!tab) return;
             root.referencePanel = tab.dataset.panelTab;
+            reportControls(root.referencePanel);
             const v = root.referenceState;
             report(v.c, v.s, v.d, v.link, v.filters, root.referencePanel);
         });
+        // The Filter dialog sits inside this root, so its range and sort fields
+        // re-render locally without a server request.
         root.addEventListener('change', (e) => {
             if (e.target.matches('[data-staff-score-order]')) {
                 const { s, filters } = root.referenceState;
                 staffScores(s, filters, rangedKeys(s));
                 return;
             }
-            if (
-                e.target.matches(
-                    '[data-report-range],[data-reference-rank-group]',
-                )
-            ) {
+            // Findings kind filters the loaded rows; unit/type/search stay server-side.
+            if (e.target.matches('[data-report-findings]')) {
+                if (!['results', 'findings'].includes(root.referencePanel))
+                    return;
+                const { s, d } = root.referenceState;
+                feed(
+                    $('[data-staff-findings]'),
+                    d.findings,
+                    s.cycleKey,
+                    findingsView(),
+                );
+                return;
+            }
+            if (e.target.matches('[data-report-range]')) {
                 const v = root.referenceState;
                 renderReference(v.c, v.s, v.d, v.link, v.filters);
             }
         });
     }
+    reportControls(root.referencePanel);
     report(c, s, d, link, filters, root.referencePanel);
 }

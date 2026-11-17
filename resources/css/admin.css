@@ -1,40 +1,174 @@
-/* Admin pages: accounts, logs, reminder emails. Builds on shared table/card/status styles. */
+/* Admin pages: accounts, logs, reminder emails. Builds on shared card, table,
+   segmented-control and status styles; only admin-specific cells live here. */
 .admin-page .table-tools {
     flex-wrap: wrap;
 }
 
-.admin-stats {
+/* Card title with a small live counter beside it ("Daftar akun · 24 akun"). */
+.admin-card-title {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
+}
+.admin-count {
     color: var(--color-muted);
-    font-size: 13px;
+    font-size: 12.5px;
+    line-height: 18px;
+    font-variant-numeric: tabular-nums;
+}
+.admin-count:empty {
+    display: none;
+}
+
+/* Desktop tables keep every column readable and scroll inside their card. */
+@media (min-width: 901px) {
+    body[data-app-shell] .admin-accounts-table {
+        min-width: 1180px;
+    }
+    body[data-app-shell] .admin-log-table {
+        min-width: 920px;
+    }
+    body[data-app-shell] .admin-recipient-table {
+        min-width: 980px;
+    }
+}
+/* Auto layout: fixed widths for identity, email and actions; break-word (not
+   anywhere) keeps long emails from shrinking their column's minimum width. */
+.admin-accounts-table th:first-child {
+    width: 220px;
+}
+.admin-accounts-table th:nth-child(2) {
+    width: 220px;
+    min-width: 200px;
+}
+.admin-accounts-table th:last-child {
+    width: 260px;
+}
+.admin-accounts-table .reference-person strong {
+    overflow-wrap: break-word;
+}
+.admin-email {
+    color: var(--color-muted);
+    overflow-wrap: break-word;
+}
+.admin-role {
+    font-weight: 600;
+    white-space: nowrap;
+}
+.admin-time {
+    font-size: 12.5px;
+    white-space: nowrap;
 }
 
 .admin-row-actions {
     display: inline-flex;
     flex-wrap: nowrap;
+    align-items: center;
     justify-content: flex-end;
-    gap: 4px;
+    gap: 2px;
     white-space: nowrap;
 }
+/* Destructive action: red text, separated from the neutral actions. */
+.admin-row-actions .admin-action-danger {
+    position: relative;
+    margin-left: 9px;
+    color: var(--color-danger);
+    font-weight: 600;
+}
+.admin-row-actions .admin-action-danger::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: -6px;
+    width: 1px;
+    background: var(--color-line);
+}
+body[data-app-shell] .data-table .admin-action-danger:hover {
+    background: var(--color-danger-soft);
+    color: var(--color-danger);
+}
+.admin-action-danger:focus-visible {
+    outline-color: var(--color-danger);
+}
+
 .admin-ellipsis {
     max-width: 260px;
     overflow: hidden;
+    color: var(--color-muted);
+    font-size: 12.5px;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+/* Detail dialogs (audit log, organization record, activity): summary block
+   above the before/after comparison or history. */
+.detail-summary {
+    padding: 14px 16px;
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: var(--color-subtle);
+}
+.admin-diff td:first-child {
+    color: var(--color-muted);
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 12px;
+}
 .admin-changed td {
-    background: color-mix(in srgb, var(--color-warning, #f59e0b) 12%, transparent);
+    background: var(--color-warning-soft);
+}
+.admin-changed td:last-child {
+    font-weight: 600;
 }
 
+/* Reminder form and recipient preview. */
 .admin-reminder-form {
     display: grid;
     gap: 16px;
 }
-
 .admin-reminder-grid {
     display: grid;
     gap: 16px;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.admin-select-all {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background: var(--color-subtle);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.admin-select-all:has(input:checked) {
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-line));
+    background: var(--color-accent-soft);
+    color: var(--color-link);
+}
+.admin-recipient-table th:first-child {
+    width: 48px;
+}
+.admin-recipient-table tbody tr:has([data-recipient]:checked) {
+    background: color-mix(in srgb, var(--color-accent-soft) 55%, transparent);
+}
+.admin-row-muted td {
+    color: var(--color-muted);
+}
+.admin-send-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-subtle) 50%, transparent);
 }
 
 .admin-page tbody[aria-busy='true'] {
@@ -52,7 +186,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-start;
-        gap: 0 16px;
+        gap: 4px 8px;
         white-space: normal;
     }
     .admin-row-actions > button {
@@ -60,9 +194,23 @@
         min-height: 44px;
         align-items: center;
     }
+    .admin-row-actions .admin-action-danger {
+        margin-left: auto;
+    }
+    .admin-row-actions .admin-action-danger::before {
+        display: none;
+    }
+    .admin-ellipsis {
+        max-width: none;
+        white-space: normal;
+    }
 }
 @media (max-width: 600px) {
-    .admin-ellipsis {
-        max-width: 140px;
+    .admin-select-all {
+        width: 100%;
+        min-height: 44px;
+    }
+    .admin-send-bar .btn {
+        width: 100%;
     }
 }

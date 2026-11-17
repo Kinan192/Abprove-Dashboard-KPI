@@ -149,7 +149,7 @@ export function emptyKpi() {
     return {
         id: '',
         name: '',
-        pillar: 'Technical Care',
+        pillar: '',
         method: 'formula',
         weight: '',
         variables: [
@@ -230,6 +230,33 @@ export function cleanKpi(kpi) {
             max: Number(kpi.policy.max),
         },
     };
+}
+/** Built-in pillar hints; always suggested alongside the pillars already used. */
+export const PILLAR_PRESETS = [
+    'Technical Care',
+    'Access',
+    'Coordination and Continuity',
+    'Interpersonal Care',
+    'Efficient',
+];
+/**
+ * Pillar suggestions: built-in hints, the loaded document (stored patterns of every
+ * period, legacy templates), the unsaved draft items and the value being edited —
+ * trimmed, non-empty, de-duplicated case-insensitively (first spelling wins), sorted.
+ */
+export function pillarSuggestions(data, draftItems = [], current = '') {
+    const seen = new Map();
+    const add = (value) => {
+        const pillar = String(value ?? '').trim(),
+            key = pillar.toLocaleLowerCase('id');
+        if (pillar && !seen.has(key)) seen.set(key, pillar);
+    };
+    PILLAR_PRESETS.forEach(add);
+    for (const item of draftItems) add(item.pillar);
+    add(current);
+    for (const pattern of data.patterns || []) for (const item of pattern.items || []) add(item.pillar);
+    for (const template of data.legacyTemplates || []) for (const item of template.items || []) add(item.pillar);
+    return [...seen.values()].sort((a, b) => a.localeCompare(b, 'id'));
 }
 /**
  * Lookup tables of the selected month: patterns with totals and usage,

@@ -1,5 +1,5 @@
 import { $, confirm, open, toast } from '../abprove/ui';
-import { node, status, field } from '../abprove/flow-dom';
+import { node, status, field, initials } from '../abprove/flow-dom';
 import { remoteTable } from './remote-table';
 import { ROLE_LABELS, when } from './labels';
 
@@ -26,7 +26,7 @@ export function initAccounts(config) {
         emptyText: 'Belum ada akun yang cocok dengan filter.',
         renderRow: renderAccount,
         onLoaded: (result) => {
-            $('[data-account-stats]').textContent = `${result.total} akun ditemukan.`;
+            $('[data-account-stats]').textContent = `${result.total} akun`;
         },
     });
 
@@ -34,7 +34,11 @@ export function initAccounts(config) {
         rows.set(String(account.id), account);
         const tr = node('tr');
         const identity = node('td');
-        identity.append(node('strong', account.name, 'block'), node('span', account.login_nip || '-', 'text-xs text-muted'));
+        const person = node('div', null, 'reference-person');
+        const copy = node('div');
+        copy.append(node('strong', account.name), node('small', account.login_nip || '-'));
+        person.append(node('span', initials(account.name), 'avatar'), copy);
+        identity.append(person);
         const area = account.unit_name || account.division_name;
         const global = ['admin', 'super_hc'].includes(account.role_key);
         const access = global
@@ -54,19 +58,20 @@ export function initAccounts(config) {
             ['toggle', account.is_active ? 'Nonaktifkan' : 'Aktifkan'],
             ['delete', 'Hapus'],
         ]) {
-            const button = node('button', label, action === 'delete' ? 'link text-link' : 'link');
+            const button = node('button', label, action === 'delete' ? 'v2-row-action admin-action-danger' : 'link v2-row-action');
             button.type = 'button';
             button.dataset.accountAction = action;
             button.dataset.id = account.id;
+            if (action === 'delete') button.setAttribute('aria-label', `Hapus akun ${account.name}`);
             wrap.append(button);
         }
         actions.append(wrap);
         tr.append(
             identity,
-            node('td', account.email || '-'),
-            node('td', ROLE_LABELS[account.role_key] || account.role_key),
+            node('td', account.email || '-', 'admin-email'),
+            node('td', ROLE_LABELS[account.role_key] || account.role_key, 'admin-role'),
             node('td', access, area || global ? '' : 'text-muted'),
-            node('td', account.last_login_at ? when(account.last_login_at) : 'Belum pernah'),
+            node('td', account.last_login_at ? when(account.last_login_at) : 'Belum pernah', account.last_login_at ? 'admin-time' : 'admin-time text-muted'),
             stateCell,
             actions,
         );

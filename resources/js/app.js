@@ -9,15 +9,6 @@ import { initFlowAssessments } from './abprove/flow-assessments';
 import { initFlowReports } from './abprove/flow-reports';
 import { createApi } from './abprove/api';
 
-if (document.body.hasAttribute('data-app-shell'))
-    window.addEventListener(
-        'scroll',
-        () => {
-            if (window.scrollY !== 0) window.scrollTo(0, 0);
-        },
-        { passive: true },
-    );
-
 document.documentElement.dataset.brandAsset = markUrl;
 const element = $('#kpi-config'),
     config = element ? JSON.parse(element.textContent) : null;

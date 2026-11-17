@@ -1,23 +1,55 @@
 import { Formula } from './formula.js';
-export const UNITS = [
-    '%',
-    'Rp',
-    'unit',
-    'kegiatan',
-    'dokter',
-    'tiket',
-    'kasus',
-    'orang',
-    'transaksi',
-    'dokumen',
-    'kali',
-    'menit',
-    'jam',
-    'hari',
-    'poin',
-    'skor',
-    'rasio',
+/** Standard units grouped for the Satuan select; the stored value is the first element. */
+export const UNIT_GROUPS = [
+    {
+        group: 'Persentase & perbandingan',
+        options: [
+            ['%', '% (persen)'],
+            ['rasio', 'Rasio'],
+        ],
+    },
+    {
+        group: 'Waktu',
+        options: [
+            ['menit', 'Menit'],
+            ['jam', 'Jam'],
+            ['hari', 'Hari'],
+        ],
+    },
+    { group: 'Keuangan', options: [['Rp', 'Rp (rupiah)']] },
+    {
+        group: 'Jumlah / volume',
+        options: [
+            ['unit', 'Unit'],
+            ['kegiatan', 'Kegiatan'],
+            ['dokter', 'Dokter'],
+            ['tiket', 'Tiket'],
+            ['kasus', 'Kasus'],
+            ['orang', 'Orang'],
+            ['transaksi', 'Transaksi'],
+            ['dokumen', 'Dokumen'],
+            ['kali', 'Kali'],
+        ],
+    },
+    {
+        group: 'Nilai',
+        options: [
+            ['poin', 'Poin'],
+            ['skor', 'Skor'],
+        ],
+    },
 ];
+/**
+ * Satuan options: standard groups plus, when the KPI already stores a non-standard
+ * unit, a leading "Satuan tersimpan" group so that value stays selectable exactly once.
+ */
+export function satuanOptions(current) {
+    const unit = String(current ?? '');
+    const standard = UNIT_GROUPS.some((g) => g.options.some(([value]) => value === unit));
+    return unit.trim() && !standard
+        ? [{ group: 'Satuan tersimpan', options: [[unit, `${unit} (tersimpan, di luar daftar)`]] }, ...UNIT_GROUPS]
+        : UNIT_GROUPS;
+}
 export function formulaErrors(k) {
     const errors = {};
     const rows = k.variables || [],

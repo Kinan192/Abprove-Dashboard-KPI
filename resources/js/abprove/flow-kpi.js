@@ -239,12 +239,13 @@ export function initKpi(c, s) {
             errorBox.hidden = true;
             errorBox.textContent = '';
         }
-        $$('[data-kpi-level]').forEach((button) =>
-            button.classList.toggle(
-                'active',
-                button.dataset.kpiLevel === level,
-            ),
-        );
+        $$('[data-kpi-level]').forEach((button) => {
+            button.classList.toggle('active', button.dataset.kpiLevel === level);
+            button.setAttribute(
+                'aria-pressed',
+                String(button.dataset.kpiLevel === level),
+            );
+        });
         const options = areas();
         optionList($('[data-kpi-area]'), options, 'Pilih area KPI');
         if (!options.some((a) => a.id === areaId))
@@ -374,9 +375,6 @@ export function initKpi(c, s) {
             level = l.dataset.kpiLevel;
             areaId = null;
             selected = null;
-            $$('[data-kpi-level]').forEach((b) =>
-                b.classList.toggle('active', b === l),
-            );
             render();
         }
         const action =

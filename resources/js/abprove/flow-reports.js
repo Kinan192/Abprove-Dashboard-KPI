@@ -7,6 +7,7 @@ import {
     labelCycle,
     empty,
     status,
+    initials,
 } from './flow-dom';
 import { toast } from './ui';
 import { paginate } from './pagination';
@@ -25,66 +26,114 @@ export function initFlowReports(c, s, a, link) {
             e.hidden = !value;
         });
     }
+    /**
+     * Team roster over the units already in the account scope. An empty unit
+     * selection means every scoped unit; a stale selection falls back to all.
+     */
     function team() {
         const root = $('[data-team-structure]');
         if (!root) return;
         const select = $('[data-team-unit]'),
-            old = select?.value;
-        const units = s.scopedUnits();
-        optionList(select, units, 'Pilih unit');
-        const unitId = units.some((u) => u.id === old)
-            ? old
-            : units[0]?.id || '';
-        if (select) select.value = unitId;
-        const unit = s.unit(unitId);
+            units = s.scopedUnits(),
+            head = root.closest('table')?.tHead?.rows[0];
+        optionList(
+            select,
+            units,
+            c.role === 'kd' ? 'Semua unit dalam divisi' : 'Semua unit',
+        );
+        const chosen = select?.value ? s.unit(select.value) : null,
+            unit = chosen || (units.length === 1 ? units[0] : null),
+            shown = unit ? [unit] : units,
+            order = new Map(shown.map((u, i) => [u.id, i])),
+            showUnit = !!head?.querySelector('[data-team-unit-column]'),
+            columns = head?.cells.length || 4,
+            members = s
+                .people('member')
+                .filter((p) => order.has(p.unitId))
+                .sort((a, b) => order.get(a.unitId) - order.get(b.unitId));
         root.replaceChildren();
         const summary = $('[data-team-summary]');
         summary.replaceChildren();
-        if (unit) {
+        if (unit)
             summary.append(
-                node('h2', unit.name, 'section-title'),
+                node('h3', unit.name, 'section-title'),
                 node(
                     'p',
-                    `Kepala Unit: ${s.account(unit.headId)?.name} / Divisi: ${s.division(unit.divisionId)?.name}`,
-                    'mt-2 text-xs text-muted',
+                    `Kepala Unit: ${s.account(unit.headId)?.name || 'Belum ditetapkan'} · Divisi: ${s.division(unit.divisionId)?.name || '-'} · ${members.length} staf`,
+                    'mt-0.5 text-xs text-muted',
                 ),
             );
-            for (const p of s
-                .people('member')
-                .filter((p) => p.unitId === unit.id)) {
-                const tr = node('tr'),
-                    name = node('td');
-                name.append(
-                    node('strong', p.name, 'block font-semibold'),
-                    node('p', p.nip, 'mt-1 text-xs text-muted'),
-                );
-                const action = node('td'),
-                    a = node('a', 'Buka penilaian', 'link');
-                a.href = link(c.role === 'ku' ? 'nilai' : 'persetujuan', {
-                    person: p.id,
-                });
-                action.append(a);
-                const assessmentStatus = node('td'),
-                    assessmentBadge = node('span', '', '');
-                status(assessmentBadge, s.assessment(p.id).status);
-                assessmentStatus.append(assessmentBadge);
-                tr.append(name, node('td', p.job), assessmentStatus, action);
-                root.append(tr);
-            }
-        }
-        if (!root.childElementCount) {
+        else if (units.length) {
+            const divisions = [
+                ...new Set(
+                    units.map((u) => s.division(u.divisionId)?.name || '-'),
+                ),
+            ];
+            summary.append(
+                node(
+                    'h3',
+                    c.role === 'kd' ? 'Semua unit dalam divisi' : 'Semua unit',
+                    'section-title',
+                ),
+                node(
+                    'p',
+                    `${units.length} unit · ${members.length} staf · Divisi: ${divisions.join(', ')}`,
+                    'mt-0.5 text-xs text-muted',
+                ),
+            );
+        } else
+            summary.append(
+                node('h3', 'Belum ada unit dalam cakupan', 'section-title'),
+            );
+        for (const p of members) {
             const tr = node('tr'),
-                td = node('td', 'Belum ada staf di unit ini.', 'empty');
-            td.colSpan = 4;
+                name = node('td');
+            tr.dataset.teamUnitId = p.unitId;
+            name.append(
+                node('strong', p.name, 'block font-semibold'),
+                node('p', p.nip, 'mt-1 text-xs text-muted'),
+            );
+            const action = node('td', null, 'numeric'),
+                a = node('a', 'Buka penilaian', 'link');
+            a.href = link(c.role === 'ku' ? 'nilai' : 'persetujuan', {
+                person: p.id,
+            });
+            action.append(a);
+            const assessmentStatus = node('td'),
+                assessmentBadge = node('span', '', '');
+            status(assessmentBadge, s.assessment(p.id).status);
+            assessmentStatus.append(assessmentBadge);
+            tr.append(name);
+            if (showUnit)
+                tr.append(node('td', s.unit(p.unitId)?.name || p.unitName));
+            tr.append(node('td', p.job), assessmentStatus, action);
+            root.append(tr);
+        }
+        if (!members.length) {
+            const tr = node('tr'),
+                td = node(
+                    'td',
+                    !units.length
+                        ? 'Belum ada unit dalam cakupan.'
+                        : unit
+                          ? 'Belum ada staf di unit ini.'
+                          : 'Belum ada staf di unit dalam cakupan.',
+                    'empty',
+                );
+            td.colSpan = columns;
             tr.append(td);
             root.append(tr);
         }
-        paginate(root, 'team', { token: unitId });
+        paginate(root, 'team', { token: unit?.id || 'all' });
     }
     const notificationState = { page: 1, perPage: 10 };
     let notificationRequest;
     function notificationRow(n) {
-        const row = node('a', null, 'block p-4 hover:bg-subtle');
+        const row = node(
+            'a',
+            null,
+            'flex items-center gap-3 px-4 py-3 text-ink no-underline transition-colors hover:bg-subtle',
+        );
         row.href = link(
             c.role === 'ku'
                 ? 'nilai'
@@ -99,16 +148,20 @@ export function initFlowReports(c, s, a, link) {
             {
                 submitted: 'Diajukan',
                 returned: 'Dikembalikan',
-                not_started: 'Belum diisi',
+                not_started: 'Belum',
             }[n.status] || n.status;
-        row.append(
-            node('strong', n.name, 'block text-sm font-semibold'),
+        const copy = node('span', null, 'min-w-0 grow'),
+            badge = node('span');
+        copy.append(
+            node('strong', n.name, 'block truncate text-sm font-semibold'),
             node(
-                'p',
-                `${n.kind === 'member' ? 'Staf' : 'Kepala Unit'} · ${state}`,
-                'mt-1 text-xs text-muted',
+                'span',
+                n.kind === 'member' ? 'Staf' : 'Kepala Unit',
+                'mt-0.5 block text-xs text-muted',
             ),
         );
+        status(badge, state);
+        row.append(node('span', initials(n.name), 'avatar'), copy, badge);
         return row;
     }
     /** The notification page reads one server page of tasks at a time. */

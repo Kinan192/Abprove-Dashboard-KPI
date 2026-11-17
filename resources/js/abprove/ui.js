@@ -11,7 +11,7 @@ export const number = (value) =>
           });
 export function toast(message, error = false) {
     const item = document.createElement('div');
-    item.className = `toast pointer-events-auto ${error ? 'text-link' : ''}`;
+    item.className = `toast ${error ? 'toast-error' : ''}`;
     item.textContent = message;
     item.setAttribute('role', error ? 'alert' : 'status');
     $('#toast-stack')?.append(item);
@@ -103,27 +103,22 @@ export function initUI() {
             );
         const theme = event.target.closest('[data-theme-choice]');
         if (theme) {
-            document.documentElement.dataset.theme = theme.dataset.themeChoice;
-            localStorage.setItem('abprove-theme', theme.dataset.themeChoice);
-            $$('[data-theme-choice]').forEach((b) =>
-                b.classList.toggle('active', b === theme),
-            );
+            try {
+                localStorage.setItem(THEME_KEY, theme.dataset.themeChoice);
+            } catch {}
+            applyTheme(theme.dataset.themeChoice);
         }
         const action = event.target.closest('[data-action]')?.dataset.action;
         if (['sidebar-toggle', 'sidebar-close'].includes(action)) {
-            const mobile = matchMedia('(max-width:900px)').matches;
-            const className = mobile ? 'nav-open' : 'nav-collapsed';
+            const className = matchMedia(MOBILE_NAV).matches
+                ? 'nav-open'
+                : 'nav-collapsed';
             if (action === 'sidebar-close')
                 document.body.classList.remove(className);
             else document.body.classList.toggle(className);
-            const expanded = document.body.classList.contains('nav-open');
-            $('#sidebar-scrim').hidden = !expanded;
-            $('#app-main').inert = expanded;
-            $('[data-action="sidebar-toggle"]').setAttribute(
-                'aria-expanded',
-                String(expanded),
-            );
-            if (expanded) $('#sidebar a').focus();
+            syncSidebar();
+            if (document.body.classList.contains('nav-open'))
+                $('#sidebar a').focus();
         }
         if (action === 'logout') {
             $('#logout-form')?.requestSubmit();
@@ -177,8 +172,7 @@ export function initUI() {
             document.body.classList.contains('nav-open')
         ) {
             document.body.classList.remove('nav-open');
-            $('#sidebar-scrim').hidden = true;
-            $('#app-main').inert = false;
+            syncSidebar();
             $$('[data-action="sidebar-toggle"]')
                 .find((button) => button.getClientRects().length)
                 ?.focus();
@@ -214,9 +208,53 @@ export function initUI() {
             true,
         ),
     );
-    matchMedia('(max-width:900px)').addEventListener('change', () => {
+    matchMedia(MOBILE_NAV).addEventListener('change', () => {
         document.body.classList.remove('nav-open');
-        if ($('#sidebar-scrim')) $('#sidebar-scrim').hidden = true;
-        if ($('#app-main')) $('#app-main').inert = false;
+        syncSidebar();
+    });
+    matchMedia(DARK_SCHEME).addEventListener('change', () => {
+        if (document.documentElement.dataset.themeMode === 'system')
+            applyTheme('system');
+    });
+    syncSidebar();
+    applyTheme(document.documentElement.dataset.themeMode);
+}
+const MOBILE_NAV = '(max-width:900px)';
+const THEME_KEY = 'abprove-theme';
+const THEME_MODES = ['system', 'light', 'dark'];
+const DARK_SCHEME = '(prefers-color-scheme: dark)';
+/** Mirrors the drawer (mobile) or rail (desktop) state onto every toggle. */
+function syncSidebar() {
+    if (!$('#sidebar')) return;
+    const mobile = matchMedia(MOBILE_NAV).matches,
+        open = mobile && document.body.classList.contains('nav-open'),
+        expanded = mobile
+            ? open
+            : !document.body.classList.contains('nav-collapsed');
+    $('#sidebar-scrim').hidden = !open;
+    $('#app-main').inert = open;
+    $$('[data-action="sidebar-toggle"]').forEach((button) =>
+        button.setAttribute('aria-expanded', String(expanded)),
+    );
+}
+/**
+ * Stores the chosen mode (system/light/dark) on data-theme-mode and resolves
+ * data-theme to light/dark, which every stylesheet and chart observer reads.
+ */
+function applyTheme(mode) {
+    const root = document.documentElement,
+        preference = THEME_MODES.includes(mode) ? mode : 'light',
+        resolved =
+            preference === 'system'
+                ? matchMedia(DARK_SCHEME).matches
+                    ? 'dark'
+                    : 'light'
+                : preference;
+    root.dataset.themeMode = preference;
+    if (root.dataset.theme !== resolved) root.dataset.theme = resolved;
+    $$('[data-theme-choice]').forEach((button) => {
+        const selected = button.dataset.themeChoice === preference;
+        button.classList.toggle('active', selected);
+        button.setAttribute('aria-pressed', String(selected));
     });
 }

@@ -418,7 +418,12 @@ function init(c, s) {
         }
         if (!(await commit((next) => savePeriod(next, p, old), form))) return;
         reset();
-        await go('periods', '', { keep: true, message: `Periode “${p.name}” tersimpan.` });
+        await go('periods', '', {
+            keep: true,
+            message: old
+                ? `Periode “${p.name}” tersimpan.`
+                : `Periode “${p.name}” tersimpan sebagai Direncanakan. Langkah berikutnya: pilih Atur pola pada baris periode ini, buat pola KPI 100%, terapkan ke seluruh staf, cek bobot, lalu Buka periode.`,
+        });
     }
     async function applySelected(release) {
         const rows = applyRows(ctx).filter((p) => ctx.selection.has(p.id));
@@ -536,7 +541,7 @@ function init(c, s) {
             }
             case 'show-missing':
                 Object.assign(ctx.filter, { division: '', unit: '', position: '', role: 'staff', status: 'none', search: '' });
-                return go('matrix');
+                return go('matrix', '', id ? { cycle: id } : {});
             case 'select-filtered':
                 return selectFiltered(true);
             case 'apply':

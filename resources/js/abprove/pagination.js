@@ -159,6 +159,13 @@ export function resetPage(key) {
         apply(state);
     }
 }
+/** Removes a list's footer and forgets its cached state; no-op for keys never paginated. */
+export function clearPagination(key) {
+    const state = lists.get(key);
+    if (!state) return;
+    state.footer?.remove();
+    lists.delete(key);
+}
 document.addEventListener('click', (event) => {
     const button = event.target.closest('[data-page-prev],[data-page-next]');
     if (!button) return;

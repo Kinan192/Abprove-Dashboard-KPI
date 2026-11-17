@@ -137,9 +137,10 @@ export function initStaffTransfer(s) {
             root.append(box);
         }
         const table = node('table', null, 'data-table'),
+            columns = ['Staf', 'Penempatan sekarang', 'Terjadwal', 'Non-Final', 'Status'],
             head = node('tr'),
             tbody = node('tbody');
-        head.append(...['Staf', 'Penempatan sekarang', 'Terjadwal', 'Non-Final', 'Status'].map((label) => node('th', label)));
+        head.append(...columns.map((label) => node('th', label)));
         const thead = node('thead');
         thead.append(head);
         const rows = [...preview.staff].sort((a, b) => b.blockers.length - a.blockers.length);
@@ -164,6 +165,7 @@ export function initStaffTransfer(s) {
                 node('td', String(staff.pending_assessments), 'numeric'),
                 state,
             );
+            columns.forEach((label, i) => (tr.cells[i].dataset.label = label));
             if (staff.blockers.length) tr.dataset.blocked = '';
             tbody.append(tr);
         }

@@ -6,18 +6,18 @@
         <div class="compact-heading"><h2 class="lead">Akun pengguna</h2><p class="mt-2 text-sm text-muted">Akun login Super HC, Kepala Divisi, Kepala Unit dan Admin. Kepala Divisi/Unit dapat masuk setelah ditunjuk Super HC sebagai kepala area.</p></div>
         <button class="btn btn-primary" type="button" data-account-new><x-abprove.icon name="plus"/>Tambah akun</button>
     </div>
-    <div class="admin-stats" data-account-stats aria-live="polite"></div>
-    <div class="card table-card">
+    <section class="card table-card admin-card">
         <div class="card-toolbar">
+            <div class="admin-card-title"><h3 class="section-title">Daftar akun</h3><span class="admin-count" data-account-stats aria-live="polite"></span></div>
             <div class="table-tools">
                 <label class="inline-filter"><span>Role</span><select class="field" data-filter="role" aria-label="Filter role"><option value="">Semua role</option>@foreach($roles as $key=>$label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select></label>
                 <label class="inline-filter"><span>Status</span><select class="field" data-filter="status" aria-label="Filter status"><option value="">Semua status</option><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select></label>
                 <input class="field" type="search" data-filter="search" placeholder="Cari nama, email atau NIP" aria-label="Cari akun">
             </div>
         </div>
-        <div class="table-wrap"><table class="data-table"><thead><tr><th>Nama / NIP login</th><th>Email</th><th>Role</th><th>Penugasan</th><th>Login terakhir</th><th>Status</th><th class="numeric">Tindakan</th></tr></thead><tbody data-account-rows></tbody></table></div>
+        <div class="table-wrap"><table class="data-table admin-table admin-accounts-table"><thead><tr><th>Nama / NIP login</th><th>Email</th><th>Role</th><th>Penugasan</th><th>Login terakhir</th><th>Status</th><th class="numeric">Tindakan</th></tr></thead><tbody data-account-rows></tbody></table></div>
         <div data-account-pager></div>
-    </div>
+    </section>
 </div>
 @push('dialogs')
 <x-abprove.dialog id="account-form-dialog" title="Akun pengguna" :drawer="true" :narrow="true">

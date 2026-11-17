@@ -15,6 +15,20 @@ export const attrs = (values) =>
         .filter(([, v]) => v !== false && v != null)
         .map(([k, v]) => (v === true ? k : `${k}="${esc(v)}"`))
         .join(' ');
+/**
+ * Select rows: `[value, label, disabled?]` or `{ id, name, disabled? }`; a
+ * `{ group, options }` row renders a native `<optgroup>` of such rows.
+ */
+function optionsMarkup(rows, value) {
+    return rows
+        .map((row) => {
+            if (row.group != null)
+                return `<optgroup label="${esc(row.group)}">${optionsMarkup(row.options, value)}</optgroup>`;
+            const [v, t, disabled] = Array.isArray(row) ? row : [row.id, row.name, row.disabled];
+            return `<option ${attrs({ value: v, selected: String(v) === String(value), disabled: !!disabled })}>${esc(t)}</option>`;
+        })
+        .join('');
+}
 export function field(name, label, value = '', options = {}) {
     const id = `gp-field-${name}`,
         common = {
@@ -23,17 +37,12 @@ export function field(name, label, value = '', options = {}) {
             class: 'field',
             required: options.required,
             disabled: options.disabled,
-            'aria-describedby': `${id}-error`,
+            'aria-describedby': `${options.help ? `${id}-help ` : ''}${id}-error`,
         };
     const control = options.options
-        ? `<select ${attrs(common)}>${options.placeholder === false ? '' : `<option value="">${esc(options.placeholder || 'Pilih')}</option>`}${options.options
-              .map((row) => {
-                  const [v, t] = Array.isArray(row) ? row : [row.id, row.name];
-                  return `<option ${attrs({ value: v, selected: String(v) === String(value) })}>${esc(t)}</option>`;
-              })
-              .join('')}</select>`
-        : `<input ${attrs({ ...common, type: options.type || 'text', value, min: options.min, max: options.max, step: options.step, maxlength: options.maxlength, list: options.list, readonly: options.readonly, autocomplete: 'off' })}>`;
-    return `<div class="gp-field ${options.wide ? 'gp-wide' : ''}"><label class="label" for="${id}">${esc(label)}${options.required ? '<span class="gp-required"> *</span>' : ''}</label>${control}${options.help ? `<small class="gp-help">${esc(options.help)}</small>` : ''}<p id="${id}-error" class="gp-field-error" data-gp-error="${esc(name)}" hidden></p></div>`;
+        ? `<select ${attrs(common)}>${options.placeholder === false ? '' : `<option value="">${esc(options.placeholder || 'Pilih')}</option>`}${optionsMarkup(options.options, value)}</select>`
+        : `<input ${attrs({ ...common, type: options.type || 'text', value, min: options.min, max: options.max, step: options.step, maxlength: options.maxlength, list: options.list, placeholder: options.placeholder, readonly: options.readonly, autocomplete: 'off' })}>`;
+    return `<div class="gp-field ${options.wide ? 'gp-wide' : ''}"><label class="label" for="${id}">${esc(label)}${options.required ? '<span class="gp-required"> *</span>' : ''}</label>${control}${options.help ? `<small id="${id}-help" class="gp-help">${esc(options.help)}</small>` : ''}<p id="${id}-error" class="gp-field-error" data-gp-error="${esc(name)}" hidden></p></div>`;
 }
 export const note = (text, kind = '') =>
     `<p class="gp-note ${kind}" role="${kind === 'error' ? 'alert' : 'note'}">${esc(text)}</p>`;
