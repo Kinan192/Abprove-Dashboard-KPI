@@ -13,6 +13,12 @@ class AssessmentTasks
 {
     public function __construct(private ScopedRecords $records) {}
 
+    /** The cycle row the task queries work on (id and month); null when it does not exist. */
+    public function cycle(int $id): ?object
+    {
+        return DB::table('assessment_cycles')->select('id', 'assessment_month')->where('id', $id)->first();
+    }
+
     /** Page of tasks ordered returned, submitted, not started; read flags hydrated only for the page. */
     public function page(AccessContext $ctx, object $cycle, int $perPage, int $page = 1): LengthAwarePaginator
     {

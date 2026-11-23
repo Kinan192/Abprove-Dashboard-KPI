@@ -3,6 +3,7 @@
 namespace App\Queries;
 
 use App\Models\Assessment;
+use App\Models\KpiTemplate;
 use App\Services\IdentityAccess\AccessContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
@@ -63,5 +64,13 @@ class ScopedRecords
     public function kpiUnits(AccessContext $ctx)
     {
         return DB::table('units')->when($ctx->role !== 'super_hc', fn ($q) => $q->where('division_id', $ctx->divisionId));
+    }
+
+    /** Sealed KPI templates effective in `$month` (Y-m-d) that the actor may use. */
+    public function kpiTemplates(AccessContext $ctx, string $month)
+    {
+        return KpiTemplate::sealed()->effectiveOn($month)
+            ->when($ctx->role === 'kepala_unit', fn ($q) => $q->where('scope_level', 'unit')->whereIn('scope_key', $this->kpiUnits($ctx)->pluck('id')))
+            ->when($ctx->role === 'kepala_divisi', fn ($q) => $q->where('scope_level', 'division')->where('scope_key', $ctx->divisionId));
     }
 }

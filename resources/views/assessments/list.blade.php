@@ -2,9 +2,9 @@
 @section('content')
 <div class="page-content page-stack workspace-v4" data-flow-list>
     <div class="toolbar">
-        <p class="max-w-[72ch] text-sm text-muted">{{ $vm->role==='hc'?'Rekap mencakup staf dan Kepala Unit. Keputusan nilai hanya pada Kepala Divisi.':($vm->role==='kd'?'Angka staf hanya dapat dibaca. Pengembalian membutuhkan alasan; persetujuan langsung menjadi Final.':'Pengisian belum dikirim tidak disimpan. Pembatalan pengajuan menghapus nilai setelah konfirmasi.') }}</p>
+        <p class="max-w-[72ch] text-sm text-muted">{{ $vm->role==='hc'?'Rekap staf dan Kepala Unit; keputusan nilai ada pada Kepala Divisi.':($vm->role==='kd'?'Koreksi nilai sebelum Final; pengembalian wajib disertai alasan.':'Pengisian yang belum dikirim tidak disimpan.') }}</p>
         <div class="flex flex-wrap gap-2">
-            <button class="btn" type="button" data-dialog-open="export-dialog"><x-abprove.icon name="download"/>Export Excel</button>
+            <button class="btn" type="button" data-dialog-open="export-dialog"><x-abprove.icon name="download"/>Ekspor data</button>
             @if($vm->role==='kd')<button class="btn btn-primary" type="button" data-flow-action="bulk-final">Finalkan pilihan <span class="num" data-selected-count>0</span></button>@endif
         </div>
     </div>

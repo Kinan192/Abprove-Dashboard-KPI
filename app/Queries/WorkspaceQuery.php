@@ -23,10 +23,10 @@ class WorkspaceQuery
     private const STATUS = ['submitted' => 'Diajukan', 'returned' => 'Dikembalikan', 'final' => 'Final'];
 
     private const ASSESSMENT_COLUMNS = ['id', 'cycle_id', 'assessment_kind', 'employee_id', 'subject_user_id', 'unit_id', 'division_id', 'kpi_template_id', 'status', 'lock_version',
-        'total_score_raw', 'positive_finding', 'negative_finding', 'return_reason', 'employee_name_snapshot', 'nip_snapshot', 'position_name_snapshot', 'unit_name_snapshot',
+        'total_score_raw', 'positive_finding', 'negative_finding', 'return_reason', 'return_notes', 'employee_name_snapshot', 'nip_snapshot', 'position_name_snapshot', 'unit_name_snapshot',
         'division_name_snapshot', 'template_name_snapshot', 'template_version_snapshot', 'category_label_snapshot', 'category_code_snapshot'];
 
-    private const ITEM_COLUMNS = ['assessment_id', 'source_kpi_item_id', 'score', 'computed_score', 'measurement_inputs', 'pillar_snapshot', 'kpi_name_snapshot', 'target_snapshot',
+    private const ITEM_COLUMNS = ['assessment_id', 'source_kpi_item_id', 'score', 'computed_score', 'reviewed_score', 'measurement_inputs', 'pillar_snapshot', 'kpi_name_snapshot', 'target_snapshot',
         'weight_percent_snapshot', 'numerator_snapshot', 'denominator_snapshot', 'formula_snapshot', 'definition_snapshot'];
 
     public function __construct(private ScopedRecords $records, private AssessmentTasks $tasks, private Insights $insights) {}
@@ -240,7 +240,8 @@ class WorkspaceQuery
                 $templates[$snapshotKey] ??= $snapshot;
                 $person = $a->assessment_kind === 'member' ? 'EMP-'.$a->employee_id : 'HEAD-'.$a->subject_user_id;
                 $entry = ['id' => $a->id, 'lockVersion' => $a->lock_version, 'status' => self::STATUS[$a->status],
-                    'values' => $rows->map(fn ($i) => (float) ($i->computed_score ?? $i->score))->all(),
+                    // Scores in force: the division head's reviewed score, else the unit head's proposal.
+                    'values' => $rows->map(fn ($i) => (float) ($i->reviewed_score ?? $i->computed_score ?? $i->score))->all(),
                     'positive' => $a->positive_finding ?? '', 'negative' => $a->negative_finding ?? '', 'reason' => $a->return_reason ?? '', 'serverTotal' => $a->total_score_raw,
                     'identity' => ['name' => $a->employee_name_snapshot, 'nip' => $a->nip_snapshot, 'job' => $a->position_name_snapshot, 'unitName' => $a->unit_name_snapshot, 'divisionName' => $a->division_name_snapshot],
                     'scope' => ['unitId' => (string) $a->unit_id, 'divisionId' => (string) $a->division_id],
@@ -248,6 +249,15 @@ class WorkspaceQuery
                     'snapshotKey' => $snapshotKey];
                 if ($rows->contains(fn ($i) => $i->measurement_inputs !== null)) {
                     $entry['inputs'] = $rows->map(fn ($i) => $i->measurement_inputs === null ? null : json_decode($i->measurement_inputs, true))->all();
+                }
+                if ($rows->contains(fn ($i) => $i->reviewed_score !== null)) {
+                    // Unit head proposals and division head reviewed scores (null = proposal applies), by item order.
+                    $entry['proposals'] = $rows->map(fn ($i) => (float) ($i->computed_score ?? $i->score))->all();
+                    $entry['reviewed'] = $rows->map(fn ($i) => $i->reviewed_score === null ? null : (float) $i->reviewed_score)->all();
+                }
+                if ($a->return_notes !== null) {
+                    // Division head notes per KPI of the current return, keyed by source KPI item id.
+                    $entry['itemNotes'] = json_decode($a->return_notes, true);
                 }
                 $mapped[$person.'|'.substr($months[$a->cycle_id], 0, 7)] = $entry;
             }

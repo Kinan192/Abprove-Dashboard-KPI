@@ -3,6 +3,7 @@
 namespace App\Services\Reporting;
 
 use App\Queries\ScopedRecords;
+use App\Services\Audit\ActorSnapshot;
 use App\Services\IdentityAccess\AccessContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Query\Builder;
@@ -23,6 +24,9 @@ class DashboardSummary
     private const INDICATOR_LIMIT = 5;
 
     private const ACTIVITY_LIMIT = 5;
+
+    /** Histogram bin width in score points; 100 / width bins cover 0..100. Narrow bins show spread within a category. */
+    private const HISTOGRAM_WIDTH = 2;
 
     public function __construct(private ScopedRecords $records) {}
 
@@ -48,6 +52,7 @@ class DashboardSummary
                 'kinds' => collect($kinds)->mapWithKeys(fn ($kind) => [$kind => $this->counts($groups->where('kind', $kind))])->all(),
             ],
             'categories' => $this->categories($ctx, $cycle),
+            'histogram' => $this->histogram($ctx, $cycle, $counts['final']),
             'indicators' => $this->indicators($ctx, $cycle),
         ];
         if ($ctx->role === 'super_hc') {
@@ -122,12 +127,35 @@ class DashboardSummary
             ->map(fn ($row) => ['code' => $row->code, 'label' => $row->label, 'total' => (int) $row->total, 'average' => $this->decimal($row->average)])->all();
     }
 
+    /**
+     * Final results per HISTOGRAM_WIDTH-point range of the raw total score, one grouped SQL query in the caller's scope.
+     * Lower bound inclusive, upper exclusive; the last bin also includes 100. BETWEEN drops NULL and
+     * out-of-range scores, which are reported as `excluded` (Final results not binned), never guessed.
+     */
+    private function histogram(AccessContext $ctx, object $cycle, int $finalCount): array
+    {
+        $width = self::HISTOGRAM_WIDTH;
+        $last = intdiv(100, $width) - 1;
+        // The integer cast avoids decimal-string group keys such as "44.000000".
+        $counts = $this->scoped($ctx)->where('cycle_id', $cycle->id)->where('status', 'final')
+            ->whereBetween('total_score_raw', [0, 100])
+            ->selectRaw('CAST(LEAST(FLOOR(total_score_raw / ?), ?) AS UNSIGNED) as bucket, COUNT(*) as total', [$width, $last])
+            ->groupBy('bucket')->pluck('total', 'bucket');
+        $bins = [];
+        for ($bin = 0; $bin <= $last; $bin++) {
+            $bins[] = ['lower' => $bin * $width, 'upper' => ($bin + 1) * $width, 'count' => (int) ($counts[$bin] ?? 0)];
+        }
+        $total = array_sum(array_column($bins, 'count'));
+
+        return ['bin_width' => $width, 'total' => $total, 'excluded' => max(0, $finalCount - $total), 'bins' => $bins];
+    }
+
     /** Final indicator scores grouped by snapshot name, so identical KPIs across individual templates merge. */
     private function indicators(AccessContext $ctx, object $cycle): array
     {
         $final = $this->scoped($ctx)->where('cycle_id', $cycle->id)->where('status', 'final')->select('id', 'unit_id');
         $rank = fn (string $direction) => DB::table('assessment_items as i')->joinSub($final, 'a', 'a.id', '=', 'i.assessment_id')
-            ->selectRaw('i.kpi_name_snapshot as name, MIN(i.pillar_snapshot) as pillar, AVG(COALESCE(i.computed_score, i.score)) as average, COUNT(*) as total, COUNT(DISTINCT a.unit_id) as units')
+            ->selectRaw('i.kpi_name_snapshot as name, MIN(i.pillar_snapshot) as pillar, AVG(COALESCE(i.reviewed_score, i.computed_score, i.score)) as average, COUNT(*) as total, COUNT(DISTINCT a.unit_id) as units')
             ->groupBy('i.kpi_name_snapshot')->orderBy('average', $direction)->orderBy('name')->limit(self::INDICATOR_LIMIT)->get()
             ->map(fn ($row) => ['name' => $row->name, 'pillar' => $row->pillar, 'average' => $this->decimal($row->average), 'total' => (int) $row->total, 'units' => (int) $row->units])->all();
 
@@ -204,7 +232,7 @@ class DashboardSummary
 
         return DB::table('audit_events as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_user_id')
             ->whereNotIn('a.action', ['login', 'notifications.read'])->orderByDesc('a.id')->limit(self::ACTIVITY_LIMIT)
-            ->get(['a.id', 'a.action', 'a.recorded_at', 'a.reason', 'a.subject_type', 'a.subject_id', 'u.name as actor_name', DB::raw("COALESCE($summary) as summary")])
+            ->get(['a.id', 'a.action', 'a.recorded_at', 'a.reason', 'a.subject_type', 'a.subject_id', DB::raw(ActorSnapshot::AUDIT_NAME_SQL.' as actor_name'), DB::raw("COALESCE($summary) as summary")])
             ->map(fn ($event) => ['id' => (string) $event->id, 'at' => CarbonImmutable::parse($event->recorded_at, 'UTC')->toIso8601ZuluString(), 'who' => $event->actor_name ?? 'Sistem',
                 'action' => $event->action, 'detail' => $event->reason ?? $event->subject_type.' #'.$event->subject_id, 'summary' => $event->summary])->all();
     }

@@ -54,7 +54,7 @@ export function headHint(role, count) {
     const label = role === 'ku' ? 'Kepala Unit' : 'Kepala Divisi';
     return count
         ? `${count} akun ${label} aktif belum memimpin area. Akun dibuat oleh Admin.`
-        : `Belum ada akun ${label} aktif yang bebas. Akun dibuat oleh Admin; minta Admin membuat atau mengaktifkan akun ${label}.`;
+        : `Belum ada akun ${label} aktif yang tersedia. Minta Admin membuat atau mengaktifkan akun.`;
 }
 
 export const period = (from, until) =>

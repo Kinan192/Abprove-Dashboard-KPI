@@ -2,6 +2,7 @@
 
 namespace App\Services\Admin;
 
+use App\Services\Audit\ActorSnapshot;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
@@ -33,10 +34,14 @@ class LogService
     public function auditDetail(int $id): array
     {
         $event = DB::table('audit_events as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_user_id')
-            ->where('a.id', $id)->firstOrFail(['a.*', 'u.name as actor_name']);
+            ->where('a.id', $id)->firstOrFail(['a.*', DB::raw(ActorSnapshot::AUDIT_NAME_SQL.' as actor_name')]);
 
         return [
             'id' => $event->id, 'action' => $event->action, 'actor_name' => $event->actor_name, 'actor_role' => $event->actor_role_key,
+            // Identity frozen at action time; null on events recorded before snapshots existed.
+            'actor_snapshot' => $event->actor_name_snapshot === null ? null : [
+                'position' => $event->actor_position_snapshot, 'unit' => $event->actor_unit_name_snapshot, 'division' => $event->actor_division_name_snapshot,
+            ],
             'subject_type' => $event->subject_type, 'subject_id' => $event->subject_id, 'reason' => $event->reason,
             'recorded_at' => $event->recorded_at,
             'before' => $event->before_data ? json_decode($event->before_data, true) : null,
@@ -47,13 +52,13 @@ class LogService
     private function audit(array $f): Builder
     {
         return DB::table('audit_events as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_user_id')
-            ->when($f['search'] ?? null, fn ($q, $s) => $q->where(fn ($q) => $q->where('u.name', 'like', "%{$s}%")
+            ->when($f['search'] ?? null, fn ($q, $s) => $q->where(fn ($q) => $q->where('a.actor_name_snapshot', 'like', "%{$s}%")->orWhere('u.name', 'like', "%{$s}%")
                 ->orWhere('a.action', 'like', "%{$s}%")->orWhere('a.reason', 'like', "%{$s}%")))
             ->when($f['role'] ?? null, fn ($q, $role) => $q->where('a.actor_role_key', $role))
             ->when($f['action'] ?? null, fn ($q, $action) => $q->where('a.action', 'like', $action.'%'))
             ->tap(fn ($q) => $this->period($q, 'a.recorded_at', $f))
             ->orderByDesc('a.id')
-            ->select('a.id', 'a.action', 'a.subject_type', 'a.subject_id', 'a.reason', 'a.actor_role_key', 'a.recorded_at', 'u.name as actor_name', DB::raw(self::SUMMARY));
+            ->select('a.id', 'a.action', 'a.subject_type', 'a.subject_id', 'a.reason', 'a.actor_role_key', 'a.recorded_at', DB::raw(ActorSnapshot::AUDIT_NAME_SQL.' as actor_name'), DB::raw(self::SUMMARY));
     }
 
     private function logins(array $f): Builder
@@ -71,7 +76,7 @@ class LogService
     private function emails(array $f): Builder
     {
         return DB::table('reminder_emails as m')->join('users as r', 'r.id', '=', 'm.recipient_user_id')
-            ->join('users as s', 's.id', '=', 'm.sent_by')->join('assessment_cycles as c', 'c.id', '=', 'm.cycle_id')
+            ->leftJoin('users as s', 's.id', '=', 'm.sent_by')->join('assessment_cycles as c', 'c.id', '=', 'm.cycle_id')
             ->when($f['search'] ?? null, fn ($q, $s) => $q->where(fn ($q) => $q->where('r.name', 'like', "%{$s}%")
                 ->orWhere('m.recipient_email', 'like', "%{$s}%")->orWhere('m.subject', 'like', "%{$s}%")))
             ->when($f['status'] ?? null, fn ($q, $status) => $q->where('m.status', $status))
@@ -79,7 +84,7 @@ class LogService
             ->tap(fn ($q) => $this->period($q, 'm.created_at', $f))
             ->orderByDesc('m.id')
             ->select('m.id', 'm.batch_id', 'm.recipient_email', 'm.recipient_role', 'm.subject', 'm.status', 'm.error', 'm.created_at', 'm.sent_at',
-                'r.name as recipient_name', 's.name as sender_name', 'c.assessment_month');
+                'r.name as recipient_name', DB::raw("COALESCE(s.name, 'Otomatis') as sender_name"), 'c.assessment_month');
     }
 
     /** Dates arrive as Asia/Jakarta calendar days; stored timestamps are UTC. */

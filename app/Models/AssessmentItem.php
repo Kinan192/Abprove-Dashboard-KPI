@@ -17,9 +17,16 @@ class AssessmentItem extends DomainModel
         return ['definition_snapshot' => 'array', 'measurement_inputs' => 'array', 'weight_percent_snapshot' => 'decimal:4', 'weighted_result_raw' => 'decimal:6'];
     }
 
+    /** The unit head's proposed score: the formula result, else the manual score. */
     public function getScoreAttribute($value)
     {
         return ($this->attributes['computed_score'] ?? null) !== null ? (float) $this->attributes['computed_score'] : (int) $value;
+    }
+
+    /** Score in force: the division head's reviewed score, else the unit head's proposal. */
+    public function effectiveScore(): float
+    {
+        return ($this->attributes['reviewed_score'] ?? null) !== null ? (float) $this->attributes['reviewed_score'] : $this->score;
     }
 
     protected static function booted(): void

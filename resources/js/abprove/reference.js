@@ -533,16 +533,10 @@ function staffScores(s, filters, visible) {
         renderRow,
     });
 }
-/** Report-only Filter fields say whether they act on the open tab. */
+/** Report-only filter fields show only on the tab they act on. */
 function reportControls(panel) {
     $$('[data-report-control]').forEach((field) => {
-        const active = field.dataset.reportControl.split(',').includes(panel),
-            hint = $('[data-report-control-hint]', field);
-        field.toggleAttribute('data-report-control-active', active);
-        if (hint)
-            hint.textContent = active
-                ? 'Berlaku pada tab yang sedang dibuka.'
-                : `Berlaku pada tab ${field.dataset.reportControlLabel}.`;
+        field.hidden = !field.dataset.reportControl.split(',').includes(panel);
     });
 }
 export function renderReference(c, s, d, link, filters) {
@@ -562,7 +556,7 @@ export function renderReference(c, s, d, link, filters) {
             const v = root.referenceState;
             report(v.c, v.s, v.d, v.link, v.filters, root.referencePanel);
         });
-        // The Filter dialog sits inside this root, so its range and sort fields
+        // The filter group sits inside this root, so its range and sort fields
         // re-render locally without a server request.
         root.addEventListener('change', (e) => {
             if (e.target.matches('[data-staff-score-order]')) {

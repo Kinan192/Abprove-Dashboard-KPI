@@ -5,8 +5,11 @@ declare(strict_types=1);
 use App\Models\User;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\ScopeResolver;
+use App\Services\Notification\AutoReminderService;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
@@ -63,3 +66,35 @@ Artisan::command('kpi:create-admin {--name=} {--email=}', function () {
 
     return 0;
 })->purpose('Membuat akun Admin pertama secara interaktif, tanpa password default.');
+
+Artisan::command('kpi:auto-reminders {--dry-run : Tampilkan rencana tanpa mencatat atau mengirim} {--at= : Waktu WIB simulasi "Y-m-d H:i", hanya dengan --dry-run}',
+    function (AutoReminderService $auto) {
+        $at = $this->option('at');
+        if ($at !== null && ! $this->option('dry-run')) {
+            $this->error('--at hanya boleh dipakai bersama --dry-run.');
+
+            return 1;
+        }
+        $now = $at === null ? CarbonImmutable::now()
+            : rescue(fn () => CarbonImmutable::createFromFormat('!Y-m-d H:i', $at, AutoReminderService::ZONE), null, false);
+        if (! $now || ($at !== null && $now->format('Y-m-d H:i') !== $at)) {
+            $this->error('Format --at harus "Y-m-d H:i" (WIB).');
+
+            return 1;
+        }
+        if ($this->option('dry-run')) {
+            $sent = $auto->sentToday($now);
+            $rows = array_map(fn ($p) => [$p['cycle']->assessment_month->format('Y-m'), $p['role'], 'H-'.$p['offset'],
+                $p['recipient']['name'], $p['recipient']['email'], $p['key'], in_array($p['key'], $sent, true) ? 'sudah' : 'belum'], $auto->plan($now));
+            $this->table(['Periode', 'Role', 'Jadwal', 'Nama', 'Email', 'Delivery key', 'Tercatat hari ini'], $rows);
+            $this->info(count($rows).' pengingat jatuh tempo pada '.$now->setTimezone(AutoReminderService::ZONE)->format('Y-m-d H:i').' WIB.');
+
+            return 0;
+        }
+        $result = $auto->run($now);
+        $this->info("Pengingat otomatis: {$result['planned']} jatuh tempo, {$result['queued']} diantrekan, {$result['skipped']} sudah tercatat.");
+
+        return 0;
+    })->purpose('Mengirim email pengingat KPI otomatis sesuai jadwal H- Admin (dijalankan scheduler tiap menit).');
+
+Schedule::command('kpi:auto-reminders')->everyMinute()->withoutOverlapping(30);

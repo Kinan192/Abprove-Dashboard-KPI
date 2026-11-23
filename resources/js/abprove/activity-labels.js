@@ -13,6 +13,7 @@ const resources = {
 const verbs = { created: 'Menambah', updated: 'Mengubah', deleted: 'Menghapus' };
 const exact = {
     'assessment.approve':'Menyetujui penilaian Final', 'assessment.return':'Mengembalikan penilaian', 'assessment.resubmit':'Mengajukan ulang penilaian',
+    'assessment.adjust': 'Mengoreksi nilai sebelum Final',
     login: 'Masuk ke sistem',
     'assessment.submitted': 'Mengajukan penilaian',
     'assessment.returned': 'Mengembalikan penilaian',
@@ -38,6 +39,7 @@ const exact = {
     'notifications.read': 'Membaca notifikasi',
     'reminder.recorded': 'Mencatat pengingat',
     'reminder.emailed': 'Mengirim email pengingat',
+    'reminder.auto_updated': 'Mengubah pengingat otomatis',
     'users.password_reset': 'Mengatur ulang kata sandi akun',
     'scope.revoked': 'Mencabut penugasan',
     'hc.granted': 'Memberikan akses Super HC',

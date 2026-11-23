@@ -10,7 +10,7 @@ class Assessment extends DomainModel
 
     protected function casts(): array
     {
-        return ['total_score_raw' => 'decimal:6', 'lock_version' => 'integer'];
+        return ['total_score_raw' => 'decimal:6', 'lock_version' => 'integer', 'return_notes' => 'array'];
     }
 
     public function items()

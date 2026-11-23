@@ -17,17 +17,13 @@ class KpiTemplateController extends Controller
     public function index(Request $r)
     {
         $f = $r->validate(['scope_level' => ['sometimes', 'in:unit,division'], 'scope_key' => ['sometimes', 'integer', 'min:1']]);
-        $q = KpiTemplate::whereNotNull('sealed_at');
-        foreach ($f as $k => $v) {
-            $q->where($k, $v);
-        }
 
-        return response()->json($q->orderByDesc('id')->paginate(25));
+        return response()->json(KpiTemplate::sealed()->where($f)->orderByDesc('id')->paginate(25));
     }
 
     public function show(int $template)
     {
-        return response()->json(['data' => KpiTemplate::whereNotNull('sealed_at')->with('items')->findOrFail($template)]);
+        return response()->json(['data' => KpiTemplate::sealed()->with('items')->findOrFail($template)]);
     }
 
     public function store(KpiTemplateRequest $r)

@@ -27,6 +27,26 @@ export const monthLabel = (value) =>
               year: 'numeric',
               timeZone: 'Asia/Jakarta',
           }).format(new Date(`${value}-01T12:00:00+07:00`));
+/** Calendar range of the year controls (prev/next + numeric input); no planning cap. */
+export const YEAR_MIN = 2000;
+export const YEAR_MAX = 2100;
+export const MONTHS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+/** Current month (YYYY-MM) in WIB. */
+export function currentMonth() {
+    const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', timeZone: 'Asia/Jakarta' })
+            .formatToParts(new Date())
+            .map((p) => [p.type, p.value]),
+    );
+    return `${parts.year}-${parts.month}`;
+}
+/** Year typed or stepped into a year control, or null when outside YEAR_MIN–YEAR_MAX. */
+export const validYear = (value) => {
+    const year = Number(value);
+    return Number.isInteger(year) && year >= YEAR_MIN && year <= YEAR_MAX ? String(year) : null;
+};
+export const monthName = (mm) =>
+    new Intl.DateTimeFormat('id-ID', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(2000, +mm - 1, 15)));
 const numeric = (value) =>
     value !== '' && value != null && Number.isFinite(Number(value));
 export function calculate(kpi, input = {}) {
@@ -119,11 +139,18 @@ export function calculate(kpi, input = {}) {
         message: '',
     };
 }
+/**
+ * Per-KPI results and total. A division head correction (`row.reviewed[id]`) is the score in force; the
+ * unit head's calculated proposal stays available as `proposal`.
+ */
 export function totals(row, inputs = row.inputs) {
-    const results = row.snapshot.map((k) => ({
-        id: k.id,
-        ...calculate(k, inputs[k.id]),
-    }));
+    const results = row.snapshot.map((k) => {
+        const r = calculate(k, inputs[k.id]),
+            reviewed = row.reviewed?.[k.id];
+        return reviewed == null
+            ? { id: k.id, ...r, proposal: null }
+            : { id: k.id, ...r, proposal: r.score, score: +reviewed, weighted: (+reviewed * +k.weight) / 100, message: '' };
+    });
     return {
         results,
         total:
@@ -169,7 +196,15 @@ export function emptyKpi() {
     };
 }
 export function emptyPattern(periodId) {
-    return { id: '', name: '', periodId, targetRole: 'staff', items: [] };
+    return { id: '', name: '', periodId, items: [] };
+}
+/** Recipient type of a person key: `head-…` are Kepala Unit, `staff-…` are staff (server members()). */
+export const personType = (personId) => (personId.startsWith('head-') ? 'unit_head' : 'staff');
+/** "3 staf, 1 Kepala Unit" of the given person keys. */
+export function recipientMix(personIds) {
+    const count = { staff: 0, unit_head: 0 };
+    for (const id of personIds) count[personType(id)]++;
+    return [count.staff && `${count.staff} staf`, count.unit_head && `${count.unit_head} Kepala Unit`].filter(Boolean).join(', ') || '0 orang';
 }
 export function kpiErrors(kpi) {
     const e = {};
@@ -205,7 +240,7 @@ export function kpiErrors(kpi) {
             'Target nol: pilih aturan "Hasil nol lulus" pada Pengaturan konversi nilai.';
     return e;
 }
-/** KPI item in the stored shape accepted by the server. */
+/** KPI item in the stored shape accepted by the server; import provenance (`importSource`) is kept as-is. */
 export function cleanKpi(kpi) {
     return {
         id: kpi.id || uid('kpi'),
@@ -229,6 +264,7 @@ export function cleanKpi(kpi) {
             min: Number(kpi.policy.min),
             max: Number(kpi.policy.max),
         },
+        ...(kpi.importSource && typeof kpi.importSource === 'object' ? { importSource: kpi.importSource } : {}),
     };
 }
 /** Built-in pillar hints; always suggested alongside the pillars already used. */
@@ -240,8 +276,8 @@ export const PILLAR_PRESETS = [
     'Efficient',
 ];
 /**
- * Pillar suggestions: built-in hints, the loaded document (stored patterns of every
- * period, legacy templates), the unsaved draft items and the value being edited —
+ * Pillar suggestions: built-in hints, pillars used by any period (`data.pillars`, from the server),
+ * patterns and legacy templates of this period, the unsaved draft items and the value being edited —
  * trimmed, non-empty, de-duplicated case-insensitively (first spelling wins), sorted.
  */
 export function pillarSuggestions(data, draftItems = [], current = '') {
@@ -254,6 +290,7 @@ export function pillarSuggestions(data, draftItems = [], current = '') {
     PILLAR_PRESETS.forEach(add);
     for (const item of draftItems) add(item.pillar);
     add(current);
+    (data.pillars || []).forEach(add);
     for (const pattern of data.patterns || []) for (const item of pattern.items || []) add(item.pillar);
     for (const template of data.legacyTemplates || []) for (const item of template.items || []) add(item.pillar);
     return [...seen.values()].sort((a, b) => a.localeCompare(b, 'id'));
@@ -272,13 +309,18 @@ export function derive(data) {
                 total: totalWeight(p.items),
                 complete: isComplete(p.items),
                 count: 0,
+                /** Holders that are Kepala Unit; the rest are staff. */
+                heads: 0,
             });
     const assigned = new Map();
     for (const a of data.patternAssignments)
         if (a.periodId === month) {
             assigned.set(a.personId, a.patternId);
             const pattern = patterns.get(a.patternId);
-            if (pattern) pattern.count++;
+            if (pattern) {
+                pattern.count++;
+                if (personType(a.personId) === 'unit_head') pattern.heads++;
+            }
         }
     const units = new Map(data.units.map((u) => [u.id, u]));
     const divisions = new Map();
@@ -290,6 +332,8 @@ export function derive(data) {
                 head: u.divisionHeadName,
             });
     const unitHeads = new Map();
+    /** Assessment status of the people of this month that already have an assessment: their sealed KPI snapshot is final. */
+    const assessed = new Map(Object.entries(data.assessmentStatus || {}));
     const readiness = {
         staff: { eligible: 0, complete: 0 },
         unit_head: { eligible: 0, complete: 0 },
@@ -301,7 +345,7 @@ export function derive(data) {
                 person.name,
             ]);
         readiness[person.type].eligible++;
-        if (patterns.get(assigned.get(person.id))?.complete)
+        if (assessed.has(person.id) || patterns.get(assigned.get(person.id))?.complete)
             readiness[person.type].complete++;
     }
     return {
@@ -313,8 +357,35 @@ export function derive(data) {
         divisions,
         unitHeads,
         people: new Map(data.people.map((p) => [p.id, p])),
+        /** Pattern holders of this month that are not eligible in it (inactive, moved out or no longer Kepala Unit). */
+        ineligible: new Map((data.ineligibleHolders || []).map((p) => [p.id, p])),
         readiness,
+        assessed,
     };
+}
+/**
+ * Current holders of pattern `id` in the selected month, eligible or not: one row per assignment, so the
+ * row count always equals the pattern's `count`.
+ */
+export function patternHolders(index, id) {
+    const rows = [];
+    for (const [personId, patternId] of index.assigned) {
+        if (patternId !== id) continue;
+        const person = index.people.get(personId),
+            other = index.ineligible.get(personId),
+            unit = person && index.units.get(person.unitId);
+        rows.push({
+            id: personId,
+            name: person?.name || other?.name || '',
+            nip: person?.nip || other?.nip || '',
+            type: person?.type || other?.type || personType(personId),
+            unitName: unit?.name || other?.unitName || '',
+            divisionName: unit?.divisionName || other?.divisionName || '',
+            eligible: !!person,
+            status: index.assessed.get(personId) || '',
+        });
+    }
+    return rows.sort((a, b) => a.name.localeCompare(b.name, 'id') || a.id.localeCompare(b.id));
 }
 export function filterPeople(index, f, role = f.role) {
     const q = f.search.trim().toLowerCase();
@@ -324,7 +395,7 @@ export function filterPeople(index, f, role = f.role) {
         if (f.division && p.divisionId !== f.division) continue;
         if (f.unit && p.unitId !== f.unit) continue;
         if (f.position && p.positionId !== f.position) continue;
-        const has = index.patterns.get(index.assigned.get(p.id))?.complete;
+        const has = index.assessed.has(p.id) || index.patterns.get(index.assigned.get(p.id))?.complete;
         if ((f.status === 'none' && has) || (f.status === 'assigned' && !has))
             continue;
         if (
@@ -351,8 +422,6 @@ export function patternErrors(data, pattern, assignedCount) {
         )
     )
         e.patternName = 'Nama pola sudah dipakai pada periode ini.';
-    if (!ROLES[pattern.targetRole])
-        e.targetRole = 'Pilih jalur penerima Staf atau Kepala Unit.';
     if (!pattern.items.length || pattern.items.length > MAX_ITEMS)
         e.items = `Isi 1 sampai ${MAX_ITEMS} KPI.`;
     else if (pattern.items.some((k) => Object.keys(kpiErrors(k)).length))
@@ -371,7 +440,6 @@ export function savePattern(data, pattern, assignedCount) {
         id: pattern.id || uid('pola'),
         name: pattern.name.trim(),
         periodId: pattern.periodId,
-        targetRole: pattern.targetRole,
         items: pattern.items.map(cleanKpi),
     };
     const index = data.patterns.findIndex((p) => p.id === saved.id);
@@ -413,15 +481,15 @@ export function duplicatePattern(data, pattern) {
         id: '',
         name: uniqueName(data, pattern.periodId, `${pattern.name} (salinan)`),
         periodId: pattern.periodId,
-        targetRole: pattern.targetRole,
         items: pattern.items.map((k) => ({ ...clone(k), id: uid('kpi') })),
     };
 }
 /**
- * Copies the patterns of a period into the target period together with the assignments
- * of people still eligible there. People who already have a pattern in the target keep it.
+ * Copies the patterns of another period (`source`: its patterns and assignments, fetched separately)
+ * into the target period, together with the assignments of people still eligible there.
+ * People who already have a pattern in the target keep it.
  */
-export function copyPatterns(data, from, to, people) {
+export function copyPatterns(data, source, to, people) {
     const names = new Set(
         data.patterns
             .filter((p) => p.periodId === to)
@@ -429,7 +497,7 @@ export function copyPatterns(data, from, to, people) {
     );
     const copies = new Map(),
         skipped = [];
-    for (const p of data.patterns.filter((p) => p.periodId === from)) {
+    for (const p of source.patterns) {
         if (names.has(p.name.toLowerCase())) {
             skipped.push(p.name);
             continue;
@@ -438,7 +506,6 @@ export function copyPatterns(data, from, to, people) {
             id: uid('pola'),
             name: p.name,
             periodId: to,
-            targetRole: p.targetRole,
             items: p.items.map((k) => ({ ...clone(k), id: uid('kpi') })),
         };
         names.add(p.name.toLowerCase());
@@ -453,10 +520,10 @@ export function copyPatterns(data, from, to, people) {
     let assigned = 0,
         kept = 0,
         ineligible = 0;
-    for (const a of data.patternAssignments.filter((a) => a.periodId === from)) {
+    for (const a of source.patternAssignments) {
         const copy = copies.get(a.patternId);
         if (!copy) continue;
-        if (people.get(a.personId)?.type !== copy.targetRole || !isComplete(copy.items))
+        if (!people.has(a.personId) || !isComplete(copy.items))
             ineligible++;
         else if (taken.has(a.personId)) kept++;
         else {
@@ -479,7 +546,6 @@ export function convertLegacy(data, templates, periodId, index) {
             id: uid('pola'),
             name: uniqueName(data, periodId, t.name || `KPI ${t.areaName}`),
             periodId,
-            targetRole: t.targetRole,
             legacyTemplateId: t.id,
             items: t.items.map((item) => ({
                 id: uid('kpi'),
@@ -520,11 +586,10 @@ export function convertLegacy(data, templates, periodId, index) {
 export function openBlock(period) {
     if (period.businessId && !period.managed) return '';
     const r = period.readiness?.staff;
-    if (!r)
-        return 'Simpan periode sebagai Direncanakan, lalu terapkan pola KPI ke seluruh staf sebelum membuka.';
+    if (!r) return 'Simpan periode terlebih dahulu, lalu terapkan pola KPI ke seluruh staf.';
     if (!r.eligible) return 'Belum ada staf aktif pada bulan ini.';
     if (r.complete < r.eligible)
-        return `${r.eligible - r.complete} dari ${r.eligible} staf belum memiliki pola KPI dengan total bobot 100%. Terapkan pola sebelum membuka periode.`;
+        return `${r.eligible - r.complete} dari ${r.eligible} staf belum memiliki pola KPI 100%.`;
     return '';
 }
 const SCHEDULE = ['opens', 'submission', 'approval', 'closes'];
@@ -541,6 +606,8 @@ export function periodErrors(data, period, old) {
         e.month = 'Pilih bulan penilaian yang valid.';
     else if (!old && data.periods.some((p) => p.id === period.id))
         e.month = 'Periode bulan ini sudah tersedia.';
+    else if (!old && !validYear(period.id.slice(0, 4)))
+        e.month = `Pilih bulan antara ${YEAR_MIN} dan ${YEAR_MAX}.`;
     if (!(period.name || '').trim() || period.name.length > 190)
         e.name = 'Nama periode wajib diisi, maksimal 190 karakter.';
     for (let i = 0; i < SCHEDULE.length; i++) {
@@ -591,10 +658,15 @@ export function savePeriod(data, period, old) {
     else data.periods.push(saved);
     return saved;
 }
-/** PUT body `data`: only the stored document (server-derived fields are dropped). */
+/**
+ * PUT body `data`: the stored document of the selected period (server-derived fields are dropped).
+ * The server replaces only this period's patterns and assignments; other periods stay as stored.
+ */
 export function documentPayload(data) {
+    const month = data.selectedMonth;
     return {
         version: 2,
+        month,
         periods: data.periods.map((p) => ({
             id: p.id,
             name: p.name,
@@ -606,15 +678,14 @@ export function documentPayload(data) {
                 c: +p.categories.c,
             },
         })),
-        patterns: data.patterns.map((p) => ({
+        patterns: data.patterns.filter((p) => p.periodId === month).map((p) => ({
             id: p.id,
             name: p.name,
             periodId: p.periodId,
-            targetRole: p.targetRole,
             ...(p.legacyTemplateId ? { legacyTemplateId: p.legacyTemplateId } : {}),
             items: p.items,
         })),
-        patternAssignments: data.patternAssignments.map((a) => ({
+        patternAssignments: data.patternAssignments.filter((a) => a.periodId === month).map((a) => ({
             periodId: a.periodId,
             personId: a.personId,
             patternId: a.patternId,

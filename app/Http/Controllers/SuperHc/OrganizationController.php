@@ -7,7 +7,6 @@ use App\Http\Requests\Organization\OrganizationRequest;
 use App\Services\IdentityAccess\MutationRunner;
 use App\Services\Organization\OrganizationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class OrganizationController extends Controller
 {
@@ -17,16 +16,8 @@ class OrganizationController extends Controller
     {
         abort_unless(in_array($resource, OrganizationService::RESOURCES), 404);
         $data = $r->validate(['search' => ['sometimes', 'string', 'max:160'], 'division_id' => ['sometimes', 'integer', 'min:1']]);
-        $q = DB::table($resource);
-        if (isset($data['search'])) {
-            $field = $resource === 'employees' ? 'full_name' : 'name';
-            $q->where($field, 'like', '%'.$data['search'].'%');
-        }
-        if ($resource === 'units' && isset($data['division_id'])) {
-            $q->where('division_id', $data['division_id']);
-        }
 
-        return response()->json($q->orderBy('id')->paginate(25));
+        return response()->json($this->service->search($resource, $data));
     }
 
     public function show(Request $r, string $resource, int $id)

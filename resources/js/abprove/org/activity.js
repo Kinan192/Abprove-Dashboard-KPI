@@ -31,6 +31,7 @@ const FIELDS = {
     effective_from: 'Mulai penempatan',
     effective_until: 'Akhir penempatan',
     batch_size: 'Jumlah staf dalam mutasi massal',
+    import_size: 'Jumlah staf dalam impor',
     scope_level: 'Jenis KPI',
     items: 'Jumlah indikator',
 };
@@ -149,7 +150,7 @@ export function initActivity(s) {
     }
     root.addEventListener('change', (event) => {
         if (event.target === periodSelect) applyPeriod();
-        // Filter chips and "Reset filter" only dispatch change; the remote table listens to input.
+        // "Reset filter" only dispatches change; the remote table listens to input.
         else if (!event.isTrusted && event.target.matches('select[data-filter]'))
             event.target.dispatchEvent(new Event('input', { bubbles: true }));
     });

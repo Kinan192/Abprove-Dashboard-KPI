@@ -111,7 +111,7 @@ export function initHeadWizard(s) {
                 if (blockers) {
                     root.append(blockers);
                     wizard.block();
-                } else root.append(node('p', 'Tidak ada hambatan. Perubahan disimpan atomik dalam satu transaksi.', 'notice notice-success'));
+                } else root.append(node('p', 'Tidak ada hambatan. Semua perubahan disimpan sekaligus.', 'notice notice-success'));
             },
         },
         4: {

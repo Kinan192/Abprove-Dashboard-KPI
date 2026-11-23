@@ -10,8 +10,72 @@ function workload(recipient) {
         : `${recipient.secondary} menunggu persetujuan · ${recipient.pending} dari ${recipient.total} Kepala Unit belum dinilai`;
 }
 
+/** "Y-m-d H:i" WIB from the server → "Sen, 24 Nov 08.00". */
+const wib = (value) =>
+    new Date(`${value.replace(' ', 'T')}:00+07:00`).toLocaleString('id-ID', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'Asia/Jakarta',
+    });
+
+/** Automatic reminder settings: persisted server-side, audited, run by `php artisan kpi:auto-reminders`. */
+async function initAutoReminders(api) {
+    const form = $('#auto-reminder-form');
+    const targets = $$('input[name="targets"]', form);
+    const errorBox = $('[data-form-error]', form);
+
+    function fill(settings) {
+        field(form, 'enabled').checked = settings.enabled;
+        field(form, 'offsets').value = settings.offsets.join(', ');
+        field(form, 'send_time').value = settings.send_time;
+        targets.forEach((box) => (box.checked = settings.targets.includes(box.value)));
+        const meta = [settings.enabled ? 'Aktif' : 'Nonaktif'];
+        if (settings.last_sent_at) meta.push(`terakhir kirim ${wib(settings.last_sent_at)}`);
+        if (settings.updated_by) meta.push(`diubah ${settings.updated_by}, ${wib(settings.updated_at)}`);
+        $('[data-auto-meta]', form).textContent = meta.join(' · ');
+        $('[data-auto-upcoming]', form).hidden = !settings.enabled;
+        $('[data-auto-list]', form).replaceChildren(
+            ...(settings.upcoming.length
+                ? settings.upcoming.map((row) =>
+                      node('li', `${wib(row.send_at)} · ${ROLE_LABELS[row.role]} · H-${row.offset} · ${monthLabel(row.month)}`),
+                  )
+                : [node('li', 'Belum ada jadwal pada periode dibuka.')]),
+        );
+    }
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        errorBox.hidden = true;
+        if (!form.reportValidity()) return;
+        const offsets = field(form, 'offsets')
+            .value.split(/[\s,;]+/)
+            .map((token) => token.replace(/^h-?/i, ''))
+            .filter(Boolean)
+            .map((token) => (/^\d+$/.test(token) ? Number(token) : token));
+        api.perform(form, async () => {
+            const result = await api.request('/reminders/settings', 'PUT', {
+                enabled: field(form, 'enabled').checked,
+                offsets,
+                send_time: field(form, 'send_time').value,
+                targets: targets.filter((box) => box.checked).map((box) => box.value),
+            });
+            fill(result.data);
+            toast('Pengingat otomatis disimpan.');
+        });
+    });
+    try {
+        fill((await api.request('/data/reminders/settings')).data);
+    } catch (error) {
+        toast(error.message, true);
+    }
+}
+
 export async function initReminders(config) {
     const { api } = config;
+    initAutoReminders(api);
     const form = $('#reminder-form');
     const tbody = $('[data-recipient-rows]');
     const sendButton = $('[data-reminder-send]');

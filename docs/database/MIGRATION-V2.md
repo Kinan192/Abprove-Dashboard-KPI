@@ -42,7 +42,7 @@ npm.cmd run build
 php artisan serve
 ```
 
-Tidak ada seeder data contoh. `kpi:create-admin` membuat Super HC pertama secara interaktif tanpa kata sandi default. Data dari database lama tidak otomatis disalin; arahkan koneksi secara sengaja sebelum menjalankan migrasi.
+Tidak ada seeder data contoh. `kpi:create-admin` membuat Admin pertama secara interaktif tanpa kata sandi default; akun Super HC dan kepala dibuat melalui menu Akun Pengguna milik Admin. Data dari database lama tidak otomatis disalin; arahkan koneksi secara sengaja sebelum menjalankan migrasi.
 
 Pilih migration Laravel untuk aplikasi. File schema.mysql.sql adalah definisi fisik untuk review/validasi database kosong; jangan mengimpor SQL itu lalu menjalankan baseline migrations pada database yang sama.
 

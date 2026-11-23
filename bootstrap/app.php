@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['kpi_session', '__Secure-kpi_session', 'kpi_dont_remember', '__Secure-kpi_dont_remember']);
+        // Worksheet names of the KPI pattern import must stay exact (e.g. "MPP " with a trailing space).
+        $middleware->trimStrings(except: ['sheets.*', 'edits.*.sheet']);
         $middleware->web(append: [
             \App\Http\Middleware\BetterAuthCookies::class,
             \App\Http\Middleware\CompressFrontendResponse::class,

@@ -320,31 +320,21 @@ html[data-restoring-session]::after {
     .notice-error {
         @apply bg-danger-soft text-danger;
     }
-    /* Dialogs: centred modal, right-hand drawer, anchored menus. */
-    .modal-dialog,
-    .drawer-dialog {
-        @apply fixed m-0 max-w-none overflow-hidden border border-line bg-paper p-0 text-ink;
-    }
+    /* Dialogs: centred popup sized to its content (body scrolls), anchored menus. */
     .modal-dialog {
-        @apply top-1/2 left-1/2 max-h-[calc(100dvh-32px)] w-[min(600px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-[0_24px_64px_-24px_rgb(15_30_38/0.4)];
+        @apply fixed top-1/2 left-1/2 m-0 max-h-[calc(100dvh-32px)] w-[min(760px,calc(100%-32px))] max-w-none -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-line bg-paper p-0 text-ink shadow-[0_24px_64px_-24px_rgb(15_30_38/0.4)];
     }
     .modal-dialog.narrow {
-        @apply w-[min(480px,calc(100%-32px))];
-    }
-    .drawer-dialog {
-        @apply top-0 right-0 bottom-0 left-auto h-dvh max-h-dvh w-[min(720px,100%)] rounded-l-2xl border-y-0 border-r-0 shadow-[-24px_0_64px_-32px_rgb(15_30_38/0.45)];
-    }
-    .drawer-dialog.narrow {
-        @apply w-[min(520px,100%)];
+        @apply w-[min(540px,calc(100%-32px))];
     }
     .modal-dialog[open] {
         animation: dialog-in 0.18s ease-out;
     }
-    .drawer-dialog[open] {
-        animation: drawer-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    .dialog-shell {
+        @apply flex max-h-[inherit] flex-col;
     }
     .dialog-header {
-        @apply flex min-h-16 shrink-0 items-center justify-between gap-4 border-b border-line px-6 py-3;
+        @apply flex min-h-14 shrink-0 items-center justify-between gap-4 border-b border-line px-6 py-2.5;
     }
     .dialog-title {
         @apply font-brand text-base leading-6 font-semibold tracking-[-0.01em] text-ink;
@@ -353,7 +343,7 @@ html[data-restoring-session]::after {
         @apply min-h-0 flex-1 overflow-y-auto px-6 py-5;
     }
     .dialog-footer {
-        @apply flex shrink-0 flex-wrap items-center justify-end gap-2.5 border-t border-line bg-subtle/50 px-6 py-4;
+        @apply flex shrink-0 flex-wrap items-center justify-end gap-2.5 border-t border-line bg-subtle/50 px-6 py-3;
     }
     .menu-dialog {
         @apply fixed top-[76px] right-6 bottom-auto left-auto m-0 max-h-[75dvh] w-72 max-w-[calc(100%-24px)] overflow-auto rounded-[14px] border border-line bg-paper p-1.5 text-ink shadow-[0_16px_40px_-16px_rgb(15_30_38/0.3)];
@@ -391,12 +381,6 @@ html[data-restoring-session]::after {
     from {
         opacity: 0;
         transform: translateY(8px);
-    }
-}
-@keyframes drawer-in {
-    from {
-        opacity: 0;
-        transform: translateX(24px);
     }
 }
 
@@ -1323,8 +1307,9 @@ body[data-app-shell] {
     .dialog-footer {
         padding-inline: 16px;
     }
-    .drawer-dialog {
-        border-radius: 0;
+    .modal-dialog {
+        width: calc(100% - 16px);
+        max-height: calc(100dvh - 16px);
     }
     .lead {
         font-size: 20px;

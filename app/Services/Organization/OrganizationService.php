@@ -5,6 +5,7 @@ namespace App\Services\Organization;
 use App\Exceptions\BusinessRule;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\AccessContext;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -23,7 +24,8 @@ class OrganizationService
         private PlacementService $placements,
     ) {}
 
-    public function save(AccessContext $ctx, string $resource, ?int $id, array $data): array
+    /** `$batch` (e.g. import_id/import_size) is added to the audit snapshots of a mass operation. */
+    public function save(AccessContext $ctx, string $resource, ?int $id, array $data, array $batch = []): array
     {
         abort_unless($ctx->role === 'super_hc' && in_array($resource, self::RESOURCES), 403);
         $old = $id ? (array) DB::table($resource)->where('id', $id)->lockForUpdate()->firstOrFail() : null;
@@ -109,12 +111,30 @@ class OrganizationService
             $this->placements->place($ctx, $id, [
                 'unit_id' => $data['unit_id'], 'effective_from' => $data['effective_from'] ?? $this->rules->month(),
                 'expected_placement_id' => null, 'reason' => 'Penempatan awal',
-            ]);
+            ], $batch);
         }
         $after = $this->safeRow($resource, $id);
-        $this->audit->record($ctx, $resource, $id, $resource.($old ? '.updated' : '.created'), $old, Arr::except($after, ['history']));
+        $this->audit->record($ctx, $resource, $id, $resource.($old ? '.updated' : '.created'), $old, Arr::except($after, ['history']) + $batch);
 
         return $after;
+    }
+
+    /**
+     * Page of one master list: name search (employees: full name) and, for units, a division filter.
+     *
+     * @param  array{search?: string, division_id?: int}  $filters
+     */
+    public function search(string $resource, array $filters): LengthAwarePaginator
+    {
+        $query = DB::table($resource);
+        if (isset($filters['search'])) {
+            $query->where($resource === 'employees' ? 'full_name' : 'name', 'like', '%'.$filters['search'].'%');
+        }
+        if ($resource === 'units' && isset($filters['division_id'])) {
+            $query->where('division_id', $filters['division_id']);
+        }
+
+        return $query->orderBy('id')->paginate(25);
     }
 
     /** Row with its current assignment or placements and the full mutation history for detail dialogs. */

@@ -9,6 +9,7 @@ use App\Models\ReminderEmail;
 use App\Queries\ScopedRecords;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\AccessContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -21,15 +22,24 @@ class ReminderService
 {
     public const TARGETS = ['unit_heads_pending', 'division_heads_pending', 'all_heads'];
 
+    /** Detail keys frozen on the log row and rendered by KpiReminderMail. */
+    public const DETAILS = ['name', 'area', 'area_id', 'pending', 'secondary', 'total', 'due_at'];
+
     public function __construct(private ScopedRecords $records, private AuditWriter $audit) {}
 
-    /** @return Collection<int, array> */
-    public function recipients(AccessContext $ctx, AssessmentCycle $cycle, string $target): Collection
+    /**
+     * Organisation-wide recipients: reminders are Admin-only (manual) or system-run (scheduled).
+     *
+     * @return Collection<int, array>
+     */
+    public function recipients(AssessmentCycle $cycle, string $target): Collection
     {
+        // Unscoped read-only context for ScopedRecords; never used to write or audit.
+        $everyone = new AccessContext(0, 'admin', 0, null, null, '');
         $month = $cycle->assessment_month->format('Y-m-d');
         $rows = collect();
         if (in_array($target, ['unit_heads_pending', 'all_heads'], true)) {
-            $members = DB::query()->fromSub($this->records->members($ctx, false, $month), 'm')
+            $members = DB::query()->fromSub($this->records->members($everyone, false, $month), 'm')
                 ->groupBy('unit_id')->pluck(DB::raw('COUNT(*)'), 'unit_id');
             $done = DB::table('assessments')->where('cycle_id', $cycle->id)->where('assessment_kind', 'member')
                 ->whereIn('status', ['submitted', 'final'])->groupBy('unit_id')->pluck(DB::raw('COUNT(*)'), 'unit_id');
@@ -47,7 +57,7 @@ class ReminderService
         if (in_array($target, ['division_heads_pending', 'all_heads'], true)) {
             $waiting = DB::table('assessments')->where('cycle_id', $cycle->id)->where('status', 'submitted')
                 ->groupBy('division_id')->pluck(DB::raw('COUNT(*)'), 'division_id');
-            $heads = DB::query()->fromSub($this->records->members($ctx, true, $month), 'h')
+            $heads = DB::query()->fromSub($this->records->members($everyone, true, $month), 'h')
                 ->groupBy('division_id')->pluck(DB::raw('COUNT(*)'), 'division_id');
             $headsDone = DB::table('assessments')->where('cycle_id', $cycle->id)->where('assessment_kind', '!=', 'member')
                 ->whereIn('status', ['submitted', 'final'])->groupBy('division_id')->pluck(DB::raw('COUNT(*)'), 'division_id');
@@ -69,29 +79,49 @@ class ReminderService
         if ($cycle->status === 'closed') {
             throw new BusinessRule('CYCLE_CLOSED', 'Periode sudah ditutup; pengingat tidak diperlukan.', 422);
         }
-        $recipients = $this->recipients($ctx, $cycle, $data['target'])
+        $recipients = $this->recipients($cycle, $data['target'])
             ->when(isset($data['user_ids']), fn ($c) => $c->whereIn('user_id', array_map('intval', $data['user_ids'])))
             ->filter(fn ($r) => $r['deliverable'])->values();
         if ($recipients->isEmpty()) {
             throw new BusinessRule('NO_RECIPIENTS', 'Tidak ada penerima yang dapat dikirimi email.', 422);
         }
         $batch = (string) Str::uuid();
-        $ids = [];
-        foreach ($recipients as $recipient) {
-            $ids[] = ReminderEmail::create([
-                'batch_id' => $batch, 'cycle_id' => $cycle->id, 'recipient_user_id' => $recipient['user_id'],
-                'recipient_email' => $recipient['email'], 'recipient_role' => $recipient['role'],
-                'subject' => $data['subject'], 'message' => $data['message'], 'status' => 'queued', 'sent_by' => $ctx->userId,
-                'details' => array_intersect_key($recipient, array_flip(['name', 'area', 'pending', 'secondary', 'total', 'due_at'])),
-            ])->id;
-        }
-        foreach ($ids as $id) {
-            SendReminderEmail::dispatch($id)->afterCommit();
-        }
+        $ids = $recipients->map(fn ($recipient) => $this->log($cycle, $recipient, $batch, $data['subject'], $data['message'], $ctx->userId))->all();
+        $this->dispatch($ids);
         $result = ['batch_id' => $batch, 'queued' => count($ids), 'cycle' => $cycle->assessment_month->format('Y-m')];
         $this->audit->record($ctx, 'assessment_cycle', $cycle->id, 'reminder.emailed', null, $result + ['target' => $data['target']]);
 
         return $result;
+    }
+
+    /**
+     * Writes one queued reminder row. Scheduled reminders pass a delivery key and no sender; a key that was already
+     * used (earlier or concurrent run) returns null so the same email is never logged or sent twice.
+     */
+    public function log(AssessmentCycle $cycle, array $recipient, string $batch, string $subject, string $message,
+        ?int $senderId, ?string $deliveryKey = null, array $extra = []): ?int
+    {
+        try {
+            return ReminderEmail::create([
+                'batch_id' => $batch, 'delivery_key' => $deliveryKey, 'cycle_id' => $cycle->id, 'recipient_user_id' => $recipient['user_id'],
+                'recipient_email' => $recipient['email'], 'recipient_role' => $recipient['role'],
+                'subject' => $subject, 'message' => $message, 'status' => 'queued', 'sent_by' => $senderId,
+                'details' => array_intersect_key($recipient, array_flip(self::DETAILS)) + $extra,
+            ])->id;
+        } catch (QueryException $e) {
+            if ($deliveryKey !== null && (int) ($e->errorInfo[1] ?? 0) === 1062) {
+                return null;
+            }
+            throw $e;
+        }
+    }
+
+    /** @param list<int> $ids */
+    public function dispatch(array $ids): void
+    {
+        foreach ($ids as $id) {
+            SendReminderEmail::dispatch($id)->afterCommit();
+        }
     }
 
     private function heads(string $role): Collection
@@ -110,9 +140,10 @@ class ReminderService
         return [
             'user_id' => (int) $head->id, 'name' => $head->name, 'email' => $email, 'role' => $role,
             'area' => $role === 'kepala_unit' ? $head->unit_name : $head->division_name,
+            'area_id' => (int) ($role === 'kepala_unit' ? $head->unit_id : $head->division_id),
             // Unit head: pending = not yet submitted, secondary = returned. Division head: pending = unit heads unscored, secondary = waiting approval.
             'pending' => $pending, 'secondary' => $secondary, 'total' => $total,
-            'due_at' => $due?->setTimezone('Asia/Jakarta')->format('Y-m-d H:i'),
+            'due_at' => $due?->copy()->setTimezone('Asia/Jakarta')->format('Y-m-d H:i'),
             'opted_out' => ! $head->email_notifications,
             'deliverable' => $email !== '' && (bool) $head->email_notifications,
         ];

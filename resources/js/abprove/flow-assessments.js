@@ -13,7 +13,6 @@ import {
 } from './flow-dom';
 import { open, close, confirm, toast } from './ui';
 import { paginate, reveal } from './pagination';
-import { activityLabel } from './activity-labels';
 import { calculate } from '../kpi-workspace/model.js';
 import {
     totalValues,
@@ -21,11 +20,66 @@ import {
     previousMonth,
     itemSignature,
 } from './flow-store';
+import '../../css/assessment-history.css';
+
+/** History event labels; codes come from assessment_events.action. */
+const HISTORY_ACTIONS = {
+    submitted: 'Mengajukan penilaian',
+    head_finalized: 'Menetapkan nilai Kepala Unit (Final)',
+    resubmitted: 'Mengajukan ulang setelah perbaikan',
+    withdrawn: 'Membatalkan pengajuan',
+    adjusted: 'Mengoreksi nilai sebelum Final',
+    returned: 'Mengembalikan untuk perbaikan',
+    approved: 'Menetapkan Final',
+};
+const HISTORY_STATUS = {
+    submitted: 'Diajukan',
+    returned: 'Dikembalikan',
+    final: 'Final',
+};
+/** Actions whose item rows are the complete sheet, not only changed rows. */
+const FULL_SHEET = ['submitted', 'head_finalized', 'withdrawn'];
+/** Stored scores keep 6 decimals; smaller differences are rounding, not changes. */
+const differs = (a, b) =>
+    a == null || b == null ? a !== b : Math.abs(+a - +b) > 0.000001;
+/** Request rows for every KPI of a sheet: formula inputs or manual scores. */
+const scorePayload = (items, a) =>
+    items.map((item, i) => ({
+        source_kpi_item_id: +item.id,
+        ...(item.config?.method === 'formula'
+            ? { inputs: a.inputs?.[i] || {} }
+            : { score: +a.values[i] }),
+    }));
+/**
+ * Parses a division head score: blank keeps the unit head's proposal; formula KPI 0–100 with at most 2 decimals,
+ * manual KPI an integer 10–100 like the unit head's scale.
+ */
+const parseReview = (raw, formula) => {
+    const value = String(raw ?? '').trim().replace(',', '.');
+    if (value === '') return { value: null };
+    const valid = formula
+        ? /^\d{1,3}(\.\d{1,2})?$/.test(value) && +value <= 100
+        : /^\d{1,3}$/.test(value) && +value >= 10 && +value <= 100;
+    return valid
+        ? { value: +value }
+        : { error: formula ? 'Nilai KD 0–100, maksimal 2 desimal.' : 'Nilai KD bilangan bulat 10–100.' };
+};
+/** Whether any KD score draft differs from the saved reviewed scores. */
+const draftChanged = (w) =>
+    w.draft.some((raw, i) => {
+        const value = raw.trim().replace(',', '.');
+        return value === ''
+            ? w.saved[i] != null
+            : w.saved[i] == null || !Number.isFinite(+value) || differs(+value, w.saved[i]);
+    });
 export function initFlowAssessments(c, s, link) {
     let selected,
         working,
         dirty = false,
         reviewed,
+        // Division head working copy of the reviewed submission: unit head proposals, saved and drafted KD
+        // scores and per-KPI notes.
+        reviewWorking = null,
         reviewSequence = 0,
         peopleTab = 'all',
         statusTab =
@@ -98,7 +152,11 @@ export function initFlowAssessments(c, s, link) {
                       s.assessment(p.id, key).status === statusTab),
         );
     }
-    function renderScore(root, p, a, readOnly = false, key = s.cycleKey) {
+    /**
+     * `review` renders a submission for the division head: the unit head's proposal and measurements stay
+     * read-only, every KPI gets a "Nilai KD" field for a reviewed score and a note field.
+     */
+    function renderScore(root, p, a, readOnly = false, key = s.cycleKey, review = false) {
         root.replaceChildren();
         const k = a.snapshot || s.template(p, key);
         if (!k) {
@@ -109,7 +167,12 @@ export function initFlowAssessments(c, s, link) {
             return null;
         }
         const sheet = clone('flow-score-sheet', root);
-        $('[data-score-instructions]', sheet).hidden = readOnly;
+        const locked = readOnly;
+        const instructions = $('[data-score-instructions]', sheet);
+        instructions.hidden = locked && !review;
+        if (review)
+            instructions.textContent =
+                'Usulan Kepala Unit tetap tersimpan. Isi Nilai KD pada KPI yang dikoreksi; catatan opsional. Kembalikan perlu catatan KPI atau catatan umum.';
         const concise = c.role === 'ku' && c.page === 'nilai';
         sheet.dataset.person = p.id;
         text(sheet, '[data-initials]', initials(p.name));
@@ -138,7 +201,8 @@ export function initFlowAssessments(c, s, link) {
         reason.hidden = !a.reason;
         reason.textContent = `Catatan Kepala Divisi: ${a.reason || ''}`;
         const lock = $('[data-lock-reason]', sheet);
-        lock.hidden = !readOnly;
+        // In the division head's review dialog the decision state is explained above the sheet instead.
+        lock.hidden = !locked || (c.role === 'kd' && root.matches('[data-review-mount]'));
         lock.textContent =
             a.status === 'Final'
                 ? 'Final. Nilai, bobot dan kategori tersimpan pada snapshot dan hanya dapat dibaca.'
@@ -171,17 +235,18 @@ export function initFlowAssessments(c, s, link) {
                 `${item.pillar} · target ${item.target}`,
             );
             text(row, '[data-weight]', `${item.weight}%`);
-            const input = $('[data-score]', row);
+            const input = $('[data-score]', row),
+                cell = input.closest('td'),
+                proposal = a.proposals?.[i] ?? a.values[i];
             input.dataset.score = i;
             input.value = a.values[i] ?? '';
-            input.disabled = readOnly;
-            input.closest('label').hidden = readOnly;
+            input.disabled = locked;
+            input.closest('label').hidden = locked;
             text(row, '[data-score-label]', `Nilai ${item.name}`);
             const output = $('[data-read-score]', row);
-            output.hidden = !readOnly;
-            output.textContent = a.values[i] ?? '-';
+            output.hidden = !locked;
+            output.textContent = review ? `Usulan KU: ${proposal ?? '-'}` : (a.values[i] ?? '-');
             if (item.config?.method === 'formula') {
-                const cell = input.closest('td');
                 cell.replaceChildren();
                 a.inputs ||= {};
                 a.inputs[i] ||= {};
@@ -194,19 +259,19 @@ export function initFlowAssessments(c, s, link) {
                     field.dataset.measurement = i;
                     field.dataset.variable = variable.key;
                     field.setAttribute('aria-label', `${item.name}: ${variable.label}`);
-                    field.readOnly = readOnly || variable.source === 'fixed';
+                    field.readOnly = locked || variable.source === 'fixed';
                     if (variable.source === 'fixed') a.inputs[i][`variable_${variable.key}`] = variable.value;
                     field.value = a.inputs[i][`variable_${variable.key}`] ?? '';
                     label.append(field);
                     cell.append(label);
                 }
-                // Input guidance belongs to editable sheets; read-only sheets report the stored value.
+                // Input guidance belongs to editable sheets; read-only sheets report the unit head's stored result.
                 let message;
-                if (readOnly)
+                if (locked)
                     message =
-                        a.values[i] == null || a.values[i] === ''
+                        proposal == null || proposal === ''
                             ? 'Belum ada nilai.'
-                            : `Nilai otomatis: ${number(a.values[i])}`;
+                            : `${review ? 'Usulan KU (otomatis)' : 'Nilai otomatis'}: ${number(proposal)}`;
                 else {
                     const result = calculate(item.config, a.inputs[i]);
                     a.values[i] = result.score;
@@ -217,6 +282,37 @@ export function initFlowAssessments(c, s, link) {
                 const summary = node('p', message, 'text-xs text-muted');
                 summary.dataset.measurementResult = i;
                 cell.append(summary);
+            }
+            if (review) {
+                const label = node('label', null, 'assessment-review-field'),
+                    field = node('input', null, 'score-input num');
+                field.type = 'text';
+                field.inputMode = 'decimal';
+                field.autocomplete = 'off';
+                field.maxLength = 6;
+                field.placeholder = 'Sesuai usulan';
+                field.dataset.reviewScore = i;
+                field.value = a.draft[i];
+                field.setAttribute('aria-label', `Nilai KD untuk ${item.name}`);
+                label.append(node('span', 'Nilai KD', 'assessment-review-label'), field);
+                cell.append(label);
+            }
+            // Reviewed score beside the proposal; filled by updateTotal.
+            const mark = node('span', null, 'assessment-score-change');
+            mark.dataset.reviewMark = i;
+            mark.hidden = true;
+            cell.append(mark);
+            const note = a.itemNotes?.[item.id];
+            const noteView = $('[data-item-note]', row);
+            noteView.hidden = !note;
+            noteView.textContent = note ? `Catatan Kepala Divisi: ${note}` : '';
+            const noteWrap = $('[data-item-note-wrap]', row);
+            noteWrap.hidden = !review;
+            if (review) {
+                const field = $('[data-item-note-input]', noteWrap);
+                field.dataset.itemNoteInput = item.id;
+                field.value = a.reviewNotes?.[item.id] || '';
+                field.setAttribute('aria-label', `Catatan untuk KPI ${item.name}`);
             }
             const definition = (r) =>
                 JSON.stringify([
@@ -313,6 +409,19 @@ export function initFlowAssessments(c, s, link) {
                 '[data-result]',
                 valid ? number((+value * r.weight) / 100) : '-',
             );
+            const mark = $(`[data-review-mark="${i}"]`, row);
+            if (mark) {
+                const reviewed = a.reviewed?.[i],
+                    proposal = a.proposals?.[i],
+                    shown = reviewed != null && (a.revising || differs(reviewed, proposal));
+                mark.hidden = !shown;
+                mark.textContent = !shown
+                    ? ''
+                    : a.revising
+                      ? `Nilai KD sebelumnya: ${number(reviewed)}`
+                      : `Nilai KD ${number(reviewed)} · usulan KU ${number(proposal)}`;
+                row.classList.toggle('assessment-row-adjusted', shown && !a.revising);
+            }
         });
         const total = totalValues(a.values, k.items),
             category =
@@ -396,12 +505,36 @@ export function initFlowAssessments(c, s, link) {
             $('[data-score-actions]').hidden = true;
             return;
         }
-        if (!working || working.personId !== selected)
+        if (!working || working.personId !== selected) {
             working = {
                 ...structuredClone(s.assessment(selected)),
                 personId: selected,
             };
+            // A returned sheet is revised from the unit head's own proposal; earlier KD scores show beside it.
+            if (editable(p) && working.proposals) {
+                working.values = [...working.proposals];
+                working.revising = true;
+            }
+        }
         const sheet = renderScore(mount, p, working, !editable(p));
+        // Unit heads read the full history of the current submission, including earlier returns and corrections.
+        const historyTab = sheet && $('[data-history-tab]', sheet);
+        if (historyTab && s.assessment(p.id).id) {
+            historyTab.hidden = false;
+            $('[data-review-decision-state]', sheet).hidden = true;
+            historyTab.addEventListener(
+                'toggle',
+                () =>
+                    historyTab.open &&
+                    timeline(
+                        $('[data-review-history]', sheet),
+                        s.assessment(p.id),
+                        p,
+                        s.cycleKey,
+                    ),
+                { once: true },
+            );
+        }
         const actions = $('[data-score-actions]');
         actions.hidden = !sheet;
         const hasKpi = !!s.template(p);
@@ -556,29 +689,74 @@ export function initFlowAssessments(c, s, link) {
         );
     }
     /**
-     * Opens one person-month. Months outside the page window are loaded first; earlier months are
-     * reached only through Final results, so their Final rows are enough.
+     * Why the division head cannot decide on this person-month, or '' when the review is open for decisions.
+     * Shown in the dialog so unavailable actions are explained instead of hidden.
      */
-    async function review(id, key = s.cycleKey) {
+    function reviewBlock(p, a, key) {
+        if (p.type !== 'member')
+            return 'Nilai Kepala Unit ditetapkan langsung oleh Kepala Divisi, tanpa persetujuan.';
+        if (a.status === 'Final') return 'Sudah Final. Nilai terkunci dan hanya dapat dibaca.';
+        if (a.status === 'Dikembalikan')
+            return 'Sudah dikembalikan. Menunggu Kepala Unit memperbaiki dan mengajukan ulang.';
+        if (a.status !== 'Diajukan') return 'Belum ada pengajuan dari Kepala Unit.';
+        if (!a.snapshot) return 'Lembar pengajuan belum termuat. Muat ulang halaman.';
+        if (key !== s.cycleKey)
+            return `Pengajuan periode ${labelCycle(key)}. Buka periode tersebut untuk memutuskan.`;
+        const closed = s.canWrite();
+        if (!closed) return '';
+        const x = s.cycle();
+        return `${closed}${x?.status === 'open' && x.approval ? ` Batas persetujuan ${dateTime(x.approval)} WIB.` : ''} Nilai KD, pengembalian dan Final tidak tersedia.`;
+    }
+    /**
+     * Opens one person-month. Months outside the page window are loaded first; earlier months are
+     * reached only through Final results, so their Final rows are enough. `keep` carries unsent
+     * per-KPI notes across a saved KD score.
+     */
+    async function review(id, key = s.cycleKey, keep = null) {
         const sequence = ++reviewSequence;
         try {
             await s.ensureMonths([key], { finalOnly: key !== s.cycleKey });
-            if (c.role === 'kd')
-                await s.ensureMonths([previousMonth(key)], { finalOnly: true });
         } catch (error) {
             return toast(error.message, true);
         }
+        // The previous month only feeds the comparison column; the review opens without it.
+        if (c.role === 'kd')
+            await s
+                .ensureMonths([previousMonth(key)], { finalOnly: true })
+                .catch(() => {});
         if (sequence !== reviewSequence) return;
         const p = s.person(id, key);
-        if (!p) return;
+        if (!p)
+            return toast(
+                'Orang ini tidak ada dalam tanggung jawab Anda pada periode tersebut.',
+                true,
+            );
         reviewed = id;
-        const assessment = s.assessment(id, key);
+        const assessment = s.assessment(id, key),
+            block = c.role === 'kd' ? reviewBlock(p, assessment, key) : null,
+            allowed = block === '';
+        reviewWorking = null;
+        if (allowed) {
+            const saved = assessment.snapshot.items.map(
+                (_, i) => assessment.reviewed?.[i] ?? null,
+            );
+            reviewWorking = {
+                ...structuredClone(assessment),
+                personId: id,
+                proposals: [...(assessment.proposals || assessment.values)],
+                saved,
+                reviewed: [...saved],
+                draft: saved.map((v) => (v == null ? '' : String(v))),
+                reviewNotes: keep?.notes || {},
+            };
+        }
         const sheet = renderScore(
             $('[data-review-mount]'),
             p,
-            assessment,
+            reviewWorking || assessment,
             true,
             key,
+            allowed,
         );
         text(
             document,
@@ -589,6 +767,7 @@ export function initFlowAssessments(c, s, link) {
         if (hist) {
             const tab = $('[data-review-mount] [data-history-tab]');
             tab.hidden = false;
+            tab.open = true;
             text(
                 sheet,
                 '[data-review-decision-state]',
@@ -598,88 +777,276 @@ export function initFlowAssessments(c, s, link) {
                       ? 'Penilaian sudah ditetapkan Final.'
                       : assessment.status === 'Dikembalikan'
                         ? 'Pengajuan dikembalikan untuk diperbaiki.'
-                        : 'Belum ada pengajuan atau keputusan.',
+                        : 'Belum ada pengajuan aktif. Riwayat pengajuan yang dibatalkan tetap ditampilkan.',
             );
-            hist.replaceChildren(
-                node('li', 'Buka untuk memuat jejak keputusan.', 'empty'),
-            );
-            // The sheet is rebuilt per review, so the first opening of this tab loads its timeline.
-            tab.addEventListener(
-                'toggle',
-                () => timeline(hist, assessment, id + key),
-                { once: true },
-            );
+            timeline(hist, assessment, p, key);
         }
-        const allowed =
-            !!sheet &&
-            c.role === 'kd' &&
-            p.type === 'member' &&
-            key === s.cycleKey &&
-            assessment.status === 'Diajukan' &&
-            !s.canWrite();
-        for (const action of ['return', 'final']) {
+        const blocked = $('[data-review-blocked]');
+        if (blocked) {
+            blocked.hidden = !block;
+            text(blocked, '[data-review-blocked-text]', block || '');
+            const other = $('[data-review-open-cycle]', blocked);
+            other.hidden =
+                !block ||
+                key === s.cycleKey ||
+                p.type !== 'member' ||
+                assessment.status !== 'Diajukan';
+            if (!other.hidden) {
+                other.href = link('persetujuan', { cycle: key, person: id, status: 'Diajukan' });
+                other.textContent = `Buka ${labelCycle(key)}`;
+            }
+        }
+        const reasonWrap = $('[data-review-reason-wrap]');
+        if (reasonWrap) {
+            reasonWrap.hidden = !allowed;
+            $('[data-review-reason]', reasonWrap).value = '';
+        }
+        for (const action of ['return', 'final', 'save-review']) {
             const b = $(`[data-flow-action="${action}"]`);
-            if (b) b.hidden = !allowed;
+            if (!b) continue;
+            b.hidden = false;
+            b.disabled = !allowed;
+            b.title = block || '';
         }
         open('review-dialog');
     }
-    /** Decision timeline of the reviewed assessment, read from the server on demand. */
-    async function timeline(hist, assessment, token) {
+    /** One timeline entry: frozen actor identity, transition, notes and per-KPI changes. */
+    function historyEntry(h) {
+        const details = h.details || {},
+            items = details.items || [],
+            full = FULL_SHEET.includes(h.action),
+            changes = items.filter(
+                (x) => full || differs(x.before, x.after),
+            ),
+            entry = node('li', null, 'assessment-history-entry'),
+            head = node('div', null, 'assessment-history-head');
+        entry.dataset.historyAction = h.action;
+        head.append(
+            node(
+                'strong',
+                h.action === 'approved' && changes.length
+                    ? 'Menetapkan Final dengan koreksi nilai'
+                    : HISTORY_ACTIONS[h.action] || 'Memperbarui penilaian',
+            ),
+        );
+        if (details.bulk > 1)
+            head.append(
+                node(
+                    'span',
+                    `Persetujuan massal · ${details.bulk} penilaian`,
+                    'assessment-history-tag',
+                ),
+            );
+        if (h.previousSubmission)
+            head.append(
+                node('span', 'Pengajuan terdahulu', 'assessment-history-tag'),
+            );
+        entry.append(head);
+        const actor = h.actor || {},
+            area = [actor.position, actor.unit, actor.division]
+                .filter(Boolean)
+                .join(' · ');
+        entry.append(
+            node(
+                'p',
+                `${actor.name || 'Sistem'}${actor.nip ? ` (NIP ${actor.nip})` : ''}${area ? ` · ${area}` : ''}`,
+                'assessment-history-actor',
+            ),
+        );
+        const facts = [`${dateTime(h.at)} WIB`];
+        if (h.statusBefore || h.statusAfter)
+            facts.push(
+                `${HISTORY_STATUS[h.statusBefore] || 'Belum diisi'} → ${HISTORY_STATUS[h.statusAfter] || 'Belum diisi'}`,
+            );
+        if (h.action === 'withdrawn' && h.totalBefore != null)
+            facts.push(`Total dibatalkan ${number(h.totalBefore)}`);
+        else if (h.totalAfter != null)
+            facts.push(
+                h.totalBefore != null && differs(h.totalBefore, h.totalAfter)
+                    ? `Total ${number(h.totalBefore)} → ${number(h.totalAfter)}`
+                    : `Total ${number(h.totalAfter)}`,
+            );
+        entry.append(node('p', facts.join(' · '), 'text-muted'));
+        if (h.note)
+            entry.append(
+                node(
+                    'p',
+                    `${h.action === 'returned' ? 'Alasan pengembalian' : h.action === 'adjusted' ? 'Alasan koreksi' : 'Catatan'}: ${h.note}`,
+                    'decision-note mt-2',
+                ),
+            );
+        const notes = items.filter((x) => x.note);
+        if (notes.length) {
+            const list = node('ul', null, 'assessment-history-notes');
+            for (const x of notes) {
+                const li = node('li');
+                li.append(node('strong', x.name), node('span', x.note));
+                list.append(li);
+            }
+            entry.append(node('p', 'Catatan per KPI', 'assessment-history-subtitle'), list);
+        }
+        if (changes.length) {
+            const box = node('details', null, 'assessment-history-items'),
+                table = node('table', null, 'assessment-history-table'),
+                headRow = node('tr');
+            box.append(
+                node(
+                    'summary',
+                    `${full ? 'Nilai per KPI' : 'Perubahan nilai KPI'} (${changes.length})`,
+                    'link cursor-pointer',
+                ),
+            );
+            const proposals = !full && changes.some((x) => x.proposal != null);
+            for (const label of ['KPI', 'Bobot', full ? 'Nilai' : 'Sebelum', ...(full ? [] : ['Sesudah']), ...(proposals ? ['Usulan KU'] : [])])
+                headRow.append(node('th', label));
+            table.append(headRow);
+            for (const x of changes) {
+                const tr = node('tr');
+                tr.append(
+                    node('td', x.name),
+                    node('td', `${number(x.weight)}%`, 'numeric'),
+                );
+                if (full)
+                    tr.append(node('td', number(x.after ?? x.before), 'numeric'));
+                else
+                    tr.append(
+                        node('td', x.before == null ? '-' : number(x.before), 'numeric'),
+                        node('td', `${x.after == null ? '-' : number(x.after)}${x.reviewed ? ' (Nilai KD)' : ''}`, 'numeric'),
+                    );
+                if (proposals)
+                    tr.append(node('td', x.proposal == null ? '-' : number(x.proposal), 'numeric'));
+                table.append(tr);
+            }
+            box.append(table);
+            entry.append(box);
+        }
+        for (const [key, label] of [
+            ['positive', 'Temuan positif'],
+            ['negative', 'Temuan negatif'],
+        ]) {
+            const finding = details.findings?.[key];
+            if (finding)
+                entry.append(
+                    node(
+                        'p',
+                        `${label}: ${finding.after ?? (h.action === 'withdrawn' ? finding.before : 'dikosongkan')}`,
+                        'text-muted mt-1',
+                    ),
+                );
+        }
+        if (h.legacy)
+            entry.append(
+                node(
+                    'p',
+                    'Dicatat sebelum riwayat rinci tersedia; nama pelaku sesuai data akun saat pembaruan sistem.',
+                    'assessment-history-legacy',
+                ),
+            );
+        return entry;
+    }
+    /**
+     * History of the person-month from the server, newest first. Without a current submission (withdrawn) the
+     * subject-period history is requested directly.
+     */
+    async function timeline(hist, assessment, p, key) {
+        const cycleId = s.cycle(key)?.dbId;
+        const path = assessment.id
+            ? `/assessments/${assessment.id}/timeline`
+            : cycleId && p.dbId
+              ? `/assessment-history?${new URLSearchParams({
+                    cycle_id: cycleId,
+                    [p.type === 'member' ? 'employee_id' : 'subject_user_id']:
+                        p.dbId,
+                })}`
+              : null;
         hist.replaceChildren(
             node(
                 'li',
-                assessment.id
-                    ? 'Memuat jejak keputusan…'
-                    : 'Belum ada aktivitas penilaian.',
+                path ? 'Memuat riwayat penilaian…' : 'Belum ada aktivitas penilaian.',
                 'empty',
             ),
         );
-        if (!assessment.id) return;
+        if (!path) return;
         let events;
         try {
-            events = (
-                await s.api.request(`/assessments/${assessment.id}/timeline`)
-            ).data;
+            events = (await s.api.request(path)).data;
         } catch (error) {
             if (hist.isConnected)
                 hist.replaceChildren(node('li', error.message, 'empty'));
             return;
         }
         if (!hist.isConnected) return;
-        hist.replaceChildren();
-        for (const h of events.toSorted(
-            (a, b) => Date.parse(a.at) - Date.parse(b.at),
-        )) {
-            const entry = node('li'),
-                title = node(
-                    'strong',
-                    {
-                        Diajukan: 'Mengajukan penilaian',
-                        Dikembalikan: 'Mengembalikan penilaian',
-                        Final: 'Menetapkan Final',
-                    }[h.action] || activityLabel(h.action),
-                );
-            entry.append(
-                title,
-                node(
-                    'p',
-                    `${h.who || 'Sistem'} · ${dateTime(h.at)} WIB`,
-                    'text-muted mt-1',
-                ),
-            );
-            if (h.reason)
-                entry.append(
-                    node(
-                        'p',
-                        `${/return|Dikembalikan/.test(h.action) ? 'Alasan pengembalian' : 'Catatan peristiwa'}: ${h.reason}`,
-                        'decision-note mt-2',
-                    ),
-                );
-            hist.append(entry);
-        }
+        hist.replaceChildren(...events.map(historyEntry));
         if (!hist.childElementCount)
             hist.append(node('li', 'Belum ada aktivitas penilaian.', 'empty'));
-        paginate(hist, 'review-history', { token, size: 3 });
+        paginate(hist, 'review-history', { token: p.id + key, size: 5 });
+    }
+    /** Error shown in the open review, next to the decision buttons. */
+    function reviewError(message) {
+        const el = $('[data-review-mount] [data-score-error]');
+        if (!el) return toast(message, true);
+        el.textContent = message;
+        el.hidden = false;
+        el.scrollIntoView({ block: 'nearest' });
+    }
+    const reviewReason = () => $('[data-review-reason]')?.value.trim() || '';
+    /**
+     * KD score changes of the open review against the saved state, or null after showing an invalid score.
+     * Notes and the general note are optional and sent when filled.
+     */
+    function reviewPlan() {
+        const w = reviewWorking,
+            reviews = [],
+            invalid = [];
+        w.snapshot.items.forEach((item, i) => {
+            const parsed = parseReview(w.draft[i], item.config?.method === 'formula');
+            if (parsed.error) return invalid.push(`${item.name}: ${parsed.error}`);
+            // A KD score equal to the proposal is no correction.
+            const value =
+                parsed.value != null && differs(parsed.value, w.proposals[i]) ? parsed.value : null;
+            if (value == null ? w.saved[i] == null : w.saved[i] != null && !differs(value, w.saved[i])) return;
+            const note = (w.reviewNotes[item.id] || '').trim();
+            reviews.push({ source_kpi_item_id: +item.id, score: value, note: note || null });
+        });
+        if (invalid.length) {
+            reviewError(invalid.join(' '));
+            return null;
+        }
+        return { reviews, reason: reviewReason() };
+    }
+    /** Saves the division head's scores; the submission stays waiting for a decision. */
+    async function saveReview() {
+        if (c.role !== 'kd' || !reviewWorking) return;
+        const plan = reviewPlan();
+        if (!plan) return;
+        if (!plan.reviews.length) return reviewError('Belum ada Nilai KD yang diubah.');
+        const id = reviewWorking.personId,
+            notes = reviewWorking.reviewNotes;
+        return s.api.perform($('[data-review-mount]'), async () => {
+            const a = s.assessment(id);
+            await s.api.request(`/assessments/${a.id}/adjust`, 'POST', {
+                lock_version: a.lockVersion,
+                reviews: plan.reviews,
+                reason: plan.reason || null,
+            });
+            await s.refresh();
+            sync();
+            await review(id, s.cycleKey, { notes });
+            toast('Nilai KD tersimpan. Usulan Kepala Unit tetap tercatat.');
+        });
+    }
+    /** Discards unsaved KD scores or notes only after confirmation. */
+    async function leaveReview() {
+        const w = reviewWorking,
+            pending =
+                w &&
+                (draftChanged(w) ||
+                    Object.values(w.reviewNotes).some((x) => x.trim()) ||
+                    !!reviewReason());
+        return (
+            !pending ||
+            (await confirm('Buang Nilai KD dan catatan yang belum disimpan?'))
+        );
     }
     async function decide(ids, returned = false) {
         if (c.role !== 'kd') return;
@@ -698,14 +1065,37 @@ export function initFlowAssessments(c, s, link) {
                 'Pilih pengajuan staf yang masih menunggu keputusan.',
                 true,
             );
-        if (!returned && rows.some((p) => s.total(p.id) == null))
-            return toast('Ada pengajuan tidak lengkap. Periksa kembali.', true);
+        // KD scores and notes come from the open review of a single submission.
+        const single =
+            rows.length === 1 && reviewWorking?.personId === rows[0].id
+                ? reviewWorking
+                : null;
+        let body = {},
+            extra;
+        if (returned) {
+            if (!single)
+                return toast('Buka pengajuan untuk mengembalikannya dengan catatan.', true);
+            const notes = Object.entries(single.reviewNotes)
+                    .map(([id, note]) => ({ source_kpi_item_id: +id, note: note.trim() }))
+                    .filter((x) => x.note),
+                reason = reviewReason();
+            if (!notes.length && !reason)
+                return reviewError('Isi catatan pada KPI yang perlu diperbaiki atau catatan umum.');
+            body = { reason: reason || null, item_notes: notes };
+            extra = `${notes.length ? `${notes.length} catatan KPI dikirim ke Kepala Unit. ` : ''}${draftChanged(single) ? 'Nilai KD yang belum disimpan tidak dipakai. ' : ''}Kepala Unit memperbaiki lalu mengajukan ulang.`;
+        } else {
+            const plan = single ? reviewPlan() : { reviews: [], reason: '' };
+            if (!plan) return;
+            if (!plan.reviews.length && rows.some((p) => s.total(p.id) == null))
+                return toast('Ada pengajuan tidak lengkap. Periksa kembali.', true);
+            if (plan.reviews.length) body.reviews = plan.reviews;
+            if (plan.reason) body.reason = plan.reason;
+            const total = single ? totalValues(single.values, single.snapshot.items) : null;
+            extra = `${plan.reviews.length ? `Nilai KD pada ${plan.reviews.length} KPI ikut disimpan. ` : ''}${total != null ? `Total ${number(total)}. ` : ''}Angka akan terkunci dan menjadi hasil resmi.`;
+        }
         const answer = await confirm(
-            `${returned ? 'Kembalikan' : 'Tetapkan Final'} ${rows.length} penilaian: ${rows.map((p) => p.name).join(', ')}? ${returned ? 'KU harus memperbaiki dan mengajukan ulang.' : 'Angka akan terkunci dan menjadi hasil resmi.'}`,
-            {
-                reason: returned,
-                label: returned ? 'Kembalikan' : 'Tetapkan Final',
-            },
+            `${returned ? 'Kembalikan' : 'Tetapkan Final'} ${rows.length} penilaian: ${rows.map((p) => p.name).join(', ')}? ${extra}`,
+            { label: returned ? 'Kembalikan' : 'Tetapkan Final' },
         );
         if (!answer) return;
         return s.api.perform(null, async () => {
@@ -716,22 +1106,16 @@ export function initFlowAssessments(c, s, link) {
                         lock_version: s.assessment(p.id).lockVersion,
                     })),
                 });
-            else
-                for (const p of rows) {
-                    const a = s.assessment(p.id);
-                    await s.api.request(
-                        '/assessments/' +
-                            a.id +
-                            '/' +
-                            (returned ? 'return' : 'approve'),
-                        'POST',
-                        {
-                            lock_version: a.lockVersion,
-                            ...(returned ? { reason: answer } : {}),
-                        },
-                    );
-                }
+            else {
+                const a = s.assessment(rows[0].id);
+                await s.api.request(
+                    `/assessments/${a.id}/${returned ? 'return' : 'approve'}`,
+                    'POST',
+                    { lock_version: a.lockVersion, ...body },
+                );
+            }
             selections.clear();
+            reviewWorking = null;
             await s.refresh();
             close('review-dialog');
             sync();
@@ -748,6 +1132,28 @@ export function initFlowAssessments(c, s, link) {
         document.dispatchEvent(new Event('flow-assessments-rendered'));
     }
     document.addEventListener('input', (e) => {
+        const reviewMount = e.target.closest('[data-review-mount]');
+        if (reviewMount && reviewWorking) {
+            if (e.target.matches('[data-item-note-input]'))
+                reviewWorking.reviewNotes[e.target.dataset.itemNoteInput] =
+                    e.target.value;
+            else if (e.target.matches('[data-review-score]')) {
+                const i = +e.target.dataset.reviewScore,
+                    parsed = parseReview(
+                        e.target.value,
+                        reviewWorking.snapshot.items[i].config?.method === 'formula',
+                    );
+                reviewWorking.draft[i] = e.target.value;
+                reviewWorking.reviewed[i] = parsed.error ? null : parsed.value;
+                reviewWorking.values[i] = parsed.error
+                    ? e.target.value
+                    : (parsed.value ?? reviewWorking.proposals[i]);
+                e.target.setAttribute('aria-invalid', String(!!parsed.error));
+                $('[data-score-error]', reviewMount).hidden = true;
+                updateTotal(reviewMount, reviewWorking.snapshot, reviewWorking);
+            }
+            return;
+        }
         if (e.target.matches('[data-measurement]')) {
             const p = s.person(selected);
             if (!editable(p) || !working) return;
@@ -891,6 +1297,7 @@ export function initFlowAssessments(c, s, link) {
             e.target.closest('[data-flow-action]')?.dataset.flowAction;
         if (action === 'final') await decide([reviewed]);
         if (action === 'return') await decide([reviewed], true);
+        if (action === 'save-review') await saveReview();
         if (action === 'bulk-final') await decide([...selections]);
         if (action === 'next-review') {
             const ids = filtered()
@@ -901,8 +1308,9 @@ export function initFlowAssessments(c, s, link) {
                 )
                 .map((p) => p.id);
             const next = ids[ids.indexOf(reviewed) + 1] || ids[0];
-            if (next) review(next);
-            else {
+            if (next) {
+                if (await leaveReview()) review(next);
+            } else {
                 close('review-dialog');
                 toast('Tidak ada pengajuan menunggu pada filter ini.');
             }
@@ -987,12 +1395,7 @@ export function initFlowAssessments(c, s, link) {
             return s.api.perform(root, async () => {
                 const current = s.assessment(p.id);
                 const payload = {
-                    scores: k.items.map((item, i) => ({
-                        source_kpi_item_id: +item.id,
-                        ...(item.config?.method === 'formula'
-                            ? { inputs: working.inputs?.[i] || {} }
-                            : { score: +working.values[i] }),
-                    })),
+                    scores: scorePayload(k.items, working),
                     positive_finding: working.positive || '',
                     negative_finding: working.negative || '',
                 };
@@ -1051,11 +1454,12 @@ export function initFlowAssessments(c, s, link) {
         }
     });
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target.matches('[data-score]')) {
+        if (e.key === 'Enter' && e.target.matches('[data-score], [data-review-score]')) {
             e.preventDefault();
             const list = $$(
-                '[data-score]:not(:disabled)',
-                $('[data-score-mount]'),
+                e.target.matches('[data-review-score]') ? '[data-review-score]' : '[data-score]:not(:disabled)',
+                e.target.closest('[data-review-mount]') ||
+                    $('[data-score-mount]'),
             );
             const next = list[list.indexOf(e.target) + 1];
             if (next) {

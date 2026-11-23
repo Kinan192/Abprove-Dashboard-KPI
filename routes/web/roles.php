@@ -16,6 +16,7 @@ foreach (['unit' => 'kepala_unit', 'division' => 'kepala_divisi', 'hc' => 'super
     Route::prefix($prefix.'/data')->middleware(['context:'.$role, 'schema.v2'])->group(function () use ($role) {
         Route::get('/workspace', [WorkspaceController::class, 'show']);
         Route::get('/insights', [FrontendDataController::class, 'insights']);
+        Route::get('/report-export', [ReportingController::class, 'export']);
         Route::get('/lookups', [FrontendDataController::class, 'lookups']);
         Route::get('/analytics', [FrontendDataController::class, 'analytics']);
         Route::get('/kpis', [FrontendDataController::class, 'kpis']);
@@ -32,6 +33,7 @@ foreach (['unit' => 'kepala_unit', 'division' => 'kepala_divisi', 'hc' => 'super
         Route::get('/assessments', [AssessmentController::class, 'index']);
         Route::get('/assessments/{assessment}', [AssessmentController::class, 'show'])->whereNumber('assessment');
         Route::get('/assessments/{assessment}/timeline', [AssessmentController::class, 'timeline'])->whereNumber('assessment');
+        Route::get('/assessment-history', [AssessmentController::class, 'history']);
         Route::get('/recap', [ReportingController::class, 'recap']);
         Route::get('/help', [FrontendController::class, 'show']);
         Route::get('/notifications', [NotificationController::class, 'index']);
@@ -54,6 +56,7 @@ foreach (['unit' => 'kepala_unit', 'division' => 'kepala_divisi', 'hc' => 'super
             Route::get('/kpis', [FrontendController::class, 'show']);
             Route::get('/heads', [ReportingController::class, 'heads']);
             Route::post('/assessments/{assessment}/approve', [AssessmentController::class, 'approve'])->whereNumber('assessment');
+            Route::post('/assessments/{assessment}/adjust', [AssessmentController::class, 'adjust'])->whereNumber('assessment');
             Route::post('/assessments/{assessment}/return', [AssessmentController::class, 'returnAssessment'])->whereNumber('assessment');
             Route::post('/approvals/bulk', [AssessmentController::class, 'bulk']);
         }

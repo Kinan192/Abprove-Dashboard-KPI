@@ -1,6 +1,6 @@
 @push('dialogs')
 @if($vm->role==='hc')<x-abprove.dialog id="kpi-name-dialog" title="Ubah nama KPI" :narrow="true"><form id="kpi-name-form"><x-abprove.flow-input name="name" label="Nama dokumen KPI" :required="true" maxlength="160"/><p class="text-xs text-muted mt-3">Nama ini digunakan pada ekspor dan riwayat KPI. Perubahan disimpan bersama indikator melalui Simpan perubahan.</p></form><x-slot:footer><button class="btn" type="button" data-dialog-close>Batal</button><button class="btn btn-primary" type="submit" form="kpi-name-form">Gunakan nama</button></x-slot:footer></x-abprove.dialog>@endif
-<x-abprove.dialog id="indicator-dialog" title="Indikator KPI" :drawer="true">
+<x-abprove.dialog id="indicator-dialog" title="Indikator KPI">
 <form id="indicator-form" class="space-y-4">
 <p class="text-xs text-muted">Form ini menambah satu indikator ke editor. Setelah semua indikator selesai, tutup form dan klik <strong>Simpan perubahan</strong> di halaman utama untuk menyimpan versi KPI.</p>
 <div class="kpi-form-section">
@@ -20,13 +20,12 @@
     <div class="kpi-form-grid mt-3" data-kpi-formula-fields hidden>
         <x-abprove.flow-input name="numerator" label="Numerator" maxlength="500" hint="Contoh: tiket selesai sesuai SLA."/>
         <x-abprove.flow-input name="denominator" label="Denominator" maxlength="500" hint="Contoh: total tiket yang dinilai."/>
-        <div class="kpi-form-span"><x-abprove.flow-input name="formula" label="Formula pengukuran" maxlength="500" hint="Contoh: (A / B) * 100. Formula disimpan sebagai definisi; penilai tetap mengisi nilai 10–100 di backend."/></div>
+        <div class="kpi-form-span"><x-abprove.flow-input name="formula" label="Formula pengukuran" maxlength="500" hint="Contoh: (A / B) * 100."/></div>
     </div>
 </div>
 <div class="kpi-form-section">
     <h3 class="kpi-form-title">3. Ditugaskan ke</h3>
     <div class="notice text-xs" data-kpi-recipients>Pilih area KPI untuk melihat penerima.</div>
-    <p class="mt-2 text-xs text-muted">Penerima mengikuti cakupan KPI. Penugasan per orang belum disimpan terpisah oleh backend.</p>
 </div>
 <p class="notice notice-error" data-form-error hidden role="alert"></p>
 </form>

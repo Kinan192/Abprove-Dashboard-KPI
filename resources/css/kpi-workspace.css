@@ -36,16 +36,38 @@
 .skp-step-count.info {
     @apply border-info/30 text-info;
 }
+/* Period picker: bounded year + month of that year */
 .fx-period-picker {
     @apply ml-auto flex items-center gap-2;
 }
-.fx-period-picker > label {
+.fx-period-picker-label {
     @apply text-[12.5px] font-semibold whitespace-nowrap text-muted;
 }
 .fx-period-picker .field {
-    @apply min-h-10 w-auto max-w-[340px] min-w-[220px] py-2;
+    @apply min-h-10 w-auto py-2;
 }
-
+/* Year control: prev/next + numeric input (no growing year list) */
+.skp-year-stepper {
+    @apply inline-flex shrink-0 items-center gap-1;
+}
+.skp-year-step {
+    @apply min-h-10 min-w-10 justify-center px-0 text-[16px] leading-none;
+}
+.skp-year-stepper .skp-year-input {
+    @apply min-h-10 w-[84px] min-w-0 flex-none py-2 text-center tabular-nums;
+    -moz-appearance: textfield;
+}
+.skp-year-input::-webkit-inner-spin-button,
+.skp-year-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.fx-period-picker .fx-period-month {
+    @apply max-w-[260px] min-w-[200px];
+}
+.skp-loading {
+    @apply py-12;
+}
 /* Progress primitives (readiness, weight totals) */
 .skp-prototype progress {
     @apply h-2 w-full min-w-0 flex-1 overflow-hidden rounded-full border-0 bg-subtle;
@@ -127,39 +149,18 @@
 .skp-panel {
     @apply min-w-0 p-5;
 }
-.skp-panel h2,
-.skp-panel > summary {
+.skp-panel h2 {
     @apply text-[15px] leading-6 font-semibold;
 }
 .skp-panel > .gp-help {
     @apply mt-1 max-w-[760px] text-[12.5px] leading-5;
 }
-details.skp-panel {
-    @apply p-0;
-}
-details.skp-panel > summary {
-    @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 px-5 py-3;
-}
-details.skp-panel > summary::-webkit-details-marker {
-    display: none;
-}
-details.skp-panel > summary::after,
 .fx-settings > summary::after {
     @apply size-2 shrink-0 -translate-y-0.5 rotate-45 border-r-[1.5px] border-b-[1.5px] border-muted transition-transform;
     content: '';
 }
-details.skp-panel[open] > summary::after,
 .fx-settings[open] > summary::after {
     @apply translate-y-0.5 -rotate-[135deg];
-}
-details.skp-panel > :not(summary) {
-    @apply mx-5;
-}
-details.skp-panel > :last-child:not(summary) {
-    @apply mb-5;
-}
-details.skp-panel > .skp-copy {
-    @apply mt-0;
 }
 .skp-legacy {
     @apply my-4 grid list-none gap-0 rounded-lg border border-line p-0;
@@ -224,32 +225,416 @@ details.skp-panel > .skp-copy {
 body[data-app-shell] .skp-row-actions .skp-link-danger {
     @apply ml-2 text-danger hover:bg-danger-soft hover:text-danger;
 }
-/* Desktop tables keep each row's action group on one line (pattern list, period
-   list, pattern KPI items); the list tables scroll locally when the card is narrow. */
+/* Pattern table scrolls locally on narrow desktops; the KPI items table keeps inline actions. */
 @media (min-width: 901px) {
-    body[data-app-shell] .gp-table.skp-patterns,
-    body[data-app-shell] .gp-table.skp-periods {
-        min-width: 960px;
+    body[data-app-shell] .gp-table.skp-patterns {
+        min-width: 820px;
     }
     .gp-table .skp-row-actions {
         flex-wrap: nowrap;
         white-space: nowrap;
     }
 }
-.skp-patterns th:nth-child(3) {
-    width: 190px;
+/* Pattern list: compact rows (max two text lines, one-line weight and actions). */
+@media (min-width: 601px) {
+    body[data-app-shell] .gp-table.skp-patterns td {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+    .skp-patterns th:first-child {
+        width: 28%;
+    }
+    .skp-patterns th:nth-child(3) {
+        width: 200px;
+    }
+    .skp-patterns th:nth-child(4) {
+        width: 150px;
+    }
+    .skp-patterns .skp-clip {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
-.skp-patterns th:nth-child(4) {
-    width: 140px;
-}
-.skp-patterns th:last-child {
-    width: 310px;
-}
-.skp-periods th:nth-child(4) {
-    width: 120px;
-}
+.skp-patterns th:last-child,
 .skp-periods th:last-child {
-    width: 310px;
+    width: 64px;
+}
+.skp-total {
+    @apply flex items-center gap-2 whitespace-nowrap;
+}
+.skp-total .skp-weight-meter {
+    @apply mt-0 w-14 flex-none;
+}
+body[data-app-shell] .skp-patterns .skp-holders-link {
+    @apply font-semibold;
+}
+
+/* Pattern import */
+.skp-import-steps {
+    @apply m-0 flex list-none flex-wrap items-center gap-x-2 gap-y-2 p-0 text-[13px] leading-5 text-muted;
+}
+.skp-import-steps li {
+    @apply inline-flex items-center gap-2 rounded-full border border-line bg-paper py-1 pr-3 pl-1;
+}
+.skp-import-steps li + li::before {
+    content: '';
+    @apply mr-1 -ml-1 h-px w-3 bg-line;
+}
+.skp-import-steps span {
+    @apply grid size-6 place-items-center rounded-full bg-subtle text-[12px] font-semibold tabular-nums;
+}
+.skp-import-steps li.done {
+    @apply text-ink;
+}
+.skp-import-steps li.done span {
+    @apply bg-accent-soft text-accent;
+}
+.skp-import-steps li.current {
+    @apply border-accent font-semibold text-ink;
+}
+.skp-import-steps li.current span {
+    @apply bg-accent text-white;
+}
+.skp-import-upload {
+    @apply grid gap-5;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+}
+.skp-import-upload.dragging .skp-dropzone,
+.skp-import-upload.dragging .skp-import-filecard {
+    @apply border-accent bg-accent-soft;
+}
+.skp-import-drop {
+    @apply grid min-w-0;
+}
+/* Visually hidden but focusable: the dropzone shows its focus ring instead. */
+.skp-import-input {
+    @apply absolute size-px overflow-hidden opacity-0;
+    clip-path: inset(50%);
+}
+.skp-dropzone {
+    @apply relative grid min-h-[168px] cursor-pointer place-items-center content-center gap-1.5 rounded-xl border-2 border-dashed border-line bg-subtle/60 px-5 py-6 text-center transition-colors;
+}
+.skp-dropzone svg {
+    @apply mb-1 text-accent;
+}
+.skp-dropzone strong {
+    @apply text-[14px] leading-5 font-semibold text-ink;
+}
+.skp-dropzone u {
+    @apply text-link underline-offset-2;
+}
+.skp-dropzone small {
+    @apply text-[12.5px] leading-5 text-muted;
+}
+.skp-dropzone:hover {
+    @apply border-accent;
+}
+.skp-dropzone:focus-within {
+    @apply border-accent outline-2 outline-offset-2 outline-accent;
+}
+.skp-import-filecard {
+    @apply relative flex min-w-0 flex-wrap items-center gap-3 self-start rounded-xl border border-line bg-subtle/60 px-4 py-3 transition-colors;
+}
+.skp-import-filecard > svg {
+    @apply shrink-0 text-accent;
+}
+.skp-import-filecard.failed > svg {
+    @apply text-danger;
+}
+.skp-import-filemeta {
+    @apply grid min-w-0 flex-1 basis-48;
+}
+.skp-import-filemeta strong {
+    @apply truncate text-[14px] leading-5 font-semibold;
+}
+.skp-import-filemeta small {
+    @apply inline-flex items-center gap-1.5 text-[12.5px] leading-5 text-muted;
+}
+.skp-spinner {
+    @apply inline-block size-3 animate-spin rounded-full border-2 border-line border-t-accent;
+}
+.skp-import-template {
+    @apply grid content-start gap-2 border-l border-line pl-5;
+}
+.skp-import-template .gp-actions {
+    @apply justify-start;
+}
+.skp-import-guide summary {
+    @apply cursor-pointer text-[13px] font-semibold text-link;
+}
+.skp-import-guide dl {
+    @apply m-0 mt-2 grid gap-1 text-[12.5px] leading-5;
+}
+.skp-import-guide dl > div {
+    @apply grid grid-cols-[92px_1fr] gap-2;
+}
+.skp-import-guide dt {
+    @apply font-semibold text-ink;
+}
+.skp-import-guide dd {
+    @apply m-0 text-muted;
+}
+.skp-import-summary {
+    @apply mb-3 px-5;
+}
+.skp-import-bar {
+    @apply sticky bottom-0 z-[5] flex flex-wrap items-center justify-between gap-3 border-t border-line bg-paper px-5 py-3;
+    box-shadow: 0 -10px 24px -18px rgb(15 30 38 / 0.35);
+}
+.skp-import-bar p {
+    @apply min-w-0 flex-1 basis-64 text-[13px] leading-5 text-muted;
+}
+@media (max-width: 860px) {
+    .skp-import-upload {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .skp-import-template {
+        @apply border-t border-l-0 pt-4 pl-0;
+    }
+}
+@media (max-width: 600px) {
+    .skp-import-summary,
+    .skp-import-bar {
+        @apply px-4;
+    }
+    .skp-import-bar .gp-actions,
+    .skp-import-bar .btn {
+        @apply flex-1;
+    }
+}
+.skp-import-actions {
+    @apply flex flex-wrap items-center justify-between gap-3;
+}
+.skp-import-actions .gp-help {
+    @apply mt-0.5 text-[12.5px] leading-5;
+}
+.skp-import-preview > .gp-note {
+    @apply mx-5 mb-3;
+}
+.skp-import-patterns {
+    @apply m-0 flex list-none flex-wrap gap-2 px-5 pb-4;
+}
+.skp-import-patterns li {
+    @apply grid gap-1 rounded-lg border border-line px-3 py-2 text-[13px];
+}
+.skp-import-patterns li > div {
+    @apply flex flex-wrap items-center gap-2;
+}
+.skp-import-patterns span {
+    @apply text-muted;
+}
+.skp-import-only {
+    @apply inline-flex items-center gap-1.5 text-[12.5px];
+}
+@media (min-width: 601px) {
+    body[data-app-shell] .gp-table.skp-import-table {
+        min-width: 960px;
+    }
+    body[data-app-shell] .gp-table.skp-import-table td {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        vertical-align: top;
+    }
+    .skp-import-table th:first-child {
+        width: 64px;
+    }
+    .skp-import-table th:nth-child(2) {
+        width: 13%;
+    }
+    .skp-import-table th:nth-child(3) {
+        width: 19%;
+    }
+    .skp-import-table th:nth-child(4) {
+        width: 140px;
+    }
+    .skp-import-table th:nth-child(5) {
+        width: 80px;
+    }
+    /* Formula keeps a readable width; "Cek" only needs room for short messages and the action. */
+    .skp-import-table th:nth-child(6) {
+        width: 22%;
+    }
+    .skp-import-table th:last-child {
+        width: 21%;
+    }
+}
+body[data-app-shell] .skp-import-table tr.invalid {
+    background: color-mix(in srgb, var(--color-danger) 5%, transparent);
+}
+.skp-import-table code {
+    @apply text-[12px];
+}
+body[data-app-shell] .gp-table.skp-import-table tfoot :is(th, td) {
+    @apply border-t border-line bg-subtle px-4 py-3 text-[13px] normal-case tracking-normal;
+}
+body[data-app-shell] .gp-table.skp-import-table tfoot th {
+    @apply text-left font-semibold text-ink;
+}
+@media (max-width: 600px) {
+    body[data-app-shell] .gp-table.skp-import-table tfoot {
+        display: block;
+    }
+    body[data-app-shell] .gp-table.skp-import-table tfoot tr {
+        @apply grid grid-cols-[1fr_auto] gap-2 border-t border-line bg-subtle;
+    }
+    body[data-app-shell] .gp-table.skp-import-table tfoot :is(th, td) {
+        @apply border-0 bg-transparent p-0;
+    }
+    body[data-app-shell] .gp-table.skp-import-table tfoot td:last-child {
+        grid-column: 1 / -1;
+    }
+}
+.skp-import-errors {
+    @apply m-0 grid list-none gap-0.5 p-0 text-[12px] leading-[17px] text-danger;
+}
+.skp-import-fix {
+    @apply mt-1 block text-[12.5px];
+}
+.gp-table small.skp-import-source {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.skp-import-preview.stale :is(.skp-import-patterns, .table-wrap) {
+    @apply opacity-50;
+}
+@media (min-width: 601px) {
+    .skp-import-table.rsab th:first-child {
+        width: 128px;
+    }
+}
+.skp-import-line strong {
+    @apply block truncate;
+}
+/* RSAB master: worksheet choice */
+.skp-import-sheets {
+    @apply grid gap-3;
+}
+.skp-import-sheet-search {
+    @apply max-w-[320px];
+}
+.skp-import-sheet-list {
+    @apply m-0 grid max-h-[320px] min-w-0 content-start gap-1.5 overflow-y-auto border-0 p-0;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.skp-import-sheet {
+    @apply flex min-w-0 cursor-pointer items-start gap-2 rounded-lg border border-line px-2.5 py-1.5 text-[13px] leading-5;
+}
+.skp-import-sheet[hidden] {
+    display: none;
+}
+.skp-import-sheet-none {
+    @apply m-0 py-2 text-[12.5px] text-muted;
+    grid-column: 1 / -1;
+}
+.skp-import-sheet:has(input:checked) {
+    @apply border-accent bg-accent-soft;
+}
+.skp-import-sheet.disabled {
+    @apply cursor-not-allowed opacity-60;
+}
+.skp-import-sheet input {
+    @apply mt-0.5 shrink-0;
+}
+.skp-import-sheet span {
+    @apply grid min-w-0;
+}
+.skp-import-sheet b {
+    @apply truncate font-semibold;
+}
+.skp-import-sheet small {
+    @apply text-[11.5px] leading-4 text-muted;
+}
+.skp-import-replace {
+    @apply inline-flex items-start gap-2 text-[13px] leading-5;
+}
+.skp-import-replace input {
+    @apply mt-0.5 shrink-0;
+}
+.fx-import-source {
+    @apply mt-1 text-[12px] leading-[17px] text-muted;
+    overflow-wrap: anywhere;
+}
+@media (min-width: 601px) {
+    body[data-app-shell] .gp-table.skp-periods {
+        min-width: 920px;
+    }
+    .skp-periods th:first-child {
+        width: 22%;
+    }
+    .skp-periods th:nth-child(2) {
+        width: 32%;
+    }
+    .skp-periods th:nth-child(3) {
+        width: 26%;
+    }
+    .skp-periods th:nth-child(4) {
+        width: 14%;
+    }
+}
+body[data-app-shell] .gp-table.skp-periods td {
+    vertical-align: top;
+    overflow-wrap: normal;
+}
+.skp-periods .gp-tag {
+    @apply whitespace-nowrap text-[12px];
+}
+.skp-period-schedule {
+    @apply m-0 grid gap-0.5 text-[12px] leading-[18px];
+}
+.skp-period-schedule > div {
+    display: grid;
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    gap: 8px;
+}
+.skp-period-schedule dt {
+    @apply text-muted;
+}
+.skp-period-schedule dd {
+    @apply m-0;
+}
+.skp-period-readiness {
+    @apply flex flex-col items-start gap-1;
+}
+.skp-period-readiness small {
+    @apply m-0;
+}
+.skp-period-readiness .link {
+    @apply min-h-10;
+}
+/* Row action menu: three-dot trigger + popover in the top layer (never clipped by table scroll). */
+body[data-app-shell] .gp-table td.skp-menu-cell {
+    text-align: right;
+    vertical-align: middle;
+}
+.skp-menu-trigger {
+    @apply inline-grid size-10 place-items-center rounded-lg border border-transparent text-muted transition-colors hover:border-line hover:bg-subtle hover:text-ink;
+}
+.skp-menu-trigger[aria-expanded='true'] {
+    @apply border-line bg-subtle text-ink;
+}
+.skp-menu-trigger:focus-visible,
+.skp-menu-item:focus-visible {
+    outline: 2px solid var(--color-link);
+    outline-offset: 1px;
+}
+.skp-menu[popover] {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    @apply max-w-[min(20rem,calc(100vw-16px))] min-w-52 overflow-visible rounded-xl border border-line bg-paper p-1 text-ink shadow-[0_12px_32px_rgb(23_43_54/0.16),0_2px_6px_rgb(23_43_54/0.08)];
+}
+.skp-menu-item {
+    @apply flex min-h-10 w-full items-center rounded-lg px-3 py-2 text-left text-[13px] leading-5 font-medium text-ink no-underline hover:bg-subtle focus:bg-subtle;
+}
+.skp-menu-item.danger {
+    @apply text-danger hover:bg-danger-soft focus:bg-danger-soft;
+}
+.skp-menu-item[aria-disabled='true'] {
+    @apply cursor-not-allowed text-muted;
 }
 
 /* Pattern & period forms */
@@ -343,18 +728,8 @@ body[data-app-shell] .skp-row-actions .skp-link-danger {
 .fx-setup-action {
     @apply mt-2 flex flex-wrap gap-2;
 }
-.skp-open-block {
-    @apply mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] leading-[18px] whitespace-normal text-warning;
-}
-.skp-open-block small {
-    @apply block max-w-[300px];
-}
-/* Locked recipient route of an assigned pattern */
-.skp-role-lock {
-    @apply mt-4 rounded-xl border border-line bg-subtle px-4 py-3 text-[13px] leading-5;
-}
-.skp-role-lock .gp-actions {
-    @apply mt-2.5 flex flex-wrap gap-2;
+[data-skp-route-impact] > .gp-note {
+    @apply mt-3;
 }
 .skp-items-heading {
     @apply mb-4 flex flex-wrap items-start justify-between gap-3;
@@ -447,6 +822,14 @@ body[data-app-shell] .skp-row-actions .skp-link-danger {
 }
 .skp-result-line {
     @apply border-t border-line bg-subtle px-5 py-2.5 text-[12.5px] text-muted;
+}
+
+/* Pattern holders */
+.skp-holder-target {
+    @apply min-h-9 w-auto max-w-[260px];
+}
+.skp-disabled-action {
+    @apply inline-flex flex-col items-end gap-1 text-[12px] text-muted;
 }
 
 /* Weight check */
@@ -685,8 +1068,22 @@ body[data-app-shell] .fx-variable button.link {
     .fx-period-picker .field {
         @apply min-h-11 max-w-none min-w-0 flex-1;
     }
+    .skp-year-step {
+        @apply min-h-11 min-w-11;
+    }
+    .skp-year-stepper .skp-year-input {
+        @apply min-h-11 w-[84px] flex-none;
+    }
+    body[data-app-shell] .gp-table td.skp-menu-cell {
+        text-align: left;
+    }
+    .skp-menu-trigger {
+        @apply size-11;
+    }
+    .skp-menu-item {
+        @apply min-h-11;
+    }
     .skp-panel,
-    details.skp-panel > summary,
     .skp-card-head,
     .skp-table-card > .table-tools,
     .skp-selection,
@@ -696,12 +1093,13 @@ body[data-app-shell] .fx-variable button.link {
     .fx-form-section,
     .fx-form-actions,
     .skp-readiness,
-    .skp-savebar {
+    .skp-savebar,
+    .skp-import-patterns {
         @apply px-4;
     }
-    details.skp-panel > :not(summary),
     .skp-form-card > .gp-note,
-    #skp-period-form > .gp-note {
+    #skp-period-form > .gp-note,
+    .skp-import-preview > .gp-note {
         @apply mx-4;
     }
     .skp-copy > label {
@@ -740,6 +1138,7 @@ body[data-app-shell] .fx-variable button.link {
     .fx-token,
     .skp-row-actions button,
     .skp-row-actions a,
+    .skp-period-readiness .link,
     .fx-recommendations .btn {
         min-height: 44px;
     }

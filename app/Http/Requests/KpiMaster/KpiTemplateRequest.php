@@ -14,6 +14,15 @@ class KpiTemplateRequest extends MutationRequest
             'unit_id' => ['required_if:scope_level,unit', 'prohibited_unless:scope_level,unit', 'integer', 'min:1'],
             'division_id' => ['required_if:scope_level,division', 'prohibited_unless:scope_level,division', 'integer', 'min:1'],
             'name' => ['required', 'string', 'max:190'], 'effective_from' => ['required', 'date_format:Y-m-01'],
+        ] + self::itemRules() + [
+            'position_id' => ['prohibited'], 'template_year' => ['prohibited'], 'status' => ['prohibited'],
+        ];
+    }
+
+    /** Rules of the `items` list; also used to check an imported template file (TemplateImport::preview). */
+    public static function itemRules(): array
+    {
+        return [
             'items' => ['required', 'array', 'min:1', 'max:200'],
             'items.*' => ['required', 'array:pillar,name,numerator,denominator,measurement_formula,target_text,weight_percent'],
             'items.*.pillar' => ['required', 'string', 'max:64'],
@@ -22,7 +31,6 @@ class KpiTemplateRequest extends MutationRequest
             'items.*.denominator' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'items.*.measurement_formula' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'items.*.weight_percent' => ['required', 'numeric', 'gt:0', 'lte:100', 'regex:/^\\d{1,3}(?:\\.\\d{1,4})?$/D'],
-            'position_id' => ['prohibited'], 'template_year' => ['prohibited'], 'status' => ['prohibited'],
         ];
     }
 }

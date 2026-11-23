@@ -24,7 +24,7 @@
         <li class="inline-flex items-center gap-1.5">@if($stepIndex)<span class="text-muted" aria-hidden="true">→</span>@endif<span class="grid size-5 place-items-center rounded-full bg-paper text-[11px] font-semibold text-accent" aria-hidden="true">{{ $stepIndex + 1 }}</span><span class="text-ink">{{ $stepLabel }}</span></li>
         @endforeach
     </ol>
-    <span>Tombol “Tambahkan ke editor” belum menyimpan ke backend.</span>
+    <span>Tersimpan setelah Simpan perubahan.</span>
 </div>
 @endif
 <div class="card kpi-workspace">
@@ -74,7 +74,6 @@
                     <div><label class="label" for="kpi-history">Lihat indikator yang pernah berlaku</label><select id="kpi-history" class="field" data-kpi-version aria-label="Riwayat perubahan KPI"></select></div>
                     <div><p class="text-xs text-muted" data-kpi-version-label></p>@if($vm->role==='hc')<button class="link mt-2 text-xs text-danger!" type="button" data-flow-action="delete-kpi-version">Hapus perubahan yang belum dipakai</button>@endif</div>
                 </div>
-                <p class="mt-3 text-xs text-muted">Bulan penggunaan menentukan kapan indikator mulai dipakai, bukan jadwal pengisian. Riwayat menampilkan susunan KPI sebelumnya. Hasil yang sudah dikirim tetap memakai indikator pada snapshot; jadwal diatur pada Periode.</p>
             </details>
         </div>
     </form>

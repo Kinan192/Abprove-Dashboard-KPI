@@ -1,8 +1,25 @@
-import { Chart, ArcElement, DoughnutController } from 'chart.js';
+import {
+    Chart,
+    ArcElement,
+    BarController,
+    BarElement,
+    CategoryScale,
+    DoughnutController,
+    LinearScale,
+    Tooltip,
+} from 'chart.js';
 import { $, $$, node, labelCycle, dateTime, status as badge } from './flow-dom';
 import { activityLabel, activitySubject } from './activity-labels';
 
-Chart.register(ArcElement, DoughnutController);
+Chart.register(
+    ArcElement,
+    DoughnutController,
+    BarController,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip,
+);
 
 const STATUSES = {
     final: { label: 'Final', badge: 'Final' },
@@ -39,6 +56,9 @@ const CYCLE_STATUS = {
 };
 /** Progress table area column per level (KD units, HC divisions). */
 const AREAS = { unit: 'Unit', division: 'Divisi' };
+/** Distribution panel views; the chosen one survives page reloads. */
+const VIEWS = ['histogram', 'categories'];
+const VIEW_KEY = 'abprove.dashboard.distribution';
 
 const formatter = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 });
 const fmt = (value) => (value == null ? '–' : formatter.format(value));
@@ -47,6 +67,9 @@ const pct = (value) => (value == null ? '–' : `${fmt(value)}%`);
 const share = (part, total) => (total ? (part * 100) / total : null);
 const css = (name) =>
     getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+/** Charts are drawn only into a visible view, never into a 0-width hidden canvas. */
+const visible = (view) =>
+    !$(`.dashboard-distribution-view[data-panel="${view}"]`)?.hidden;
 /** Linear blend of two `#rrggbb` tokens; `t` 0 → `from`, 1 → `to`. */
 function blend(from, to, t) {
     const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)),
@@ -269,7 +292,7 @@ function distribution(state) {
             return li;
         }),
     );
-    if (!total) {
+    if (!total || !visible('categories')) {
         clearChart(host);
         return;
     }
@@ -300,12 +323,125 @@ function distribution(state) {
                 resizeDelay: 80,
                 cutout: '70%',
                 layout: { padding: 6 },
+                // The legend carries every figure; no tooltip to clip.
+                plugins: { tooltip: { enabled: false } },
             },
         },
         `Diagram donat sebaran kategori dari ${fmt(total)} hasil Final: ${items
             .map((item) => `${item.label} ${fmt(item.count)} (${pct(share(item.count, total))})`)
             .join(', ')}.`,
         'Jumlah per kategori tersedia pada daftar di samping diagram.',
+    );
+}
+
+/** Interval label: lower bound inclusive, upper exclusive except the bin ending at 100, which includes 100. */
+const rangeLabel = (bin) =>
+    `${bin.lower} hingga ${bin.upper === 100 ? '' : '<'}${bin.upper}`;
+
+/**
+ * Final results counted per narrow fixed range (bin_width points) of their
+ * raw total score, from one scoped SQL aggregate. Only the occupied extent is
+ * drawn: first through last non-empty range, empty ranges inside it kept as
+ * real zeros, so every in-range Final result is shown. Bars show counts only;
+ * the "Data histogram" table is the text alternative. Final results without a
+ * 0–100 score are named in the caption as excluded, never binned.
+ */
+function histogram(state) {
+    const m = state.d.metrics,
+        h = state.d.histogram,
+        filled = (bin) => bin.count > 0,
+        shown = h.total
+            ? h.bins.slice(h.bins.findIndex(filled), h.bins.findLastIndex(filled) + 1)
+            : [],
+        labels = shown.map(rangeLabel),
+        host = $('[data-dashboard-chart="histogram"]'),
+        empty = $('[data-dashboard-histogram-empty]'),
+        excluded = h.excluded
+            ? ` ${fmt(h.excluded)} hasil Final tanpa nilai 0–100 tidak dihitung.`
+            : '';
+    $('[data-dashboard-histogram-caption]').textContent =
+        (h.total
+            ? `${fmt(h.total)} hasil Final dari ${fmt(m.total)} subjek · interval ${h.bin_width} poin · nilai ${shown[0].lower}–${shown.at(-1).upper}.`
+            : m.total
+              ? `Belum ada hasil Final${h.excluded ? ' bernilai 0–100' : ''} dari ${fmt(m.total)} subjek.`
+              : 'Belum ada subjek dalam cakupan pada periode ini.') + excluded;
+    empty.textContent = 'Belum ada hasil Final bernilai 0–100 untuk histogram.';
+    empty.hidden = Boolean(h.total);
+    $('.dashboard-histogram-data').hidden = !h.total;
+    $('[data-dashboard-histogram-rows]').replaceChildren(
+        ...shown.map((bin, index) => {
+            const tr = node('tr'),
+                th = node('th', labels[index]);
+            th.scope = 'row';
+            tr.append(th, cell(fmt(bin.count), 'Jumlah'));
+            return tr;
+        }),
+    );
+    if (!h.total || !visible('histogram')) {
+        clearChart(host);
+        return;
+    }
+    const ink = css('--color-muted'),
+        line = css('--color-line'),
+        font = { size: 12, family: getComputedStyle(document.body).fontFamily };
+    draw(
+        host,
+        {
+            type: 'bar',
+            data: {
+                labels: shown.map((bin) => `${bin.lower}–${bin.upper}`),
+                datasets: [
+                    {
+                        data: shown.map((bin) => bin.count),
+                        backgroundColor: css('--dashboard-final'),
+                        hoverBackgroundColor: css('--dashboard-final-hover'),
+                        borderRadius: 3,
+                        barPercentage: 0.9,
+                        categoryPercentage: 0.92,
+                        maxBarThickness: 40,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                resizeDelay: 80,
+                layout: { padding: { top: 4 } },
+                // Whole column hover, so empty ranges still report their real 0.
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        border: { color: line },
+                        ticks: { color: ink, font, maxRotation: 0, autoSkipPadding: 6 },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: line },
+                        border: { display: false },
+                        ticks: { color: ink, font, precision: 0, maxTicksLimit: 4 },
+                        title: { display: true, text: 'Jumlah hasil Final', color: ink, font },
+                    },
+                },
+                plugins: {
+                    tooltip: {
+                        displayColors: false,
+                        padding: 6,
+                        titleFont: font,
+                        bodyFont: font,
+                        callbacks: {
+                            title: (items) => `Nilai ${labels[items[0].dataIndex]}`,
+                            label: (item) => `${fmt(item.raw)} hasil Final`,
+                        },
+                    },
+                },
+            },
+        },
+        `Histogram ${fmt(h.total)} hasil Final per rentang nilai: ${shown
+            .map((bin, index) => `${labels[index]}: ${fmt(bin.count)}`)
+            .join(', ')}.`,
+        'Jumlah per rentang nilai tersedia pada tabel Data histogram.',
     );
 }
 
@@ -579,13 +715,14 @@ function render(root, state) {
     }
     cards(state);
     distribution(state);
+    histogram(state);
     agenda(state);
     tasks(state);
     progress(state);
     indicators(state);
     activities(state);
 }
-/** Clears every data host and the chart; safe for errors and no-cycle months. */
+/** Clears every data host and both charts; safe for errors and no-cycle months. */
 function blank(root, message) {
     for (const host of $$('[data-dashboard-chart]', root)) clearChart(host);
     for (const list of $$('[data-dashboard-tasks],[data-dashboard-indicators],[data-dashboard-activities]', root))
@@ -598,6 +735,12 @@ function blank(root, message) {
     $('[data-dashboard-donut]', root).dataset.empty = 'true';
     $('[data-dashboard-category-figure]', root).textContent = '–';
     $('[data-dashboard-category-sub]', root).textContent = 'Tanpa data';
+    $('[data-dashboard-histogram-caption]', root).textContent = '';
+    const histogramEmpty = $('[data-dashboard-histogram-empty]', root);
+    histogramEmpty.textContent = message;
+    histogramEmpty.hidden = false;
+    $('[data-dashboard-histogram-rows]', root).replaceChildren();
+    $('.dashboard-histogram-data', root).hidden = true;
     const count = $('[data-dashboard-task-count]', root);
     if (count) count.textContent = '';
     const chip = $('[data-dashboard-cycle-status]', root);
@@ -642,18 +785,39 @@ export function initDashboard(c, s, link) {
     }
     root.addEventListener('click', (event) => {
         if (event.target.closest('[data-dashboard-reload]')) load();
+        const view = event.target.closest(
+            '.dashboard-distribution-tabs [data-panel-tab]',
+        )?.dataset.panelTab;
+        if (view)
+            try {
+                localStorage.setItem(VIEW_KEY, view);
+            } catch {}
     });
     document.addEventListener('flow-updated', () => {
         clearTimeout(timer);
         timer = setTimeout(load, 180);
     });
-    // Doughnut colours are read from CSS tokens, so it redraws on theme change.
-    new MutationObserver(() => {
-        if (ready()) distribution(root.dashboardState);
-    }).observe(document.documentElement, {
+    const redraw = () => {
+        if (!ready()) return;
+        distribution(root.dashboardState);
+        histogram(root.dashboardState);
+    };
+    // Chart colours are read from CSS tokens, so they redraw on theme change.
+    new MutationObserver(redraw).observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['data-theme'],
     });
+    // initPanels toggles `hidden` on tab click/arrow keys; the shown view draws
+    // once laid out and the hidden one releases its chart.
+    const views = new MutationObserver(redraw);
+    for (const view of $$('.dashboard-distribution-view', root))
+        views.observe(view, { attributes: true, attributeFilter: ['hidden'] });
+    let saved = null;
+    try {
+        saved = localStorage.getItem(VIEW_KEY);
+    } catch {}
+    if (VIEWS.includes(saved))
+        $(`.dashboard-distribution-tabs [data-panel-tab="${saved}"]`, root)?.click();
     setInterval(() => {
         if (ready()) agenda(root.dashboardState);
     }, 60000);

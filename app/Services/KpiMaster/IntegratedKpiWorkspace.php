@@ -10,6 +10,7 @@ use App\Queries\ScopedRecords;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\AccessContext;
 use App\Support\KpiWorkspaceDocument;
+use App\Support\TabularUpload;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -18,21 +19,26 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * KPI workspace of Super HC: named KPI patterns per period, one pattern per person per period.
- * Pattern + assignment are resolved per person into sealed KPI templates (kpi_workspace_publications),
- * so assessment forms and snapshots keep using the template pipeline.
+ * A pattern has no recipient type: the same pattern can be held by staff and Kepala Unit together.
+ * Pattern + assignment are resolved per person into sealed KPI templates (kpi_workspace_publications):
+ * staff resolve to a unit template, Kepala Unit to a division template, so assessment forms and snapshots
+ * keep using the template pipeline and its reviewer workflow.
+ *
+ * Reads and writes are scoped to one period (`month`): the client only receives and sends the patterns and
+ * assignments of that period; the other periods of the stored document are kept as they are.
  */
 class IntegratedKpiWorkspace
 {
-    /** Pattern target role => KPI template scope level. */
+    /** Person type => KPI template scope level. */
     private const LEVELS = ['staff' => 'unit', 'unit_head' => 'division'];
 
-    private const MAX_ITEMS = 200;
+    public const MAX_ITEMS = 200;
 
     /** @var array<string, array<string, array>> people per month keyed by person id */
     private array $members = [];
 
     public function __construct(
-        private KpiFormula $formula,
+        private KpiItemRules $rules,
         private KpiMasterService $master,
         private AuditWriter $audit,
         private ScopedRecords $records,
@@ -46,15 +52,71 @@ class IntegratedKpiWorkspace
         return ['revision' => $document['revision'], 'data' => $this->read($document['data'], $context, $month, $includeAssessments)];
     }
 
+    /** Patterns and assignments of one period only (source of "Gunakan KPI dari periode lain"). */
+    public function patternsOf(?string $month): array
+    {
+        if (! $this->isMonth($month)) {
+            $this->invalid('Periode sumber tidak valid.');
+        }
+        $document = $this->documents->load();
+        $data = $this->normalize($document['data']);
+
+        return ['revision' => $document['revision'], 'data' => ['periodId' => $month] + $this->scope($data, $month)];
+    }
+
+    /** Pattern names of a period that accepts imported patterns (exists and is not closed). */
+    public function importNames(?string $month): array
+    {
+        $data = $this->normalize($this->documents->load()['data']);
+
+        return array_column($this->importScope($data, $month)['patterns'], 'name');
+    }
+
+    /**
+     * Adds imported patterns to `month` as new patterns without holders, through the regular save pipeline
+     * (revision check, item rules, audit). An existing pattern name is a conflict; nothing is overwritten.
+     */
+    public function import(AccessContext $context, int $revision, string $month, array $patterns): array
+    {
+        $data = $this->normalize($this->documents->load(true)['data']);
+        $scoped = $this->importScope($data, $month);
+        $taken = array_flip(array_map(fn ($p) => mb_strtolower($p['name']), $scoped['patterns']));
+        foreach ($patterns as $pattern) {
+            if (isset($taken[mb_strtolower($pattern['name'])])) {
+                throw new BusinessRule('PATTERN_EXISTS', 'Pola “'.$pattern['name'].'” sudah ada di '.$this->label($month).'. Ganti nama di file.', 422);
+            }
+        }
+
+        return $this->save($context, $revision, ['month' => $month, 'periods' => $this->periods($data['periods']),
+            'patterns' => [...$scoped['patterns'], ...$patterns], 'patternAssignments' => $scoped['patternAssignments']]);
+    }
+
+    private function importScope(array $data, ?string $month): array
+    {
+        if (! $this->isMonth($month)) {
+            $this->invalid('Periode tujuan tidak valid. Muat ulang halaman.');
+        }
+        $period = collect($this->periods($data['periods']))->firstWhere('id', $month);
+        if (! $period) {
+            throw new BusinessRule('IMPORT_PERIOD', 'Buat periode '.$this->label($month).' sebelum mengimpor pola.', 422);
+        }
+        if ($period['status'] === 'closed') {
+            throw new BusinessRule('PERIOD_CLOSED', 'Periode '.$this->label($month).' ditutup; pola tidak dapat ditambahkan.', 422);
+        }
+
+        return $this->scope($data, $month);
+    }
+
     public function save(AccessContext $context, int $revision, array $input): array
     {
         $document = $this->documents->load(true);
         if ($document['revision'] !== $revision) {
             throw ValidationException::withMessages(['revision' => 'Data KPI sudah berubah. Muat ulang halaman sebelum menyimpan.']);
         }
+        $month = (string) ($input['month'] ?? '');
         $before = $this->normalize($document['data']);
         $before['periods'] = $this->periods($before['periods']);
-        $input = $this->normalize($input);
+        $input = $this->merge($this->normalize($input), $before, $month);
         $this->validate($input, $before);
         $this->syncCycles($input['periods'], $before['periods'], $context);
         $input['patternAssignments'] = $this->publish($input, $before, $context);
@@ -65,19 +127,65 @@ class IntegratedKpiWorkspace
         return ['revision' => $this->documents->write($document['id'], $document['revision'] + 1, $stored, $context->userId)];
     }
 
+    /** Replaces the patterns and assignments of `month` in the stored document with the submitted ones. */
+    private function merge(array $input, array $before, string $month): array
+    {
+        if (! $this->isMonth($month)) {
+            $this->invalid('Periode yang disimpan tidak valid. Muat ulang halaman.');
+        }
+        foreach ([...$input['patterns'], ...$input['patternAssignments']] as $row) {
+            if ($row['periodId'] !== $month) {
+                $this->invalid('Pola dan penugasan hanya dapat disimpan untuk periode yang sedang dibuka. Muat ulang halaman.');
+            }
+        }
+        $others = fn (array $rows) => array_values(array_filter($rows, fn ($row) => $row['periodId'] !== $month));
+        $input['patterns'] = [...$others($before['patterns']), ...$input['patterns']];
+        $input['patternAssignments'] = [...$others($before['patternAssignments']), ...$input['patternAssignments']];
+
+        return $input;
+    }
+
+    /** @return array{patterns: array, patternAssignments: array} */
+    private function scope(array $document, string $month): array
+    {
+        $of = fn (array $rows) => array_values(array_filter($rows, fn ($row) => $row['periodId'] === $month));
+
+        return ['patterns' => $of($document['patterns']), 'patternAssignments' => $of($document['patternAssignments'])];
+    }
+
+    private function isMonth(?string $value): bool
+    {
+        return (bool) preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $value ?? '');
+    }
+
     private function read(array $stored, AccessContext $context, ?string $month, bool $includeAssessments): array
     {
-        $month = preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $month ?? '') ? $month : now('Asia/Jakarta')->format('Y-m');
+        $month = $this->isMonth($month) ? $month : now('Asia/Jakarta')->format('Y-m');
         $document = $this->normalize($stored);
         $periods = $this->periods($document['periods']);
         $index = $this->assignmentIndex($document['patternAssignments']);
         $complete = [];
+        $summary = [];
+        $pillars = [];
         foreach ($document['patterns'] as $pattern) {
             $complete[$pattern['id']] = bccomp($this->total($pattern['items']), '100', 4) === 0;
+            $summary[$pattern['periodId']] ??= ['patterns' => 0, 'complete' => 0];
+            $summary[$pattern['periodId']]['patterns']++;
+            $summary[$pattern['periodId']]['complete'] += (int) $complete[$pattern['id']];
+            foreach ($pattern['items'] as $item) {
+                if ($item['pillar'] !== '') {
+                    $pillars[mb_strtolower($item['pillar'])] ??= $item['pillar'];
+                }
+            }
         }
+        $pillars = array_values($pillars);
+        sort($pillars, SORT_NATURAL | SORT_FLAG_CASE);
+        $scoped = $this->scope($document, $month);
+        $assessed = $this->assessed($month);
         foreach ($periods as &$period) {
             if ($period['status'] !== 'closed') {
-                $period['readiness'] = $this->readiness($this->members($context, $period['id']), $index[$period['id']] ?? [], $complete);
+                $periodAssessed = ($period['hasAssessments'] ?? false) ? $this->assessed($period['id']) : [];
+                $period['readiness'] = $this->readiness($this->members($context, $period['id']), $index[$period['id']] ?? [], $complete, $periodAssessed);
             }
         }
         unset($period);
@@ -96,11 +204,17 @@ class IntegratedKpiWorkspace
             'version' => 2,
             'selectedMonth' => $month,
             'periods' => $periods,
-            'patterns' => $document['patterns'],
-            'patternAssignments' => $document['patternAssignments'],
+            'patterns' => $scoped['patterns'],
+            'patternAssignments' => $scoped['patternAssignments'],
+            // Other periods only as counts: the selected period is the only one rendered or edited.
+            'patternSummary' => (object) $summary,
+            'pillars' => $pillars,
+            // Assessment status per assessed person of the month: their sealed KPI snapshot is final.
+            'assessmentStatus' => (object) $assessed,
             'units' => $units->map(fn ($u) => ['id' => (string) $u->id, 'name' => $u->name, 'divisionId' => (string) $u->division_id, 'divisionName' => $u->division_name, 'divisionHeadName' => $divisionHeads[$u->division_id] ?? ''])->all(),
             'positions' => $positions,
             'people' => $people,
+            'ineligibleHolders' => $this->ineligibleHolders($month, $this->members($context, $month), $scoped['patternAssignments']),
             'legacyTemplates' => $this->legacyTemplates($month, $people, $document['patterns'], $periods),
             'assessmentsLoaded' => $includeAssessments,
             'assessments' => [],
@@ -153,13 +267,64 @@ class IntegratedKpiWorkspace
         return $this->members[$month];
     }
 
-    private function readiness(array $people, array $assigned, array $complete): array
+    /** People with a 100% pattern, or already assessed (their sealed KPI snapshot is final for the month). */
+    private function readiness(array $people, array $assigned, array $complete, array $assessed): array
     {
         $result = ['staff' => ['eligible' => 0, 'complete' => 0], 'unit_head' => ['eligible' => 0, 'complete' => 0]];
         foreach ($people as $person) {
             $result[$person['type']]['eligible']++;
-            if ($complete[$assigned[$person['id']] ?? ''] ?? false) {
+            if (isset($assessed[$person['id']]) || ($complete[$assigned[$person['id']] ?? ''] ?? false)) {
                 $result[$person['type']]['complete']++;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Pattern holders of `month` that are not eligible in that month (inactive, moved out or no longer Kepala Unit).
+     * Their assignment is kept until released explicitly, so they are listed with their last known area instead of
+     * being omitted from the pattern's user list and count.
+     */
+    private function ineligibleHolders(string $month, array $members, array $assignments): array
+    {
+        $ids = ['staff' => [], 'unit_head' => []];
+        foreach ($assignments as $row) {
+            [$prefix, $id] = explode('-', $row['personId'], 2) + [1 => ''];
+            if (! isset($members[$row['personId']]) && ctype_digit($id)) {
+                $ids[$prefix === 'head' ? 'unit_head' : 'staff'][$id] = (int) $id;
+            }
+        }
+        if (! $ids['staff'] && ! $ids['unit_head']) {
+            return [];
+        }
+        $date = $month.'-01';
+        $end = CarbonImmutable::parse($date, 'Asia/Jakarta')->addMonth();
+        $area = ['u.name as unit_name', 'd.name as division_name'];
+        $people = [
+            'staff' => DB::table('employees')->whereIn('id', $ids['staff'])->get(['id', 'full_name as name', 'nip'])->keyBy('id'),
+            'unit_head' => DB::table('users')->whereIn('id', $ids['unit_head'])->get(['id', 'name', 'login_nip as nip'])->keyBy('id'),
+        ];
+        // Last known area: the month's assessment, else the latest placement / Kepala Unit post started before the month ended.
+        $areas = [
+            'staff' => DB::table('employee_placements as p')->join('units as u', 'u.id', '=', 'p.unit_id')->join('divisions as d', 'd.id', '=', 'p.division_id')
+                ->whereIn('p.employee_id', $ids['staff'])->where('p.effective_from', '<', $end->format('Y-m-d'))->orderBy('p.effective_from')->get(['p.employee_id as id', ...$area])->keyBy('id'),
+            'unit_head' => DB::table('scope_assignments as h')->join('units as u', 'u.id', '=', 'h.unit_id')->join('divisions as d', 'd.id', '=', 'u.division_id')
+                ->where('h.role_key', 'kepala_unit')->whereIn('h.user_id', $ids['unit_head'])->where('h.assigned_at', '<', $end->utc()->format('Y-m-d H:i:s.u'))->orderBy('h.assigned_at')->get(['h.user_id as id', ...$area])->keyBy('id'),
+        ];
+        $assessed = DB::table('assessments as a')->join('assessment_cycles as c', 'c.id', '=', 'a.cycle_id')->join('units as u', 'u.id', '=', 'a.unit_id')->join('divisions as d', 'd.id', '=', 'a.division_id')
+            ->where('c.assessment_month', $date)->where(fn ($q) => $q->where('a.assessment_kind', 'member')->whereIn('a.employee_id', $ids['staff'])
+                ->orWhere(fn ($q) => $q->where('a.assessment_kind', '<>', 'member')->whereIn('a.subject_user_id', $ids['unit_head'])))
+            ->get(['a.assessment_kind', 'a.employee_id', 'a.subject_user_id', ...$area])
+            ->keyBy(fn ($a) => $a->assessment_kind === 'member' ? 'staff-'.$a->employee_id : 'head-'.$a->subject_user_id);
+        $result = [];
+        foreach ($ids as $type => $list) {
+            foreach ($list as $id) {
+                $key = ($type === 'staff' ? 'staff-' : 'head-').$id;
+                $person = $people[$type][$id] ?? null;
+                $place = $assessed[$key] ?? $areas[$type][$id] ?? null;
+                $result[] = ['id' => $key, 'name' => (string) ($person->name ?? ''), 'nip' => (string) ($person->nip ?? ''), 'type' => $type,
+                    'unitName' => (string) ($place->unit_name ?? ''), 'divisionName' => (string) ($place->division_name ?? '')];
             }
         }
 
@@ -189,11 +354,11 @@ class IntegratedKpiWorkspace
             if (isset($converted[$template->id])) {
                 continue;
             }
-            $role = $template->scope_level === 'unit' ? 'staff' : 'unit_head';
-            $field = $role === 'staff' ? 'unitId' : 'divisionId';
-            $ids = array_column(array_filter($people, fn ($p) => $p['type'] === $role && $p[$field] === (string) $template->scope_key), 'id');
+            $type = $template->scope_level === 'unit' ? 'staff' : 'unit_head';
+            $field = $type === 'staff' ? 'unitId' : 'divisionId';
+            $ids = array_column(array_filter($people, fn ($p) => $p['type'] === $type && $p[$field] === (string) $template->scope_key), 'id');
             if ($ids) {
-                $result[] = ['id' => $template->id, 'name' => $template->name, 'targetRole' => $role, 'areaName' => $names[$template->scope_level][$template->scope_key] ?? '', 'personIds' => $ids,
+                $result[] = ['id' => $template->id, 'name' => $template->name, 'level' => $template->scope_level, 'areaName' => $names[$template->scope_level][$template->scope_key] ?? '', 'personIds' => $ids,
                     'items' => $template->items->map(fn ($i) => ['name' => $i->name, 'pillar' => $i->pillar, 'weight' => (float) $i->weight_percent])->values()->all()];
             }
         }
@@ -205,7 +370,8 @@ class IntegratedKpiWorkspace
     {
         $month = $data['selectedMonth'];
         $rows = Assessment::whereHas('cycle', fn ($q) => $q->where('assessment_month', $month.'-01'))->with('items')->get();
-        $finalizers = DB::table('users')->whereIn('id', $rows->pluck('finalized_by')->filter()->unique())->pluck('name', 'id');
+        // Finalizer name frozen at Final time; legacy rows (no snapshot) fall back to the account's current name.
+        $finalizers = DB::table('users')->whereIn('id', $rows->whereNull('finalized_by_name_snapshot')->pluck('finalized_by')->filter()->unique())->pluck('name', 'id');
         $period = collect($data['periods'])->firstWhere('id', $month);
         $categories = $period['categories'] ?? [];
         $result = [];
@@ -213,22 +379,30 @@ class IntegratedKpiWorkspace
             $person = ($assessment->assessment_kind === 'member' ? 'staff-' : 'head-').($assessment->employee_id ?? $assessment->subject_user_id);
             $snapshot = [];
             $inputs = [];
+            // Division head corrections: they replace the unit head's proposal (still shown) in totals.
+            $reviewed = [];
             foreach ($assessment->items as $item) {
                 $definition = $item->definition_snapshot ?? ['id' => 'business-item-'.$item->source_kpi_item_id, 'name' => $item->kpi_name_snapshot, 'pillar' => $item->pillar_snapshot, 'method' => 'manual', 'weight' => (float) $item->weight_percent_snapshot, 'target' => $item->target_snapshot, 'periodId' => $month];
                 $snapshot[] = $definition;
                 $inputs[$definition['id']] = $item->measurement_inputs ?? ['value' => (float) $item->score];
+                if (($item->getAttributes()['reviewed_score'] ?? null) !== null) {
+                    $reviewed[$definition['id']] = $item->effectiveScore();
+                }
             }
             $result[$person] = ['id' => 'business-'.$assessment->id, 'dbId' => $assessment->id, 'periodId' => $month, 'personId' => $person, 'subjectType' => $assessment->assessment_kind === 'member' ? 'staff' : 'unit_head',
-                'unitId' => (string) $assessment->unit_id, 'divisionId' => (string) $assessment->division_id, 'status' => $assessment->status, 'snapshot' => $snapshot, 'inputs' => $inputs,
+                'unitId' => (string) $assessment->unit_id, 'divisionId' => (string) $assessment->division_id, 'status' => $assessment->status, 'snapshot' => $snapshot, 'inputs' => $inputs, 'reviewed' => (object) $reviewed,
                 'positive' => $assessment->positive_finding ?? '', 'negative' => $assessment->negative_finding ?? '', 'finalTotal' => $assessment->status === 'final' ? (float) $assessment->total_score_raw : null,
-                'completedBy' => $finalizers[$assessment->finalized_by] ?? null, 'categorySnapshot' => $categories];
+                // Stored total (effective scores) of a saved assessment; the client never recomputes a corrected proposal.
+                'total' => $assessment->total_score_raw === null ? null : (float) $assessment->total_score_raw,
+                'completedBy' => $assessment->finalized_by_name_snapshot ?? $finalizers[$assessment->finalized_by] ?? null,
+                'completedByCurrentName' => $assessment->finalized_by_name_snapshot === null && isset($finalizers[$assessment->finalized_by]), 'categorySnapshot' => $categories];
         }
         if (($period['status'] ?? '') === 'open') {
             $patterns = array_column($data['patterns'], null, 'id');
             $resolved = [];
             foreach ($data['people'] as $person) {
                 $pattern = $patterns[$assigned[$person['id']] ?? ''] ?? null;
-                if (isset($result[$person['id']]) || ! $pattern || $pattern['targetRole'] !== $person['type']) {
+                if (isset($result[$person['id']]) || ! $pattern) {
                     continue;
                 }
                 $result[$person['id']] = ['id' => 'pending-'.$month.'|'.$person['id'], 'periodId' => $month, 'personId' => $person['id'], 'subjectType' => $person['type'], 'unitId' => $person['unitId'], 'divisionId' => $person['divisionId'],
@@ -243,7 +417,7 @@ class IntegratedKpiWorkspace
     {
         $periods = [];
         foreach ($input['periods'] as $period) {
-            if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/D', $period['id']) || isset($periods[$period['id']])) {
+            if (! $this->isMonth($period['id']) || isset($periods[$period['id']])) {
                 $this->invalid('Bulan periode tidak valid atau ganda.');
             }
             if ($period['name'] === '' || mb_strlen($period['name']) > 190) {
@@ -292,9 +466,6 @@ class IntegratedKpiWorkspace
                 $this->invalid("{$label} sudah ada pada periode yang sama. Gunakan nama lain.");
             }
             $names[$nameKey] = true;
-            if (! isset(self::LEVELS[$pattern['targetRole']])) {
-                $this->invalid("{$label}: pilih jalur penerima Staf atau Kepala Unit.");
-            }
             if (! $pattern['items'] || count($pattern['items']) > self::MAX_ITEMS) {
                 $this->invalid("{$label}: isi 1 sampai ".self::MAX_ITEMS.' KPI.');
             }
@@ -352,57 +523,8 @@ class IntegratedKpiWorkspace
                 $this->invalid("{$name}: ID KPI tidak valid atau ganda.");
             }
             $ids[$item['id']] = true;
-            if ($item['name'] === '' || mb_strlen($item['name']) > 150) {
-                $this->invalid("{$label}: nama KPI wajib diisi, maksimal 150 karakter.");
-            }
-            if ($item['pillar'] === '' || mb_strlen($item['pillar']) > 64) {
-                $this->invalid("{$name}: pilar wajib diisi, maksimal 64 karakter.");
-            }
-            if ($item['method'] !== 'formula') {
-                $this->invalid("{$name}: KPI harus dinilai otomatis dari formula.");
-            }
-            if ($item['weight'] === null || $item['weight'] <= 0 || $item['weight'] > 100) {
-                $this->invalid("{$name}: bobot harus lebih dari 0 sampai 100% dengan maksimal 4 desimal.");
-            }
-            if ($item['unit'] === '' || mb_strlen($item['unit']) > 32) {
-                $this->invalid("{$name}: pilih satuan pengukuran.");
-            }
-            if ($item['target'] === null || $item['target'] < 0) {
-                $this->invalid("{$name}: target harus angka nol atau lebih.");
-            }
-            if (! in_array($item['direction'], ['higher', 'lower'], true)) {
-                $this->invalid("{$name}: pilih polaritas.");
-            }
-            $policy = $item['policy'];
-            if ($policy['min'] === null || $policy['max'] === null || $policy['min'] < 0 || $policy['max'] > 100 || $policy['min'] >= $policy['max']) {
-                $this->invalid("{$name}: rentang skor otomatis harus 0 ≤ minimum < maksimum ≤ 100.");
-            }
-            if (($item['target'] == 0 && $policy['zeroRule'] !== 'zero-pass') || ($item['target'] > 0 && $policy['rule'] !== ($item['direction'] === 'lower' ? 'reverse-positive' : 'target-normalized'))) {
-                $this->invalid("{$name}: aturan konversi belum sesuai target dan polaritas.");
-            }
-            $keys = [];
-            if (! $item['variables'] || count($item['variables']) > 26) {
-                $this->invalid("{$name}: isi 1 sampai 26 variabel.");
-            }
-            foreach ($item['variables'] as $variable) {
-                if (! preg_match('/^[A-Z]$/D', $variable['key']) || isset($keys[$variable['key']]) || $variable['label'] === '' || mb_strlen($variable['label']) > 150 || ! in_array($variable['source'], ['manual', 'fixed'], true)) {
-                    $this->invalid("{$name}: setiap variabel wajib berkode A–Z unik, bernama, dan bersumber jelas.");
-                }
-                if ($variable['source'] === 'fixed' && ($variable['value'] === null || ! is_finite($variable['value']))) {
-                    $this->invalid("{$name}: angka tetap variabel {$variable['key']} tidak valid.");
-                }
-                $keys[$variable['key']] = true;
-            }
-            if ($item['formula'] === '' || mb_strlen($item['formula']) > 1200) {
-                $this->invalid("{$name}: formula wajib diisi, maksimal 1200 karakter.");
-            }
-            try {
-                $tree = $this->formula->compile($item['formula']);
-            } catch (ValidationException $e) {
-                $this->invalid("{$name}: ".collect($e->errors())->flatten()->first());
-            }
-            if (array_diff($this->formula->variables($tree), array_keys($keys))) {
-                $this->invalid("{$name}: formula memakai variabel yang belum didefinisikan.");
+            if ($error = array_values($this->rules->errors($item))[0] ?? null) {
+                $this->invalid("{$name}: {$error}");
             }
         }
     }
@@ -447,7 +569,12 @@ class IntegratedKpiWorkspace
 
     /**
      * Resolves pattern assignments per eligible person of each non-closed period and synchronises publications.
-     * Returns the assignments to store (assignments of people no longer eligible are pruned).
+     * Returns the assignments to store. A pattern may be held by staff and Kepala Unit together; the template scope
+     * follows the person (staff → unit, Kepala Unit → division).
+     *
+     * Assessed people keep their pattern (publication and assessment snapshot untouched). An unchanged assignment of a
+     * person no longer eligible in the month is kept without publication until it is released explicitly; only new or
+     * changed assignments must target an eligible person.
      */
     private function publish(array $input, array $before, AccessContext $context): array
     {
@@ -485,11 +612,11 @@ class IntegratedKpiWorkspace
             }
             $valid = [];
             foreach ($assigned as $personId => $patternId) {
-                $person = $people[$personId] ?? null;
-                if (! $person || $person['type'] !== $patterns[$patternId]['targetRole']) {
+                if (! isset($people[$personId])) {
                     if (($old[$personId] ?? null) !== $patternId) {
-                        throw new BusinessRule('PATTERN_NOT_ELIGIBLE', ($person['name'] ?? $personId).' tidak memenuhi syarat pola “'.$patterns[$patternId]['name'].'” pada '.$this->label($month).'. Pola Staf hanya untuk staf, pola Kepala Unit hanya untuk Kepala Unit yang aktif pada bulan tersebut.', 422);
+                        throw new BusinessRule('PATTERN_NOT_ELIGIBLE', $personId.' tidak aktif sebagai staf atau Kepala Unit pada '.$this->label($month).'; pola “'.$patterns[$patternId]['name'].'” tidak dapat diterapkan.', 422);
                     }
+                    $kept[] = ['periodId' => $month, 'personId' => $personId, 'patternId' => $patternId];
 
                     continue;
                 }
@@ -565,14 +692,15 @@ class IntegratedKpiWorkspace
     /** Published KPI definitions of a pattern (same shape for every assigned person). */
     private function rows(array $pattern): array
     {
-        return array_map(fn ($item) => $item + ['periodId' => $pattern['periodId'], 'targetRole' => $pattern['targetRole'], 'patternId' => $pattern['id'], 'patternName' => $pattern['name']], $pattern['items']);
+        return array_map(fn ($item) => $item + ['periodId' => $pattern['periodId'], 'patternId' => $pattern['id'], 'patternName' => $pattern['name']], $pattern['items']);
     }
 
+    /** @return array<string, string> person key => assessment status of the month */
     private function assessed(string $month): array
     {
         return DB::table('assessments as a')->join('assessment_cycles as c', 'c.id', '=', 'a.cycle_id')->where('c.assessment_month', $month.'-01')
-            ->get(['a.assessment_kind', 'a.employee_id', 'a.subject_user_id'])
-            ->mapWithKeys(fn ($a) => [($a->assessment_kind === 'member' ? 'staff-'.$a->employee_id : 'head-'.$a->subject_user_id) => true])->all();
+            ->get(['a.assessment_kind', 'a.employee_id', 'a.subject_user_id', 'a.status'])
+            ->mapWithKeys(fn ($a) => [($a->assessment_kind === 'member' ? 'staff-'.$a->employee_id : 'head-'.$a->subject_user_id) => $a->status])->all();
     }
 
     private function record(array $input, array $before, AccessContext $context): void
@@ -636,7 +764,8 @@ class IntegratedKpiWorkspace
 
     private function pattern(array $pattern): array
     {
-        $result = ['id' => $this->text($pattern['id'] ?? ''), 'name' => $this->text($pattern['name'] ?? ''), 'periodId' => $this->text($pattern['periodId'] ?? ''), 'targetRole' => $this->text($pattern['targetRole'] ?? ''),
+        // Stored `targetRole` of older documents is dropped here: patterns have no recipient type.
+        $result = ['id' => $this->text($pattern['id'] ?? ''), 'name' => $this->text($pattern['name'] ?? ''), 'periodId' => $this->text($pattern['periodId'] ?? ''),
             'items' => array_map(fn ($item) => $this->item($item), is_array($pattern['items'] ?? null) ? array_values(array_filter($pattern['items'], 'is_array')) : [])];
         if (is_numeric($pattern['legacyTemplateId'] ?? null)) {
             $result['legacyTemplateId'] = (int) $pattern['legacyTemplateId'];
@@ -659,13 +788,42 @@ class IntegratedKpiWorkspace
             $variables[] = $row;
         }
 
-        return [
+        $result = [
             'id' => $this->text($item['id'] ?? ''), 'name' => $this->text($item['name'] ?? ''), 'pillar' => $this->text($item['pillar'] ?? ''), 'method' => $this->text($item['method'] ?? ''),
             'weight' => is_numeric($weight) && preg_match('/^\d{1,3}(?:\.\d{1,4})?$/D', (string) $weight) ? (float) $weight : null,
             'variables' => $variables, 'formula' => $this->text($item['formula'] ?? ''), 'target' => $this->number($item['target'] ?? null),
             'unit' => $this->text($item['unit'] ?? ''), 'direction' => $this->text($item['direction'] ?? ''),
             'policy' => ['rule' => $this->text($policy['rule'] ?? ''), 'zeroRule' => $this->text($policy['zeroRule'] ?? ''), 'min' => $this->number($policy['min'] ?? null), 'max' => $this->number($policy['max'] ?? null)],
         ];
+        if ($source = $this->importSource($item['importSource'] ?? null)) {
+            $result['importSource'] = $source;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Provenance of an imported KPI (source sheet, line, original target/formula/weighting rule); display
+     * only, never executed. Malformed or oversized metadata is dropped.
+     */
+    private function importSource(mixed $source): ?array
+    {
+        if (! is_array($source) || ! is_string($source['sheet'] ?? null) || ! is_int($source['line'] ?? null)) {
+            return null;
+        }
+        $result = ['sheet' => $source['sheet'], 'line' => $source['line']];
+        if (trim($result['sheet']) === '' || mb_strlen($result['sheet']) > 100 || $result['line'] < 1 || $result['line'] > 1048576) {
+            return null;
+        }
+        foreach (['target', 'formula', 'rule'] as $key) {
+            $value = $source[$key] ?? '';
+            if (! is_string($value) || mb_strlen($value) > TabularUpload::MAX_CELL) {
+                return null;
+            }
+            $result[$key] = $value;
+        }
+
+        return $result;
     }
 
     private function text(mixed $value): string

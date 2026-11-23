@@ -62,12 +62,17 @@ export function formulaTokens(k) {
         .join('');
 }
 /**
- * KPI editor of one pattern item. `others` is the weight of the remaining items in the
- * pattern; `pillars` are the pillar suggestions offered by the Pilar input's datalist.
+ * Shared KPI form for pattern items and import corrections. Callers supply only the
+ * surrounding copy/actions; fields, formula tools and interaction selectors stay identical.
  */
-export function editor(k, test, others, editing, pillars = []) {
-    const information = `<section class="fx-form-section">${sectionHeading(1, 'Informasi KPI', 'Nama indikator dan pilar yang menaunginya.')}<div class="fx-info-grid gp-form-grid">${field('name', 'Nama KPI', k.name, { required: true, wide: true, maxlength: 150 })}${field('pillar', 'Pilar', k.pillar, { required: true, list: 'skp-pillars', maxlength: 64, placeholder: 'Ketik atau pilih pilar', help: 'Pilih saran (pilar bawaan dan pilar yang sudah dipakai) atau ketik nama pilar baru. Saran disaring sesuai teks yang sudah terisi; kosongkan kolom untuk melihat semua. Pilar baru langsung disarankan untuk KPI berikutnya di pola ini dan tersimpan permanen setelah Simpan pola.' })}<datalist id="skp-pillars">${pillars.map((p) => `<option value="${esc(p)}"></option>`).join('')}</datalist></div></section>`;
-    const target = `<section class="fx-form-section">${sectionHeading(2, 'Target, polaritas & bobot', 'Tentukan arah capaian yang baik dan porsi KPI ini dalam pola.')}<div class="fx-target-grid gp-form-grid">${field('unit', 'Satuan', k.unit, { options: satuanOptions(k.unit), placeholder: false, help: 'Satuan realisasi dan target, dikelompokkan menurut jenis ukuran.' })}${field(
+export function editor(k, test, others, {
+    editing = false, pillars = [], title = editing ? `Ubah KPI: ${k.name}` : 'KPI baru dalam pola',
+    saveLabel = editing ? 'Perbarui KPI di pola' : 'Tambahkan ke pola',
+    subtitle = 'Lengkapi tiga bagian, lalu tambahkan ke pola.',
+    notices = '', extra = '', extraActions = '', footnote = 'Tersimpan setelah Anda memilih Simpan pola.',
+} = {}) {
+    const information = `<section class="fx-form-section">${sectionHeading(1, 'Informasi KPI', 'Nama indikator dan pilarnya.')}<div class="fx-info-grid gp-form-grid">${field('name', 'Nama KPI', k.name, { required: true, wide: true, maxlength: 150 })}${field('pillar', 'Pilar', k.pillar, { required: true, list: 'skp-pillars', maxlength: 64, placeholder: 'Ketik atau pilih pilar', help: 'Pilih dari saran atau ketik pilar baru.' })}<datalist id="skp-pillars">${pillars.map((p) => `<option value="${esc(p)}"></option>`).join('')}</datalist></div></section>`;
+    const target = `<section class="fx-form-section">${sectionHeading(2, 'Target, polaritas & bobot', 'Arah capaian yang baik dan porsi KPI dalam pola.')}<div class="fx-target-grid gp-form-grid">${field('unit', 'Satuan', k.unit, { options: satuanOptions(k.unit), required: true, placeholder: 'Pilih satuan', help: 'Satuan realisasi dan target.' })}${field(
         'direction',
         'Polaritas',
         k.direction,
@@ -76,23 +81,26 @@ export function editor(k, test, others, editing, pillars = []) {
                 ['higher', 'Semakin tinggi semakin baik'],
                 ['lower', 'Semakin rendah semakin baik'],
             ],
-            placeholder: false,
-            help: 'Pakai "semakin rendah" hanya untuk waktu tunggu, downtime, atau biaya.',
+            placeholder: 'Pilih polaritas',
+            help: 'Pilih “semakin rendah” untuk waktu tunggu, downtime atau biaya.',
         },
-    )}${field('target', 'Target', k.target, { type: 'number', min: 0, step: 'any', required: true })}${field('weight', 'Bobot (%)', k.weight, { type: 'number', min: '0.0001', max: 100, step: '0.0001', required: true })}</div><p class="gp-help fx-score-help" data-fx-weight-total>${weightLine(others, k.weight)}</p><details class="fx-settings"><summary>Pengaturan konversi nilai</summary><p class="gp-help">Skor = realisasi ÷ target × maksimum (polaritas semakin tinggi) atau target ÷ realisasi × maksimum (semakin rendah), dibatasi minimum–maksimum.</p><div class="gp-form-grid">${field('zeroRule', 'Aturan target nol', k.policy.zeroRule, {
+    )}${field('target', 'Target', k.target, { type: 'number', min: 0, step: 'any', required: true })}${field('weight', 'Bobot (%)', k.weight, { type: 'number', min: '0.0001', max: 100, step: '0.0001', required: true })}</div><p class="gp-help fx-score-help" data-fx-weight-total>${weightLine(others, k.weight)}</p><details class="fx-settings"><summary>Pengaturan konversi nilai</summary><p class="gp-help">Nilai = realisasi ÷ target × maksimum (semakin tinggi) atau target ÷ realisasi × maksimum (semakin rendah), dibatasi minimum–maksimum.</p><div class="gp-form-grid">${field('zeroRule', 'Aturan target nol', k.policy.zeroRule, {
         options: [
             ['pending', 'Tidak dipakai (target lebih dari nol)'],
             ['zero-pass', 'Hasil nol lulus; selain itu gagal'],
         ],
         placeholder: false,
     })}${field('scoreMin', 'Nilai otomatis minimum', k.policy.min, { type: 'number', min: 0, max: 99 })}${field('scoreMax', 'Nilai otomatis maksimum', k.policy.max, { type: 'number', min: 1, max: 100 })}</div><p class="gp-field-error" data-gp-error="policy" hidden></p></details></section>`;
-    const formula = `<section class="fx-form-section">${sectionHeading(3, 'Variabel & formula', 'Susun data yang diisi penilai, lalu rangkai formulanya. Uji dengan angka contoh sebelum menyimpan.')}<div class="fx-formula-grid"><div class="fx-builder"><h3>Variabel input</h3><p class="gp-help">Kode A, B, C otomatis. Keterangan menjadi label input saat penilaian.</p><div data-fx-variables>${variablesMarkup(k)}</div>${field('formula', 'Formula pengukuran', k.formula, { required: true, help: 'Gunakan kode variabel, operator dan fungsi di bawah.', maxlength: 1200 })}<div class="fx-tokens" data-fx-tokens>${formulaTokens(k)}</div><div class="fx-human"><span>Dibaca sebagai</span><p data-fx-human>${esc(humanFormula(k))}</p></div><div data-fx-test-panel>${formulaTest(k, test)}</div></div><aside class="fx-review" data-fx-review aria-label="Pemeriksaan formula">${formulaReview(k)}</aside></div></section>`;
-    return `<section class="card skp-form-card fx-kpi-editor" id="skp-kpi-editor"><div class="fx-card-heading"><div><h2>${editing ? `Ubah KPI: ${esc(k.name)}` : 'KPI baru dalam pola'}</h2><p>Lengkapi tiga bagian di bawah, lalu tambahkan ke pola.</p></div>${button('kpi-cancel', 'Tutup editor')}</div><form id="skp-kpi-form" novalidate autocomplete="off">${information}${target}${formula}<div class="fx-form-actions">${button('kpi-save', editing ? 'Perbarui KPI di pola' : 'Tambahkan ke pola', '', 'btn btn-primary')}${button('kpi-cancel', 'Batal')}<span class="gp-help">KPI tersimpan permanen setelah Anda memilih Simpan pola.</span></div></form></section>`;
+    const formula = `<section class="fx-form-section">${sectionHeading(3, 'Variabel & formula', 'Data yang diisi penilai dan cara menghitungnya.')}<div class="fx-formula-grid"><div class="fx-builder"><h3>Variabel input</h3><p class="gp-help">Kode A, B, C dibuat otomatis. Nama variabel menjadi label isian penilai.</p><div data-fx-variables>${variablesMarkup(k)}</div>${field('formula', 'Formula pengukuran', k.formula, { required: true, help: 'Gunakan kode variabel, operator dan fungsi di bawah.', maxlength: 1200 })}<div class="fx-tokens" data-fx-tokens>${formulaTokens(k)}</div><div class="fx-human"><span>Dibaca sebagai</span><p data-fx-human>${esc(humanFormula(k))}</p></div><div data-fx-test-panel>${formulaTest(k, test)}</div></div><aside class="fx-review" data-fx-review aria-label="Pemeriksaan formula">${formulaReview(k)}</aside></div></section>`;
+    const s = k.importSource,
+        origin = s?.sheet ? `<p class="fx-import-source">Asal impor: ${esc(s.sheet)} baris ${esc(s.line)}${[s.target && `target ${s.target}`, s.formula, s.rule && `ketentuan ${s.rule}`].filter(Boolean).map((t) => ` · ${esc(t)}`).join('')}</p>` : '';
+    return `<section class="card skp-form-card fx-kpi-editor" id="skp-kpi-editor"><div class="fx-card-heading"><div><h2>${esc(title)}</h2>${subtitle ? `<p>${esc(subtitle)}</p>` : ''}${origin}</div>${button('kpi-cancel', 'Tutup editor')}</div><form id="skp-kpi-form" novalidate autocomplete="off">${notices ? `<div class="fx-form-section">${notices}</div>` : ''}<p class="gp-note error" data-form-error role="alert" hidden></p>${information}${target}${formula}${extra ? `<div class="fx-form-section">${extra}</div>` : ''}<div class="fx-form-actions">${button('kpi-save', saveLabel, '', 'btn btn-primary')}${button('kpi-cancel', 'Batal')}${extraActions}<span class="gp-help">${esc(footnote)}</span></div></form></section>`;
 }
 export function weightLine(others, weight) {
+    if (others == null) return 'Total bobot belum tersedia; perbaiki bobot KPI lainnya.';
     const value = Number(weight);
     const total =
         Math.round(others * 10000 + (Number.isFinite(value) ? Math.round(value * 10000) : 0)) /
         10000;
-    return `Total bobot pola setelah KPI ini: <b>${num(total, 4)}%</b> dari 100%${total === 100 ? ' · tepat 100%' : total > 100 ? ` · lebih ${num(total - 100, 4)}%` : ` · kurang ${num(100 - total, 4)}%`}. Skor = nilai 10–100 × bobot; contoh 80 × 10% = 8.`;
+    return `Total bobot pola setelah KPI ini: <b>${num(total, 4)}%</b> dari 100%${total === 100 ? ' · tepat 100%' : total > 100 ? ` · lebih ${num(total - 100, 4)}%` : ` · kurang ${num(100 - total, 4)}%`}. Nilai berbobot = nilai KPI × bobot.`;
 }

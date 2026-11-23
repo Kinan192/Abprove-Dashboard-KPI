@@ -1,2 +1,15 @@
 @extends('layouts.app')
-@section('content')<div class="page-content page-stack workspace-v4"><div class="toolbar"><p class="text-sm text-muted">Struktur dan penempatan dikelola Super HC.</p><a class="btn btn-primary" href="{{ $vm->link($vm->role==='ku'?'nilai':'persetujuan') }}">Buka penilaian</a></div><section class="card table-card"><div class="card-toolbar"><div class="min-w-0" data-team-summary aria-live="polite"></div>@if($vm->role!=='ku')<div class="table-tools"><x-abprove.table-filters id="team-filter-dialog" title="Filter tim divisi"><label>Unit<select class="field" data-team-unit aria-label="Pilih unit tim"><option value="">{{ $vm->role==='kd'?'Semua unit dalam divisi':'Semua unit' }}</option></select></label></x-abprove.table-filters></div>@endif</div><div class="table-wrap"><table class="data-table"><thead><tr><th>Nama / NIP</th>@if($vm->role!=='ku')<th data-team-unit-column>Unit</th>@endif<th>Jabatan</th><th>Status penilaian</th><th class="numeric">Tindakan</th></tr></thead><tbody data-team-structure></tbody></table></div></section></div>@endsection
+@section('content')
+<div class="page-content page-stack workspace-v4">
+    <div class="toolbar"><p class="text-sm text-muted">Struktur dan penempatan dikelola Super HC.</p><a class="btn btn-primary" href="{{ $vm->link($vm->role==='ku'?'nilai':'persetujuan') }}">Buka penilaian</a></div>
+    <section class="card table-card">
+        <div class="card-toolbar">
+            <div class="min-w-0" data-team-summary aria-live="polite"></div>
+            @if($vm->role!=='ku')
+            <div class="table-tools"><x-abprove.table-filters id="team-filters" title="Filter tim"><label>Unit<select class="field" data-team-unit aria-label="Pilih unit tim"><option value="">{{ $vm->role==='kd'?'Semua unit dalam divisi':'Semua unit' }}</option></select></label></x-abprove.table-filters></div>
+            @endif
+        </div>
+        <div class="table-wrap"><table class="data-table"><thead><tr><th>Nama / NIP</th>@if($vm->role!=='ku')<th data-team-unit-column>Unit</th>@endif<th>Jabatan</th><th>Status penilaian</th><th class="numeric">Tindakan</th></tr></thead><tbody data-team-structure></tbody></table></div>
+    </section>
+</div>
+@endsection

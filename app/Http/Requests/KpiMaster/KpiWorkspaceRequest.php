@@ -13,9 +13,10 @@ class KpiWorkspaceRequest extends MutationRequest
     {
         return $this->baseRules() + [
             'revision' => ['required', 'integer', 'min:0'],
-            'data' => ['required', 'array:version,periods,patterns,patternAssignments'],
+            'data' => ['required', 'array:version,month,periods,patterns,patternAssignments'],
             'data.version' => ['required', 'integer', 'in:2'],
-            'data.periods' => ['required', 'array', 'min:1', 'max:120'],
+            'data.month' => ['required', 'string', 'regex:/^\d{4}-(0[1-9]|1[0-2])$/D'],
+            'data.periods' => ['required', 'array', 'min:1', 'max:600'],
             'data.patterns' => ['present', 'array', 'max:3000'],
             'data.patternAssignments' => ['present', 'array', 'max:200000'],
         ];
@@ -26,6 +27,7 @@ class KpiWorkspaceRequest extends MutationRequest
         return [
             'data.array' => 'Data KPI hanya boleh berisi periode, pola KPI dan penugasan pola.',
             'data.version.in' => 'Versi data KPI tidak didukung. Muat ulang halaman.',
+            'data.month.*' => 'Periode yang disimpan tidak valid. Muat ulang halaman.',
             'data.periods.required' => 'Minimal satu periode wajib ada.',
         ];
     }

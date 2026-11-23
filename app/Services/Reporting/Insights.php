@@ -112,7 +112,7 @@ class Insights
             ->selectRaw("a.kpi_template_id as template_id, MIN(a.template_name_snapshot) as template_name, a.assessment_kind as kind,
                 MIN(IF(a.assessment_kind = 'member', a.unit_name_snapshot, a.division_name_snapshot)) as area, i.source_kpi_item_id as item_id,
                 MIN(i.pillar_snapshot) as pillar, MIN(i.kpi_name_snapshot) as name, MIN(i.weight_percent_snapshot) as weight,
-                SUM(COALESCE(i.computed_score, i.score)) as total, COUNT(*) as count, MIN(i.sort_order) as position")
+                SUM(COALESCE(i.reviewed_score, i.computed_score, i.score)) as total, COUNT(*) as count, MIN(i.sort_order) as position")
             ->orderBy('a.assessment_kind')->orderBy('a.kpi_template_id')->orderBy('position')->get()
             ->map(function ($g) {
                 $average = bcdiv((string) $g->total, (string) $g->count, 6);

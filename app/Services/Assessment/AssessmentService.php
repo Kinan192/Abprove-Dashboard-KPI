@@ -15,7 +15,13 @@ use Illuminate\Support\Facades\DB;
 
 class AssessmentService
 {
-    public function __construct(private ScopedRecords $records, private AuditWriter $audit) {}
+    /** Unit-head actions on a staff submission; every other action is the division head's review. */
+    private const SCORER_ACTIONS = ['resubmit', 'withdraw'];
+
+    /** Action => history event. */
+    private const EVENTS = ['resubmit' => 'resubmitted', 'withdraw' => 'withdrawn', 'adjust' => 'adjusted', 'return' => 'returned', 'approve' => 'approved'];
+
+    public function __construct(private ScopedRecords $records, private AuditWriter $audit, private AssessmentHistory $history) {}
 
     public function form(AccessContext $ctx, array $data): array
     {
@@ -95,21 +101,30 @@ class AssessmentService
         }
         $result = $a->fresh()->load('items')->toArray();
         $this->audit->record($ctx, 'assessment', $a->id, $heads ? 'assessment.head.final' : 'assessment.submitted', null, $result);
+        $this->history->record($ctx, $heads ? 'head_finalized' : 'submitted', null, $result, ['request_id' => $data['request_id'] ?? null]);
 
         return $result;
     }
 
     public function authorize(AccessContext $ctx, int $id, string $action): Assessment
     {
+        abort_unless(isset(self::EVENTS[$action]), 404);
         $a = $this->records->assessments($ctx)->whereKey($id)->firstOrFail();
-        $score = $ctx->role === 'kepala_unit' && $a->assessment_kind === 'member';
-        $review = $ctx->role === 'kepala_divisi' && $a->assessment_kind === 'member';
-        abort_unless(in_array($action, ['resubmit', 'withdraw']) ? $score : $review, 403);
+        $role = in_array($action, self::SCORER_ACTIONS, true) ? 'kepala_unit' : 'kepala_divisi';
+        abort_unless($a->assessment_kind === 'member' && $ctx->role === $role, 403);
 
         return $a;
     }
 
-    public function change(AccessContext $ctx, int $id, string $action, array $data): array
+    /**
+     * Pending work follows the area, not the person: the active head of the assessment's unit (scorer actions)
+     * or division (review actions) continues it under their own identity, including a successor after a
+     * resignation or replacement. The stored scorer/reviewer columns and every earlier history event keep the
+     * original author; the history records who acted each time.
+     *
+     * @param  int|null  $bulk  size of the bulk approval this change belongs to
+     */
+    public function change(AccessContext $ctx, int $id, string $action, array $data, ?int $bulk = null): array
     {
         $this->authorize($ctx, $id, $action);
         $a = $this->records->assessments($ctx)->whereKey($id)->lockForUpdate()->firstOrFail();
@@ -121,60 +136,162 @@ class AssessmentService
         }
         $cycle = AssessmentCycle::whereKey($a->cycle_id)->lockForUpdate()->firstOrFail();
         $this->window($cycle, $ctx);
+        if (in_array($action, self::SCORER_ACTIONS, true) ? (int) $a->unit_id !== $ctx->unitId : (int) $a->division_id !== $ctx->divisionId) {
+            throw new BusinessRule('SCOPE_CHANGED', 'Penilaian berada di luar area tanggung jawab Anda.');
+        }
         $before = $a->load('items')->toArray();
-        if (in_array($action, ['return', 'approve']) && $a->reviewer_assignment_id != $ctx->assignmentId) {
-            throw new BusinessRule('SCOPE_CHANGED', 'Penanggung jawab pengajuan berubah.');
-        }
-        if (in_array($action, ['resubmit', 'withdraw']) && $a->scorer_unit_assignment_id != $ctx->assignmentId) {
-            throw new BusinessRule('SCOPE_CHANGED', 'Penanggung jawab pengisian berubah.');
-        }
+        $notes = [];
         if ($action === 'withdraw') {
             $this->status($a, 'submitted');
             $a->items()->delete();
             $a->delete();
             $result = ['assessment_id' => $id, 'employee_id' => $a->employee_id, 'cycle_id' => $a->cycle_id, 'status' => 'not_started', 'deleted' => true];
             $this->audit->record($ctx, 'assessment', $id, 'assessment.withdrawn', $before, $result);
+            $this->history->record($ctx, 'withdrawn', $before, null, ['request_id' => $data['request_id'] ?? null]);
 
             return $result;
         }
         if ($action === 'resubmit') {
             $this->status($a, 'returned');
-            $source = $a->items()->lockForUpdate()->get()->map(function ($item) {
-                $item->weight_percent = $item->weight_percent_snapshot;
-                $item->id = $item->source_kpi_item_id;
-                $item->workspace_definition = $item->definition_snapshot;
-
-                return $item;
-            });
-            $values = $this->scores($source, $data);
-            foreach ($a->items()->lockForUpdate()->get() as $item) {
-                $item->score = (int) round($values['scores'][$item->source_kpi_item_id]);
-                $item->computed_score = $item->definition_snapshot && $item->definition_snapshot['method'] === 'formula' ? $values['scores'][$item->source_kpi_item_id] : null;
-                $item->measurement_inputs = $values['inputs'][$item->source_kpi_item_id] ?? null;
-                $item->save();
-            }
+            $this->rescore($a, $data);
             $a->positive_finding = $data['positive_finding'] ?? null;
             $a->negative_finding = $data['negative_finding'] ?? null;
             $a->status = 'submitted';
-            $a->total_score_raw = $values['total'];
             $a->submitted_at = now();
             $a->return_reason = null;
+            $a->return_notes = null;
+        } elseif ($action === 'adjust') {
+            $this->status($a, 'submitted');
+            $notes = $this->review($a, $data['reviews']);
         } elseif ($action === 'return') {
             $this->status($a, 'submitted');
+            $notes = $this->notes($a, $data['item_notes'] ?? []);
+            $reason = trim((string) ($data['reason'] ?? ''));
+            if ($reason === '' && ! $notes) {
+                throw new BusinessRule('RETURN_REASON_REQUIRED', 'Isi catatan pada KPI yang perlu diperbaiki atau alasan pengembalian.', 422);
+            }
             $a->status = 'returned';
-            $a->return_reason = trim($data['reason']);
-        } elseif ($action === 'approve') {
-            $this->status($a, 'submitted');
-            $this->finalize($ctx, $a);
+            // Notes on the KPIs are enough; the stored reason then summarises them for lists and notifications.
+            $a->return_reason = $reason !== '' ? $reason : 'Perbaiki '.count($notes).' KPI sesuai catatan Kepala Divisi.';
+            $a->return_notes = $notes ?: null;
         } else {
-            abort(404);
+            $this->status($a, 'submitted');
+            if (! empty($data['reviews'])) {
+                $notes = $this->review($a, $data['reviews']);
+            }
+            $this->finalize($ctx, $a);
         }
         $a->lock_version++;
         $a->save();
         $result = $a->fresh()->load('items')->toArray();
+        if ($action === 'adjust' && ! AssessmentHistory::itemChanges($before, $result)) {
+            throw new BusinessRule('NO_CHANGES', 'Tidak ada nilai yang berubah.', 422);
+        }
         $this->audit->record($ctx, 'assessment', $id, 'assessment.'.$action, $before, $result, $data['reason'] ?? null);
+        $this->history->record($ctx, self::EVENTS[$action], $before, $result, [
+            'note' => $data['reason'] ?? null, 'notes' => $notes, 'bulk' => $bulk, 'request_id' => $data['request_id'] ?? null,
+        ]);
 
         return $result;
+    }
+
+    /**
+     * Rescores the captured sheet with the same formula and weight validation as a new submission (unit head
+     * revision of a returned assessment). Reviewed scores of the previous submission no longer apply.
+     */
+    private function rescore(Assessment $a, array $data): void
+    {
+        $items = $a->items()->lockForUpdate()->get();
+        $values = $this->scores($items->map(fn ($item) => (object) [
+            'id' => $item->source_kpi_item_id, 'weight_percent' => $item->weight_percent_snapshot, 'workspace_definition' => $item->definition_snapshot,
+        ]), $data);
+        foreach ($items as $item) {
+            $value = $values['scores'][$item->source_kpi_item_id];
+            $item->score = (int) round($value);
+            $item->computed_score = ($item->definition_snapshot['method'] ?? null) === 'formula' ? $value : null;
+            $item->measurement_inputs = $values['inputs'][$item->source_kpi_item_id] ?? null;
+            $item->reviewed_score = null;
+            $item->save();
+        }
+        $a->total_score_raw = $values['total'];
+    }
+
+    /**
+     * Applies division head reviewed scores to a submitted staff assessment. The unit head's proposal (score,
+     * computed_score) and formula measurements stay as submitted; a null score or one equal to the proposal
+     * restores the proposal. Formula KPIs take 0–100 (request validation: at most 2 decimals); manual KPIs keep the
+     * unit head's scale, an integer 10–100. Notes and the general reason are optional; history records every change.
+     *
+     * @param  list<array{source_kpi_item_id: int, score: int|float|string|null, note?: ?string}>  $rows
+     * @return array<int, string> non-empty notes keyed by source KPI item id
+     */
+    private function review(Assessment $a, array $rows): array
+    {
+        $items = $a->items()->lockForUpdate()->get()->keyBy(fn ($item) => (int) $item->source_kpi_item_id);
+        $notes = [];
+        foreach ($rows as $row) {
+            $id = (int) $row['source_kpi_item_id'];
+            $item = $items->get($id) ?? throw new BusinessRule('REVIEW_ITEM_UNKNOWN', 'Koreksi merujuk KPI di luar penilaian ini.', 422);
+            $value = $row['score'] === null || $row['score'] === '' ? null : bcadd((string) $row['score'], '0', 6);
+            $formula = ($item->definition_snapshot['method'] ?? null) === 'formula';
+            if ($value !== null && ! $formula && (bccomp($value, bcadd($value, '0', 0), 6) !== 0 || bccomp($value, '10', 6) < 0 || bccomp($value, '100', 6) > 0)) {
+                throw new BusinessRule('INVALID_SCORE', 'Nilai KD untuk KPI manual '.$item->kpi_name_snapshot.' harus bilangan bulat 10–100.', 422);
+            }
+            if ($value !== null && bccomp($value, self::proposal($item), 6) === 0) {
+                $value = null;
+            }
+            $old = $item->reviewed_score === null ? null : bcadd((string) $item->reviewed_score, '0', 6);
+            $note = trim((string) ($row['note'] ?? ''));
+            if ($note !== '') {
+                $notes[$id] = $note;
+            }
+            if ($old === $value) {
+                continue;
+            }
+            $item->reviewed_score = $value;
+            $item->save();
+        }
+        $total = '0';
+        foreach ($items as $item) {
+            $total = bcadd($total, self::weighted($item->reviewed_score === null ? self::proposal($item) : (string) $item->reviewed_score, (string) $item->weight_percent_snapshot), 6);
+        }
+        $a->total_score_raw = $total;
+
+        return $notes;
+    }
+
+    /** The unit head's proposed score of an item: the formula result, else the manual score. */
+    private static function proposal(AssessmentItem $item): string
+    {
+        return bcadd((string) ($item->getAttributes()['computed_score'] ?? $item->getAttributes()['score']), '0', 6);
+    }
+
+    /**
+     * assessment_items.weighted_result_raw is DECIMAL(12,6) and MySQL rounds half-up on store; the
+     * protect_assessment_update trigger requires the total to equal the sum of those stored values.
+     */
+    private static function weighted(string $value, string $weight): string
+    {
+        return bcadd(bcdiv(bcmul($value, $weight, 10), '100', 10), '0.0000005', 6);
+    }
+
+    /** @return array<int, string> non-empty division head notes keyed by source KPI item id */
+    private function notes(Assessment $a, array $rows): array
+    {
+        $ids = $a->items->pluck('source_kpi_item_id')->map(fn ($id) => (int) $id)->all();
+        $notes = [];
+        foreach ($rows as $row) {
+            $id = (int) $row['source_kpi_item_id'];
+            if (! in_array($id, $ids, true)) {
+                throw new BusinessRule('NOTE_ITEM_UNKNOWN', 'Catatan merujuk KPI di luar penilaian ini.', 422);
+            }
+            $note = trim((string) ($row['note'] ?? ''));
+            if ($note !== '') {
+                $notes[$id] = $note;
+            }
+        }
+
+        return $notes;
     }
 
     private function scores($items, array $data): array
@@ -201,10 +318,7 @@ class AssessmentService
             }
             $scores[$item->id] = $value;
             $weight = bcadd($weight, (string) $item->weight_percent, 4);
-            // assessment_items.weighted_result_raw is DECIMAL(12,6) and MySQL rounds half-up on store; the
-            // protect_assessment_update trigger requires the total to equal the sum of those stored values.
-            $weighted = bcadd(bcdiv(bcmul((string) $value, (string) $item->weight_percent, 10), '100', 10), '0.0000005', 6);
-            $total = bcadd($total, $weighted, 6);
+            $total = bcadd($total, self::weighted((string) $value, (string) $item->weight_percent), 6);
         }
         if (bccomp($weight, '100', 4) !== 0) {
             throw new BusinessRule('INVALID_WEIGHT', 'Bobot KPI harus 100%.', 422);
@@ -215,7 +329,8 @@ class AssessmentService
 
     private function finalize(AccessContext $ctx, Assessment $a): void
     {
-        abort_unless($ctx->role === 'kepala_divisi' && $a->reviewer_user_id == $ctx->userId, 403);
+        // Any active head of the assessment's division may finalize, including a successor of the routed reviewer.
+        abort_unless($ctx->role === 'kepala_divisi' && (int) $a->division_id === $ctx->divisionId, 403);
         $category = DB::table('cycle_categories')->where('cycle_id', $a->cycle_id)->where('lower_bound', '<=', $a->total_score_raw)
             ->where(fn ($q) => $q->whereNull('upper_bound')->orWhere('upper_bound', '>', $a->total_score_raw))->get();
         if ($category->count() !== 1) {
@@ -225,6 +340,8 @@ class AssessmentService
         $a->status = 'final';
         $a->finalized_at = now();
         $a->finalized_by = $ctx->userId;
+        $a->finalized_assignment_id = $ctx->assignmentId;
+        $a->finalized_by_name_snapshot = DB::table('users')->where('id', $ctx->userId)->value('name');
         $a->category_code_snapshot = $c->code;
         $a->category_label_snapshot = $c->label;
         $a->category_lower_snapshot = $c->lower_bound;

@@ -1,0 +1,107 @@
+/* Assessment review corrections, per-KPI notes and history timeline (flow-assessments.js). */
+.assessment-kpi-note {
+    margin-top: 6px;
+    padding: 6px 8px;
+    border-left: 3px solid var(--color-warning);
+    border-radius: 6px;
+    background: var(--color-warning-soft);
+    font-size: 12px;
+    line-height: 18px;
+    white-space: pre-line;
+}
+.assessment-kpi-note-field {
+    display: block;
+    margin-top: 8px;
+}
+.assessment-kpi-note-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.assessment-kpi-note-field textarea {
+    min-height: 56px;
+    font-size: 13px;
+}
+.assessment-score-change {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--color-warning);
+    white-space: normal;
+}
+/* Division head reviewed score under the unit head's proposal. */
+.assessment-review-field {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 6px;
+}
+.assessment-review-label {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.assessment-row-adjusted > td {
+    background: var(--color-warning-soft);
+}
+.assessment-history-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.assessment-history-tag {
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    padding: 0 8px;
+    font-size: 11px;
+    color: var(--color-muted);
+}
+.assessment-history-actor {
+    margin-top: 2px;
+    color: var(--color-ink);
+}
+.assessment-history-subtitle {
+    margin-top: 8px;
+    font-weight: 600;
+}
+.assessment-history-notes {
+    margin-top: 4px;
+    display: grid;
+    gap: 4px;
+}
+.assessment-history-notes > li {
+    border-radius: 8px;
+    padding: 6px 8px;
+    background: var(--color-subtle);
+    white-space: pre-line;
+}
+.assessment-history-notes strong {
+    display: block;
+}
+.assessment-history-items {
+    margin-top: 8px;
+}
+.assessment-history-table {
+    margin-top: 6px;
+    width: 100%;
+    border-collapse: collapse;
+}
+.assessment-history-table th,
+.assessment-history-table td {
+    border-bottom: 1px solid var(--color-line);
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: top;
+}
+.assessment-history-table .numeric {
+    text-align: right;
+    white-space: nowrap;
+}
+.assessment-history-legacy {
+    margin-top: 6px;
+    font-style: italic;
+    color: var(--color-muted);
+}

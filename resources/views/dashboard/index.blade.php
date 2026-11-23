@@ -36,17 +36,40 @@ $sections = $ku ? ['agenda', 'categories', 'indicators'] : ['categories', 'agend
         @foreach($sections as $section)
             @switch($section)
             @case('categories')
-            <section class="dashboard-panel dashboard-distribution" id="dashboard-categories" aria-labelledby="dashboard-categories-title">
+            {{-- Final distribution: score-range histogram by default, the category doughnut as the alternative view.
+                 dashboard.js draws only the visible view's chart and remembers the chosen view. --}}
+            <section class="dashboard-panel dashboard-distribution" id="dashboard-categories" aria-labelledby="dashboard-categories-title" data-panel-group>
                 <div class="dashboard-panel-head">
-                    <div><h3 class="section-title" id="dashboard-categories-title">Sebaran kategori nilai</h3><p class="dashboard-caption" data-dashboard-categories-caption>Persentase dari jumlah hasil Final periode ini.</p></div>
+                    <div><h3 class="section-title" id="dashboard-categories-title">Distribusi nilai Final</h3></div>
                     <a class="link" href="{{ $vm->link($copy['report']) }}" data-dashboard-categories-report>Nilai per karyawan</a>
                 </div>
-                <div class="dashboard-status">
-                    <div class="dashboard-donut" data-dashboard-donut data-empty="true">
-                        <div class="dashboard-chart" data-dashboard-chart="categories" data-kind="doughnut" hidden></div>
-                        <p class="dashboard-donut-center" aria-hidden="true"><strong data-dashboard-category-figure>–</strong><span data-dashboard-category-sub>hasil Final</span></p>
+                <nav class="seg dashboard-distribution-tabs" role="tablist" aria-label="Tampilan distribusi nilai Final">
+                    <button type="button" role="tab" data-panel-tab="histogram" aria-selected="true" tabindex="0" class="active">Rentang nilai</button>
+                    <button type="button" role="tab" data-panel-tab="categories" aria-selected="false" tabindex="-1">Kategori</button>
+                </nav>
+                <div class="dashboard-distribution-view" data-panel="histogram">
+                    <p class="dashboard-caption" data-dashboard-histogram-caption>Memuat…</p>
+                    <div class="dashboard-chart dashboard-histogram" data-dashboard-chart="histogram" data-kind="bar" hidden></div>
+                    <p class="dashboard-empty" data-dashboard-histogram-empty hidden></p>
+                    <details class="dashboard-disclosure dashboard-histogram-data" hidden>
+                        <summary>Data histogram</summary>
+                        <div class="table-wrap dashboard-histogram-table" role="region" tabindex="0" aria-label="Jumlah hasil Final per rentang nilai">
+                            <table class="data-table">
+                                <thead><tr><th scope="col">Rentang nilai</th><th scope="col">Jumlah</th></tr></thead>
+                                <tbody data-dashboard-histogram-rows></tbody>
+                            </table>
+                        </div>
+                    </details>
+                </div>
+                <div class="dashboard-distribution-view" data-panel="categories" hidden>
+                    <p class="dashboard-caption" data-dashboard-categories-caption>Persentase dari jumlah hasil Final periode ini.</p>
+                    <div class="dashboard-status">
+                        <div class="dashboard-donut" data-dashboard-donut data-empty="true">
+                            <div class="dashboard-chart" data-dashboard-chart="categories" data-kind="doughnut" hidden></div>
+                            <p class="dashboard-donut-center" aria-hidden="true"><strong data-dashboard-category-figure>–</strong><span data-dashboard-category-sub>hasil Final</span></p>
+                        </div>
+                        <ul class="dashboard-stack-legend" data-dashboard-category-legend tabindex="0" aria-label="Jumlah hasil Final per kategori, persentasenya dari seluruh hasil Final, dan rerata nilainya"></ul>
                     </div>
-                    <ul class="dashboard-stack-legend" data-dashboard-category-legend tabindex="0" aria-label="Jumlah hasil Final per kategori, persentasenya dari seluruh hasil Final, dan rerata nilainya"></ul>
                 </div>
             </section>
             @break

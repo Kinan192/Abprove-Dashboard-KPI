@@ -1,12 +1,15 @@
 /* Role dashboard (KU/KD/HC). Compact overview on the green shell canvas:
    heading and four pastel metric cards with current-period totals (no
-   month-to-month comparison), then explicit role grid rows whose panels
-   stretch so tops and bottoms align. Long lists and the area progress table
-   scroll inside their panel on desktop; phones use natural page flow.
-   KU: one row (agenda with the fill action, Final categories, KPI); staff
+   month-to-month comparison), then explicit role grid rows sized by their
+   content. Panels in a row stretch to the tallest one, so tops and bottoms
+   align; long bodies (area table, highlight and KPI lists) stop at a density
+   cap and scroll inside their panel on desktop; phones use natural page flow.
+   KU: one row (agenda with the fill action, Final distribution, KPI); staff
    work lives on Isi nilai and Anggota Unit, so there is no staff table.
-   KD/HC: a 2×2 grid, categories and agenda above the area progress table
-   beside the tabbed highlights (priorities, KPI, HC activity).
+   KD/HC: a 2×2 grid, distribution and agenda above the area progress table
+   beside the tabbed highlights (priorities, KPI, HC activity). The
+   distribution panel shows one chart at a time: the score histogram by
+   default, the category doughnut as the alternative tab.
    Neutral paper panels, green data, amber only for "returned"/open-work
    accents. Chart tokens live on :root because dashboard.js reads them through
    getComputedStyle(document.documentElement); they must stay plain colours
@@ -22,8 +25,9 @@
     /* Category doughnut: best category → lowest category. */
     --dashboard-category-high: #0b6b45;
     --dashboard-category-low: #a9dcc0;
-    --dashboard-list: 272px;
     --dashboard-donut: 132px;
+    /* Histogram plot height; the host needs it (maintainAspectRatio off). */
+    --dashboard-histogram: 140px;
 }
 [data-theme='dark'] {
     --dashboard-final: #4cc48c;
@@ -66,9 +70,9 @@
     --card-amber-ink: #f0bd72;
 }
 body[data-app-shell] .role-dashboard.page-content {
-    @apply m-0 grid min-w-0 content-start gap-4;
+    @apply m-0 grid min-w-0 content-start gap-3;
     container: dashboard / inline-size;
-    padding-top: 20px;
+    padding-top: 12px;
     padding-bottom: 12px;
 }
 
@@ -110,7 +114,7 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply -my-1.5 -mr-2 inline-flex min-h-10 shrink-0 items-center rounded-[10px] px-3 text-[13px] font-semibold transition-colors hover:bg-accent-soft hover:no-underline;
 }
 .role-dashboard .dashboard-panel {
-    @apply flex min-w-0 flex-col gap-3 rounded-2xl border border-line bg-paper p-4;
+    @apply flex min-w-0 flex-col gap-2.5 rounded-2xl border border-line bg-paper px-4 py-3.5;
 }
 .role-dashboard .dashboard-loading,
 .role-dashboard .dashboard-empty {
@@ -130,7 +134,7 @@ body[data-app-shell] .role-dashboard.page-content {
     background: var(--color-track, var(--color-subtle));
 }
 .role-dashboard .seg button {
-    @apply gap-1.5 rounded-full px-3 text-[12.5px];
+    @apply min-h-9 gap-1.5 rounded-full px-3 text-[12.5px];
 }
 .role-dashboard .seg button svg {
     @apply size-3.5;
@@ -154,22 +158,29 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply bg-white/20 text-white;
 }
 
-/* Layout: explicit role grids. Grid items stretch to their row, so panel
-   tops and bottoms align; panel bodies are capped and scroll locally. */
+/* Layout: explicit role grids with content-sized rows. Grid items stretch to
+   their row, so panel tops and bottoms align with the taller neighbour. Body
+   caps: the area table and highlight lists end at their last item when it
+   fits and otherwise scroll locally. On wide containers the caps follow the
+   viewport so a laptop screen shows the whole dashboard without scrolling,
+   never forcing a panel taller than its content (narrow: fixed caps below). */
 .role-dashboard .dashboard-layout {
-    @apply grid min-w-0 items-stretch gap-4;
+    @apply grid min-w-0 items-stretch gap-3;
+    --dashboard-table-cap: clamp(160px, calc(100dvh - 662px), 360px);
+    --dashboard-list: clamp(116px, calc(100dvh - 714px), 300px);
 }
-/* KD/HC: 2×2 grid. Categories + agenda, then the progress table beside the
-   highlights; on wide containers the second row has a bounded height (see
-   the min-width container query below) so both panels share top and bottom. */
+/* KD/HC: 2×2 grid. Distribution + agenda, then the progress table beside
+   the highlights. */
 .role-dashboard:not([data-role-dashboard='ku']) .dashboard-layout {
     grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
     grid-template-areas:
         'categories agenda'
         'progress insights';
 }
-/* KU: a single row of three bounded panels; the KPI list gets the widest. */
+/* KU: a single row of three panels; the KPI list gets the widest. Five KPI
+   rows fit under the list cap. */
 .role-dashboard[data-role-dashboard='ku'] .dashboard-layout {
+    --dashboard-list: 272px;
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.2fr);
     grid-template-areas: 'agenda categories indicators';
 }
@@ -203,7 +214,7 @@ body[data-app-shell] .role-dashboard.page-content {
     --card-line: var(--color-line);
     --card-ink: var(--color-link);
     --card-dot: var(--card-ink);
-    @apply grid min-w-0 content-start gap-y-0.5 rounded-2xl border px-4 py-3.5 text-ink transition-[border-color,box-shadow];
+    @apply grid min-w-0 content-start gap-y-0.5 rounded-2xl border px-4 py-2.5 text-ink transition-[border-color,box-shadow];
     border-color: var(--card-line);
     background: var(--card-bg);
 }
@@ -284,14 +295,70 @@ body[data-app-shell] .role-dashboard.page-content {
     background: var(--dashboard-pending);
 }
 
-/* Final category doughnut beside its permanent count legend (swatch colours
-   are set inline by dashboard.js to match the segments). */
+/* Distribution of Final results. Tabs switch between the score histogram
+   (default: real counts per 10-point range, data table in a disclosure) and
+   the category doughnut beside its count legend (swatch colours are set
+   inline by dashboard.js to match the segments). Wide panels carry the tabs
+   on the title row; narrow ones give them a full-width row. */
 .role-dashboard .dashboard-distribution {
+    @apply grid content-start gap-x-3;
     container: dashboard-distribution / inline-size;
+    grid-template-columns: minmax(0, 1fr) auto;
 }
+.role-dashboard .dashboard-distribution > * {
+    grid-column: 1 / -1;
+}
+.role-dashboard .dashboard-distribution-tabs {
+    @apply flex w-full;
+}
+.role-dashboard .dashboard-distribution-tabs button {
+    flex: 1 1 0;
+}
+@container dashboard-distribution (min-width: 560px) {
+    .role-dashboard .dashboard-distribution > .dashboard-panel-head {
+        grid-column: 1;
+        align-self: center;
+    }
+    .role-dashboard .dashboard-distribution > .dashboard-distribution-tabs {
+        grid-column: 2;
+        grid-row: 1;
+        width: auto;
+    }
+}
+.role-dashboard .dashboard-distribution-view {
+    @apply grid min-w-0 content-start gap-1.5;
+}
+.role-dashboard[data-role-dashboard='ku'] {
+    --dashboard-histogram: 160px;
+}
+.role-dashboard .dashboard-histogram {
+    height: var(--dashboard-histogram);
+}
+/* Closed, the disclosure's 40px target overlaps the panel padding a little;
+   open, its table shows about four ranges and scrolls in its own box. */
+.role-dashboard .dashboard-histogram-data:not([open]) {
+    margin-bottom: -10px;
+}
+.role-dashboard .dashboard-histogram-table {
+    width: min(100%, 360px);
+    max-height: 160px;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+.role-dashboard .dashboard-histogram-table > .data-table :is(th, td) {
+    padding: 6px 12px;
+}
+.role-dashboard .dashboard-histogram-table > .data-table tbody th {
+    @apply bg-transparent text-[13px] leading-5 font-normal tracking-normal text-ink normal-case tabular-nums;
+}
+.role-dashboard .dashboard-histogram-table > .data-table :is(th, td):last-child {
+    text-align: right;
+}
+/* Category view: the legend keeps a compact column beside the doughnut so
+   counts stay next to their labels on wide panels. */
 .role-dashboard .dashboard-status {
-    @apply grid flex-1 items-center gap-4;
-    grid-template-columns: var(--dashboard-donut) minmax(0, 1fr);
+    @apply grid items-center justify-start gap-4;
+    grid-template-columns: var(--dashboard-donut) minmax(0, 340px);
 }
 .role-dashboard .dashboard-donut {
     @apply relative;
@@ -362,38 +429,42 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 
 /* Local table scrolling: real tables with visible sticky headers at every
-   width; wide content scrolls inside its box, never the page. */
+   width; wide content scrolls inside its box, never the page. Compact rows
+   (8px block padding, 12px headers) leave more room for data. */
 .role-dashboard .dashboard-table-scroll {
     overscroll-behavior-x: contain;
 }
 .role-dashboard .dashboard-table-scroll > .data-table :is(th, td):not(.empty) {
     white-space: nowrap;
 }
-.role-dashboard .dashboard-table-scroll > .data-table thead th {
+.role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table thead th {
     position: sticky;
     top: 0;
     z-index: 2;
+    font-size: 12px;
     background: color-mix(in srgb, var(--color-subtle) 60%, var(--color-paper));
 }
-/* KD/HC area table: bounded like the highlight lists so the dashboard never
-   grows into a tall wall (two-column flow). Wide containers replace this cap
-   with the bounded second grid row, which the table fills. */
+.role-dashboard .dashboard-table-scroll > .data-table :is(th, td) {
+    padding-block: 8px;
+}
+/* KD/HC area table: content height up to the layout cap, so a short table
+   ends at its last row and a long one (expanded HC units) scrolls under its
+   sticky header. */
 .role-dashboard .dashboard-progress-scroll {
-    flex: 1 1 auto;
-    min-height: 0;
-    max-height: clamp(180px, calc(100dvh - 660px), 480px);
+    flex: 0 1 auto;
+    max-height: var(--dashboard-table-cap);
 }
 @media (min-width: 901px) {
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) {
         min-width: 0;
     }
 }
 @media (max-width: 900px) {
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) {
         display: table;
         min-width: 100%;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) thead {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) thead {
         position: static;
         display: table-header-group;
         width: auto;
@@ -401,32 +472,32 @@ body[data-app-shell] .role-dashboard.page-content {
         overflow: visible;
         clip-path: none;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) tbody {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tbody {
         display: table-row-group;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) tr {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tr {
         display: table-row;
         padding: 0;
         border-bottom: 0;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) tr[hidden] {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tr[hidden] {
         display: none;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) td {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) td {
         display: table-cell;
         padding: 8px 12px;
         border-bottom: 1px solid var(--color-line);
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) tbody tr:last-child td {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tbody tr:last-child :is(th, td) {
         border-bottom: 0;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) th {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) th {
         padding: 8px 12px;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) td[data-label]::before {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) td[data-label]::before {
         content: none;
     }
-    body[data-app-shell] .role-dashboard .dashboard-table-scroll > .data-table:not(.score-table):not(.gp-table) .numeric {
+    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) .numeric {
         text-align: right;
     }
 }
@@ -469,6 +540,10 @@ body[data-app-shell] .role-dashboard.page-content {
     overflow-y: auto;
     scrollbar-width: thin;
 }
+/* KPI inside the KD/HC highlights sits under an extra order-tab row. */
+.role-dashboard .dashboard-insights .dashboard-indicator-list {
+    max-height: max(116px, calc(var(--dashboard-list) - 52px));
+}
 
 /* Indicators */
 .role-dashboard .dashboard-indicators .workspace-tabs {
@@ -479,7 +554,7 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-indicator {
     --tone: var(--dashboard-final);
-    @apply grid items-center gap-3 border-b border-line py-2.5;
+    @apply grid items-center gap-3 border-b border-line py-2;
     grid-template-columns: minmax(0, 1fr) minmax(48px, 22%) 36px;
 }
 .role-dashboard .dashboard-indicator:last-child {
@@ -556,7 +631,7 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-schedule {
     @apply grid pb-1;
-    max-height: 240px;
+    max-height: 176px;
     overflow-y: auto;
     scrollbar-width: thin;
 }
@@ -709,37 +784,15 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply text-xs text-muted;
 }
 
-/* Wide KD/HC: the second row gets one bounded, viewport-following height
-   (as shared table cards do); the progress table and the visible highlight
-   list fill their panels and scroll inside them. */
-@container dashboard (min-width: 961px) {
-    .role-dashboard:not([data-role-dashboard='ku']) .dashboard-layout {
-        grid-template-rows: auto clamp(280px, calc(100dvh - 542px), 520px);
-    }
-    .role-dashboard:not([data-role-dashboard='ku']) :is(.dashboard-progress, .dashboard-insights) {
-        min-height: 0;
-    }
-    .role-dashboard:not([data-role-dashboard='ku']) .dashboard-progress-scroll {
-        max-height: none;
-    }
-    .role-dashboard:not([data-role-dashboard='ku']) :is(.dashboard-insight:not([hidden]), .dashboard-insight > .dashboard-indicators) {
-        display: flex;
-        flex: 1 1 auto;
-        flex-direction: column;
-        min-height: 0;
-    }
-    .role-dashboard:not([data-role-dashboard='ku']) .dashboard-insights :is(.dashboard-task-list, .dashboard-indicator-list:not([hidden]), .dashboard-activity-list) {
-        flex: 1 1 auto;
-        min-height: 0;
-        max-height: none;
-    }
-}
-
 /* Narrower content (container width, so the shell sidebar is accounted
-   for): two columns in natural flow. KD/HC: categories + agenda, then the
-   work table and the highlights full width. KU: agenda + categories, then
-   KPI full width. */
+   for): two columns in natural flow with fixed density caps. KD/HC:
+   distribution + agenda, then the work table and the highlights full width.
+   KU: agenda + distribution, then KPI full width. */
 @container dashboard (max-width: 960px) {
+    .role-dashboard .dashboard-layout {
+        --dashboard-table-cap: 360px;
+        --dashboard-list: 320px;
+    }
     .role-dashboard:not([data-role-dashboard='ku']) .dashboard-layout {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-areas:
@@ -804,8 +857,12 @@ body[data-app-shell] .role-dashboard.page-content {
     .role-dashboard .dashboard-panel-link,
     .role-dashboard .dashboard-disclosure summary,
     .role-dashboard .dashboard-expand,
-    .role-dashboard .dashboard-agenda-cta {
+    .role-dashboard .dashboard-agenda-cta,
+    .role-dashboard .seg button {
         @apply min-h-11;
+    }
+    .role-dashboard[data-role-dashboard] {
+        --dashboard-histogram: 172px;
     }
     .role-dashboard .dashboard-panel {
         @apply rounded-[14px];
@@ -821,9 +878,9 @@ body[data-app-shell] .role-dashboard.page-content {
     }
     /* Page scroll only on phones: no nested vertical scroll traps; tables
        keep sideways scrolling inside their box. */
-    .role-dashboard :is(.dashboard-task-list, .dashboard-indicator-list, .dashboard-activity-list, .dashboard-schedule, .dashboard-stack-legend) {
+    .role-dashboard .dashboard-layout :is(.dashboard-task-list, .dashboard-indicator-list, .dashboard-activity-list, .dashboard-schedule, .dashboard-stack-legend, .dashboard-histogram-table) {
         max-height: none;
-        overflow: visible;
+        overflow-y: visible;
     }
     .role-dashboard .dashboard-progress-scroll {
         max-height: none;

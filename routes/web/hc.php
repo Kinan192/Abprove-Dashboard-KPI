@@ -3,6 +3,7 @@
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SuperHc\ActivityController;
 use App\Http\Controllers\SuperHc\CycleController;
+use App\Http\Controllers\SuperHc\EmployeeImportController;
 use App\Http\Controllers\SuperHc\HeadAssignmentController;
 use App\Http\Controllers\SuperHc\KpiTemplateController;
 use App\Http\Controllers\SuperHc\KpiWorkspaceController;
@@ -22,6 +23,8 @@ Route::patch('/organization/{resource}/{id}', [OrganizationController::class, 'u
 Route::delete('/organization/{resource}/{id}', [OrganizationController::class, 'destroy'])->whereIn('resource', $resources)->whereNumber('id');
 Route::post('/employees/transfer-preview', [PlacementController::class, 'preview']);
 Route::post('/employees/transfers', [PlacementController::class, 'transfer']);
+Route::post('/employees/import-preview', [EmployeeImportController::class, 'preview']);
+Route::post('/employees/import', [EmployeeImportController::class, 'store']);
 Route::get('/heads/preview', [HeadAssignmentController::class, 'preview']);
 Route::post('/heads/reassign', [HeadAssignmentController::class, 'reassign']);
 Route::get('/audit', [ActivityController::class, 'index']);
@@ -32,6 +35,8 @@ Route::post('/kpi-templates/import-preview', [TemplateImportController::class, '
 Route::get('/import/sample', [TemplateImportController::class, 'sample'])->withoutMiddleware('frontend');
 Route::get('/kpi-workspace', [KpiWorkspaceController::class, 'show']);
 Route::put('/kpi-workspace', [KpiWorkspaceController::class, 'update']);
+Route::post('/kpi-workspace/import-preview', [KpiWorkspaceController::class, 'importPreview']);
+Route::post('/kpi-workspace/import', [KpiWorkspaceController::class, 'import']);
 Route::get('/kpi-templates', [KpiTemplateController::class, 'index']);
 Route::get('/kpi-templates/new', [FrontendController::class, 'show']);
 Route::get('/kpi-templates/{template}', [KpiTemplateController::class, 'show'])->whereNumber('template');

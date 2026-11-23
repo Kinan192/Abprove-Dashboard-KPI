@@ -20,7 +20,7 @@
     </section>
 </div>
 @push('dialogs')
-<x-abprove.dialog id="account-form-dialog" title="Akun pengguna" :drawer="true" :narrow="true">
+<x-abprove.dialog id="account-form-dialog" title="Akun pengguna" :narrow="true">
     <form id="account-form" method="post" class="space-y-4" novalidate>
         <input type="hidden" name="id">
         <x-abprove.flow-input name="name" label="Nama lengkap" :required="true" maxlength="160" autocomplete="off"/>

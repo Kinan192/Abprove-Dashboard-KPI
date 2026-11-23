@@ -204,7 +204,7 @@ export function initUI() {
     });
     window.addEventListener('storage-error', () =>
         toast(
-            'Opslag browser penuh. Perubahan bertahan selama halaman ini terbuka.',
+            'Penyimpanan browser penuh. Perubahan hanya bertahan selama halaman ini terbuka.',
             true,
         ),
     );

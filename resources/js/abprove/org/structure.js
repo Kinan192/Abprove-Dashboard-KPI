@@ -4,6 +4,7 @@ import { paginate } from '../pagination';
 import { syncSearchableSelects } from '../searchable-select';
 import { initHeadWizard } from './head-wizard';
 import { initStaffTransfer } from './staff-transfer';
+import { initStaffImport } from './staff-import';
 import {
     AREAS,
     freeHeads,
@@ -24,28 +25,28 @@ const KINDS = {
         set: 'divisions',
         title: 'Divisi',
         noun: 'divisi',
-        description: 'Setiap divisi aktif dipimpin satu Kepala Divisi. Gunakan Kepala untuk mengganti, memindah, menukar, atau melepas kepala.',
+        description: 'Setiap divisi aktif dipimpin satu Kepala Divisi.',
         headers: ['Nama divisi', 'Kepala Divisi', 'Cakupan', 'Status', 'Tindakan'],
     },
     unit: {
         set: 'units',
         title: 'Unit',
         noun: 'unit',
-        description: 'Unit berada di bawah satu divisi dan dipimpin satu Kepala Unit. KPI staf mengikuti Unit.',
+        description: 'Unit berada di bawah satu divisi dan dipimpin satu Kepala Unit.',
         headers: ['Nama unit', 'Kepala Unit', 'Divisi', 'Status', 'Tindakan'],
     },
     position: {
         set: 'positions',
         title: 'Jabatan',
         noun: 'jabatan',
-        description: 'Jabatan mengklasifikasikan pekerjaan staf. Hak akses ditentukan oleh akun yang dikelola Admin.',
+        description: 'Klasifikasi pekerjaan staf. Hak akses login diatur Admin.',
         headers: ['Nama jabatan', 'Staf aktif', 'Status', 'Tindakan'],
     },
     staff: {
         set: 'staff',
         title: 'Data Staf',
         noun: 'staf',
-        description: 'Data kepegawaian tanpa akun login. Gunakan Mutasi untuk memindahkan unit, satu per satu atau massal.',
+        description: 'Data kepegawaian tanpa akun login. Pindahkan unit melalui Mutasi.',
         headers: ['Nama', 'Jabatan', 'Unit', 'KPI unit', 'Penilai', 'Status', 'Tindakan'],
     },
 };
@@ -58,7 +59,8 @@ export function initStructure(c, s) {
         body = $('[data-org-body]'),
         form = $('#entity-form'),
         heads = initHeadWizard(s),
-        transfers = initStaffTransfer(s);
+        transfers = initStaffTransfer(s),
+        imports = initStaffImport(s);
     const requested = new URLSearchParams(location.search).get('tab');
     let kind = KINDS[requested] ? requested : PAGE_KINDS[c.page] || 'division',
         detailController = null;
@@ -87,6 +89,7 @@ export function initStructure(c, s) {
         primary.textContent = `Tambah ${config.noun}`;
         $('[data-quick-unit]').hidden = kind !== 'division';
         $('[data-staff-bulk]').hidden = kind !== 'staff';
+        $('[data-staff-import]').hidden = kind !== 'staff';
         $$('[data-org-count]', root).forEach((count) => {
             count.textContent = s.data[KINDS[count.dataset.orgCount].set].filter((r) => r.active).length;
             count.title = 'Jumlah data aktif';
@@ -366,8 +369,8 @@ export function initStructure(c, s) {
             section,
             '[data-org-division-units-note]',
             units.length
-                ? `Staf aktif dihitung dari penempatan ${monthLabel(currentMonth())}. Pilih Rincian untuk melihat kepala dan riwayat unit.`
-                : 'Belum ada unit di divisi ini. Gunakan Tambah unit untuk membuat unit di bawah divisi ini.',
+                ? `Staf aktif per ${monthLabel(currentMonth())}.`
+                : 'Belum ada unit. Gunakan Tambah unit.',
         );
         list.hidden = !units.length;
         list.append(
@@ -450,6 +453,7 @@ export function initStructure(c, s) {
             edit(type);
         }
         if (event.target.closest('[data-staff-bulk]')) transfers.open();
+        if (event.target.closest('[data-staff-import]')) imports.open();
         const button = event.target.closest('[data-entity-edit],[data-entity-detail],[data-head-change],[data-staff-transfer]');
         if (!button) return;
         const { entityEdit, entityDetail, headChange, staffTransfer } = button.dataset;

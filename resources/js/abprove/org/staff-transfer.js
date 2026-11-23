@@ -130,7 +130,7 @@ export function initStaffTransfer(s) {
             box.setAttribute('role', 'alert');
             body.append(
                 node('strong', `${blocked} staf terblokir.`, 'block'),
-                node('span', 'Mutasi disimpan atomik: satu staf terblokir membatalkan seluruh mutasi. Perbaiki hambatannya atau keluarkan staf tersebut.'),
+                node('span', 'Satu staf terblokir membatalkan seluruh mutasi. Perbaiki hambatannya atau keluarkan staf tersebut.'),
                 drop,
             );
             box.append(body);
@@ -196,7 +196,7 @@ export function initStaffTransfer(s) {
                 );
                 from.min = earliest;
                 if (!from.value) from.value = currentMonth() < earliest ? earliest : currentMonth();
-                $('[data-transfer-month-help]', form).textContent = `Paling awal ${monthLabel(earliest)} (bulan berjalan WIB atau periode terbuka tertua). Histori sebelum itu tidak ditulis ulang.`;
+                $('[data-transfer-month-help]', form).textContent = `Paling awal ${monthLabel(earliest)}. Histori sebelumnya tidak berubah.`;
                 syncSearchableSelects(form);
             },
             async leave() {
@@ -232,7 +232,7 @@ export function initStaffTransfer(s) {
                     body = node('div');
                 body.append(
                     node('strong', `${preview.staff.length} staf ke Unit ${target.unit_name} (${target.division_name}) mulai ${monthLabel(preview.effective_from)}.`, 'block'),
-                    node('span', `Penilai baru ${target.head_name || 'belum ada'}; reviewer ${target.division_head_name || 'belum ada'}. Penilaian Final dan histori sebelum bulan efektif tetap pada unit asal. Alasan: ${field(form, 'reason').value.trim()}`),
+                    node('span', `Penilai baru: ${target.head_name || 'belum ada'}. Peninjau: ${target.division_head_name || 'belum ada'}. Penilaian Final dan histori sebelum bulan efektif tetap pada unit asal. Alasan: ${field(form, 'reason').value.trim()}`),
                 );
                 summary.replaceChildren(body);
             },

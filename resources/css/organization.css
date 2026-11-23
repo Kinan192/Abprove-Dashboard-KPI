@@ -38,7 +38,7 @@
     width: 96px;
 }
 
-/* Detail drawer: destructive action pinned left, edits grouped right. */
+/* Detail dialog: destructive action pinned left, edits grouped right. */
 .org-detail-actions {
     display: contents;
 }
@@ -346,6 +346,23 @@
     background: var(--color-danger-soft);
 }
 
+/* Staff import dialog. */
+.org-import-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 16px;
+}
+.org-import-head p {
+    flex: 1 1 260px;
+}
+.org-import-error {
+    white-space: pre-line;
+    max-height: 30dvh;
+    overflow: auto;
+}
+
 /* Staff picker (step 1 of the transfer wizard). */
 .org-picker-filters {
     display: grid;
@@ -476,5 +493,8 @@
     }
     .org-unit-item .btn {
         margin-left: auto;
+    }
+    .org-import-head .btn {
+        flex: 1 1 0;
     }
 }

@@ -15,7 +15,7 @@
             <h1>{{ $forgot?'Lupa kata sandi':'Masuk' }}</h1>
             <p class="mt-1 mb-6 text-sm text-muted">{{ $forgot?'Pemulihan akun':'Masuk ke akun Anda' }}</p>
             @if($forgot)
-                <p class="text-sm leading-6 text-muted">Hubungi Super HC untuk mengatur ulang kata sandi. Sebutkan nama dan NIP Anda. Super HC dapat membuat kata sandi baru melalui menu Akun Kepala setelah memverifikasi identitas Anda.</p>
+                <p class="text-sm leading-6 text-muted">Hubungi Admin untuk mengatur ulang kata sandi.</p>
                 <a class="link mt-5 inline-flex items-center gap-2 text-sm" href="{{ url('/login') }}"><x-abprove.icon name="back"/>Kembali ke halaman masuk</a>
             @else
                 @if($errors->any())<div class="notice notice-error mb-5" role="alert">{{ $errors->first() }}</div>@endif

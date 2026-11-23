@@ -8,7 +8,13 @@ class ReminderEmail extends DomainModel
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['batch_id', 'cycle_id', 'recipient_user_id', 'recipient_email', 'recipient_role', 'subject', 'message', 'details', 'status', 'error', 'sent_by', 'sent_at'];
+    protected $fillable = ['batch_id', 'delivery_key', 'cycle_id', 'recipient_user_id', 'recipient_email', 'recipient_role', 'subject', 'message', 'details', 'status', 'error', 'sent_by', 'sent_at'];
+
+    /** Automatic (scheduled) reminders carry a unique delivery key and have no human sender. */
+    public function isAutomatic(): bool
+    {
+        return $this->delivery_key !== null;
+    }
 
     protected function casts(): array
     {

@@ -3,37 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Assessment\AssessmentRequest;
+use App\Queries\AssessmentSearch;
 use App\Queries\ScopedRecords;
+use App\Services\Assessment\AssessmentHistory;
 use App\Services\Assessment\AssessmentService;
 use App\Services\IdentityAccess\MutationRunner;
-use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class AssessmentController extends Controller
 {
-    private const TIMELINE_LIMIT = 100;
+    public function __construct(private AssessmentService $service, private MutationRunner $mutations, private ScopedRecords $records, private AssessmentHistory $history) {}
 
-    public function __construct(private AssessmentService $service, private MutationRunner $mutations, private ScopedRecords $records) {}
-
-    public function index(Request $r)
+    public function index(Request $r, AssessmentSearch $search)
     {
-        $f = $r->validate(['cycle_id' => ['sometimes', 'integer', 'min:1'], 'status' => ['sometimes', 'in:submitted,returned,final'], 'kind' => ['sometimes', 'in:member,unit_head'], 'search' => ['sometimes', 'string', 'max:160'], 'unit_id' => ['sometimes', 'integer', 'min:1'], 'division_id' => ['sometimes', 'integer', 'min:1']]);
-        $q = $this->records->assessments($r->attributes->get('access_context'));
-        foreach (['cycle_id', 'status', 'unit_id', 'division_id'] as $key) {
-            if (isset($f[$key])) {
-                $q->where($key, $f[$key]);
-            }
-        }
-        if (isset($f['kind'])) {
-            $q->where('assessment_kind', $f['kind']);
-        }
-        if (isset($f['search'])) {
-            $q->where(fn ($q) => $q->where('employee_name_snapshot', 'like', '%'.$f['search'].'%')->orWhere('nip_snapshot', 'like', '%'.$f['search'].'%'));
-        }
+        $f = $r->validate([
+            'cycle_id' => ['sometimes', 'integer', 'min:1'], 'status' => ['sometimes', 'in:submitted,returned,final'], 'kind' => ['sometimes', 'in:member,unit_head'],
+            'search' => ['sometimes', 'string', 'max:160'], 'unit_id' => ['sometimes', 'integer', 'min:1'], 'division_id' => ['sometimes', 'integer', 'min:1'],
+        ]);
 
-        return response()->json($q->orderBy('id')->paginate(25));
+        return response()->json($search->filtered($r->attributes->get('access_context'), $f)->orderBy('id')->paginate(25));
     }
 
     public function show(Request $r, int $assessment)
@@ -51,15 +40,29 @@ class AssessmentController extends Controller
         return response()->json(['data' => $this->service->form($r->attributes->get('access_context'), $data)]);
     }
 
-    /** Latest decision events of one visible assessment in the review dialog shape. */
+    /** History of a visible assessment's subject-period, including submissions withdrawn before it. */
     public function timeline(Request $r, int $assessment)
     {
-        abort_unless($this->records->assessments($r->attributes->get('access_context'))->toBase()->where('id', $assessment)->exists(), 404);
+        $ctx = $r->attributes->get('access_context');
+        $a = $this->records->assessments($ctx)->toBase()->where('id', $assessment)->first(['id', 'cycle_id', 'assessment_kind', 'employee_id', 'subject_user_id']);
+        abort_unless($a, 404);
+        $member = $a->assessment_kind === 'member';
 
-        return response()->json(['data' => DB::table('audit_events as a')->leftJoin('users as u', 'u.id', '=', 'a.actor_user_id')
-            ->where('a.assessment_id', $assessment)->orderByDesc('a.recorded_at')->orderByDesc('a.id')->limit(self::TIMELINE_LIMIT)
-            ->get(['a.action', 'u.name as who', 'a.recorded_at', 'a.reason'])
-            ->map(fn ($e) => ['action' => $e->action, 'who' => $e->who, 'at' => CarbonImmutable::parse($e->recorded_at, 'UTC')->format('Y-m-d\TH:i:s\Z'), 'reason' => $e->reason])]);
+        return response()->json(['data' => $this->history->timeline($ctx, $a->cycle_id, $a->assessment_kind, $member ? $a->employee_id : $a->subject_user_id, $a->id)]);
+    }
+
+    /** History of one subject-period without a current assessment, e.g. after a withdrawn submission. */
+    public function history(Request $r)
+    {
+        $ctx = $r->attributes->get('access_context');
+        $d = $r->validate([
+            'cycle_id' => ['required', 'integer', 'min:1'],
+            'employee_id' => ['required_without:subject_user_id', 'prohibits:subject_user_id', 'integer', 'min:1'],
+            'subject_user_id' => [$ctx->role === 'kepala_unit' ? 'prohibited' : 'required_without:employee_id', 'integer', 'min:1'],
+        ]);
+        $member = isset($d['employee_id']);
+
+        return response()->json(['data' => $this->history->timeline($ctx, $d['cycle_id'], $member ? 'member' : 'unit_head', $member ? $d['employee_id'] : $d['subject_user_id'])]);
     }
 
     public function store(AssessmentRequest $r)
@@ -84,6 +87,12 @@ class AssessmentController extends Controller
         return $this->mutate($r, $assessment, 'approve');
     }
 
+    /** Division head reviewed scores on a submitted staff assessment before Final; the unit head's proposal stays. */
+    public function adjust(AssessmentRequest $r, int $assessment)
+    {
+        return $this->mutate($r, $assessment, 'adjust');
+    }
+
     public function returnAssessment(AssessmentRequest $r, int $assessment)
     {
         return $this->mutate($r, $assessment, 'return');
@@ -105,6 +114,6 @@ class AssessmentController extends Controller
             foreach ($rows as $row) {
                 $this->service->authorize($c, $row['id'], 'approve');
             }
-        }, fn ($c) => $rows->map(fn ($row) => $this->service->change($c, $row['id'], 'approve', $row))->all()));
+        }, fn ($c) => $rows->map(fn ($row) => $this->service->change($c, $row['id'], 'approve', $row + ['request_id' => $d['request_id']], $rows->count()))->all()));
     }
 }

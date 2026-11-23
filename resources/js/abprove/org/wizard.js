@@ -1,7 +1,7 @@
 import { $, $$, error } from '../flow-dom';
 
 /**
- * Four-step drawer (Pilih → Tujuan → Dampak → Konfirmasi) around a form with [data-wizard-panel]
+ * Four-step dialog (Pilih → Tujuan → Dampak → Konfirmasi) around a form with [data-wizard-panel]
  * sections and footer buttons. `steps[n].enter()` runs when step n is shown; `steps[n].leave()`
  * may be async and throws to stay on the step with its message. Enter in a field moves forward
  * instead of submitting early.

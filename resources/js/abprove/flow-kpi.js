@@ -121,7 +121,7 @@ export function initKpi(c, s) {
         const help = $('[data-kpi-method-help]');
         if (help)
             help.textContent = showFormula
-                ? 'Formula disimpan sebagai definisi pengukuran. Penilai tetap memasukkan nilai 10–100 pada backend.'
+                ? 'Formula hanya mendefinisikan pengukuran. Penilai tetap mengisi nilai 10–100.'
                 : 'Penilai memasukkan satu nilai 10–100. Formula tidak dipakai.';
     }
     function fillRecipients() {
