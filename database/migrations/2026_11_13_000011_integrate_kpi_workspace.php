@@ -17,10 +17,10 @@ return new class extends Migration
             $table->json('definition_snapshot')->nullable();
             $table->json('measurement_inputs')->nullable();
         });
-        DB::statement('ALTER TABLE assessment_items DROP CHECK chk_assessment_items_score');
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE assessment_items DROP CHECK chk_assessment_items_score'));
         DB::statement('ALTER TABLE assessment_items MODIFY score DECIMAL(12,6) NULL');
         DB::statement('ALTER TABLE assessment_items ADD CONSTRAINT chk_assessment_items_score CHECK (score BETWEEN 0 AND 100 AND (definition_snapshot IS NOT NULL OR score >= 10))');
-        DB::statement('ALTER TABLE assessments DROP CHECK chk_assessment_total');
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE assessments DROP CHECK chk_assessment_total'));
         DB::statement('ALTER TABLE assessments ADD CONSTRAINT chk_assessment_total CHECK (total_score_raw BETWEEN 0 AND 100)');
         Schema::table('assessment_cycles', fn (Blueprint $table) => $table->boolean('workspace_managed')->default(false));
         Schema::create('kpi_workspace_publications', function (Blueprint $table) {

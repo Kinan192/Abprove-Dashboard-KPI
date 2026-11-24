@@ -13,8 +13,8 @@ return new class extends Migration
             throw new RuntimeException('Integrasi formula harus dimigrasikan sebelum penilaian otomatis pertama.');
         }
         Schema::table('assessment_items', fn (Blueprint $table) => $table->decimal('computed_score', 12, 6)->nullable());
-        DB::statement('ALTER TABLE assessment_items DROP CHECK chk_assessment_items_score');
-        DB::statement('ALTER TABLE assessment_items DROP CHECK chk_assessment_items_result_presence');
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE assessment_items DROP CHECK chk_assessment_items_score'));
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE assessment_items DROP CHECK chk_assessment_items_result_presence'));
         DB::statement('ALTER TABLE assessment_items MODIFY score TINYINT UNSIGNED NOT NULL');
         DB::statement('ALTER TABLE assessment_items MODIFY weighted_result_raw DECIMAL(12,6) GENERATED ALWAYS AS (COALESCE(computed_score, score) * weight_percent_snapshot / 100) STORED');
         DB::statement('ALTER TABLE assessment_items ADD CONSTRAINT chk_assessment_items_score CHECK (score BETWEEN 0 AND 100 AND (computed_score IS NOT NULL OR score >= 10) AND (computed_score IS NULL OR computed_score BETWEEN 0 AND 100))');

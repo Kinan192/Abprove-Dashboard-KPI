@@ -18,7 +18,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE assessments DROP CHECK chk_assessment_kind');
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE assessments DROP CHECK chk_assessment_kind'));
         Schema::table('assessments', function (Blueprint $table) {
             $table->dropConstrainedForeignId('head_assignment_id');
             $table->dropColumn('assessment_kind');

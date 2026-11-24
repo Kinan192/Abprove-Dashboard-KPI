@@ -14,7 +14,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('roles')->insertOrIgnore(['role_key' => 'admin', 'label' => 'Admin']);
-        DB::statement('ALTER TABLE scope_assignments DROP CHECK chk_scope_shape');
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE scope_assignments DROP CHECK chk_scope_shape'));
         DB::statement("ALTER TABLE scope_assignments ADD CONSTRAINT chk_scope_shape CHECK (
             (role_key IN ('admin','super_hc') AND division_id IS NULL AND unit_id IS NULL) OR
             (role_key='kepala_divisi' AND division_id IS NOT NULL AND unit_id IS NULL) OR
@@ -63,7 +63,7 @@ return new class extends Migration
         }
         Schema::dropIfExists('reminder_emails');
         Schema::dropIfExists('login_events');
-        DB::statement('ALTER TABLE scope_assignments DROP CHECK chk_scope_shape');
+        DB::statement(str_replace('DROP CHECK ', DB::connection()->isMaria() ? 'DROP CONSTRAINT ' : 'DROP CHECK ', 'ALTER TABLE scope_assignments DROP CHECK chk_scope_shape'));
         DB::statement("ALTER TABLE scope_assignments ADD CONSTRAINT chk_scope_shape CHECK (
             (role_key='super_hc' AND division_id IS NULL AND unit_id IS NULL) OR
             (role_key='kepala_divisi' AND division_id IS NOT NULL AND unit_id IS NULL) OR
