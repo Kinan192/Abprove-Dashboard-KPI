@@ -1,0 +1,8 @@
+[
+{"id":5,"code":"POS-1","name":"Pengembang Aplikasi","is_active":1,"created_at":"2026-11-14 02:57:10.252354","updated_at":"2026-11-14 02:57:10.252354"},
+{"id":6,"code":"POS-2","name":"Teknisi Infrastruktur","is_active":1,"created_at":"2026-11-14 02:57:10.258508","updated_at":"2026-11-14 02:57:10.258508"},
+{"id":7,"code":"POS-3","name":"Petugas Layanan Pelanggan","is_active":1,"created_at":"2026-11-14 02:57:10.263915","updated_at":"2026-11-14 02:57:10.263915"},
+{"id":8,"code":"POS-4","name":"Staf Administrasi","is_active":1,"created_at":"2026-11-14 02:57:10.264840","updated_at":"2026-11-14 02:57:10.264840"},
+{"id":9,"code":"POS-5","name":"Analis Laboratorium","is_active":1,"created_at":"2026-11-16 01:20:59.361423","updated_at":"2026-11-16 01:20:59.361423"},
+{"id":10,"code":"POS-6","name":"Radiografer","is_active":1,"created_at":"2026-11-16 01:20:59.362287","updated_at":"2026-11-16 01:20:59.362287"}
+]

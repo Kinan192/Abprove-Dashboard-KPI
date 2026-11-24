@@ -1,0 +1,18 @@
+[
+{"id":17,"cycle_id":4,"code":"k","label":"Kurang","lower_bound":"0.000000","upper_bound":"70.000000","sort_order":1},
+{"id":18,"cycle_id":4,"code":"c","label":"Cukup","lower_bound":"70.000000","upper_bound":"80.000000","sort_order":2},
+{"id":19,"cycle_id":4,"code":"b","label":"Baik","lower_bound":"80.000000","upper_bound":"90.000000","sort_order":3},
+{"id":20,"cycle_id":4,"code":"sb","label":"Sangat Baik","lower_bound":"90.000000","upper_bound":null,"sort_order":4},
+{"id":21,"cycle_id":3,"code":"k","label":"Kurang","lower_bound":"0.000000","upper_bound":"70.000000","sort_order":1},
+{"id":22,"cycle_id":3,"code":"c","label":"Cukup","lower_bound":"70.000000","upper_bound":"80.000000","sort_order":2},
+{"id":23,"cycle_id":3,"code":"b","label":"Baik","lower_bound":"80.000000","upper_bound":"90.000000","sort_order":3},
+{"id":24,"cycle_id":3,"code":"sb","label":"Sangat Baik","lower_bound":"90.000000","upper_bound":null,"sort_order":4},
+{"id":25,"cycle_id":5,"code":"k","label":"Kurang","lower_bound":"0.000000","upper_bound":"70.000000","sort_order":1},
+{"id":26,"cycle_id":5,"code":"c","label":"Cukup","lower_bound":"70.000000","upper_bound":"80.000000","sort_order":2},
+{"id":27,"cycle_id":5,"code":"b","label":"Baik","lower_bound":"80.000000","upper_bound":"90.000000","sort_order":3},
+{"id":28,"cycle_id":5,"code":"sb","label":"Sangat Baik","lower_bound":"90.000000","upper_bound":null,"sort_order":4},
+{"id":29,"cycle_id":6,"code":"k","label":"Kurang","lower_bound":"0.000000","upper_bound":"70.000000","sort_order":1},
+{"id":30,"cycle_id":6,"code":"c","label":"Cukup","lower_bound":"70.000000","upper_bound":"80.000000","sort_order":2},
+{"id":31,"cycle_id":6,"code":"b","label":"Baik","lower_bound":"80.000000","upper_bound":"90.000000","sort_order":3},
+{"id":32,"cycle_id":6,"code":"sb","label":"Sangat Baik","lower_bound":"90.000000","upper_bound":null,"sort_order":4}
+]

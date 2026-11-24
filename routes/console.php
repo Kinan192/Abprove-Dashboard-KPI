@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\ScopeResolver;
 use App\Services\Notification\AutoReminderService;
+use App\Support\DataSnapshot;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -31,6 +32,12 @@ Artisan::command('kpi:auth-key', function () {
     file_put_contents($path, $env);
     $this->info('Better Auth secret disimpan pada .env.');
 });
+
+Artisan::command('kpi:export-seed', function () {
+    $counts = DataSnapshot::default()->export();
+    $this->table(['Tabel', 'Baris'], array_map(fn ($table, $count) => [$table, $count], array_keys($counts), $counts));
+    $this->info('Data disimpan di database/seeders/data. Di komputer lain: php artisan migrate --seed pada database kosong.');
+})->purpose('Menyimpan data database saat ini sebagai seeder (database/seeders/data).');
 
 Artisan::command('kpi:create-admin {--name=} {--email=}', function () {
     if (DB::table('scope_assignments')->where('role_key', 'admin')->whereNull('revoked_at')->exists()) {

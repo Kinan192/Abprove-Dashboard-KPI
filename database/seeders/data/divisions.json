@@ -1,0 +1,5 @@
+[
+{"id":3,"code":"DIV-1","name":"Teknologi dan Operasional","is_active":1,"created_at":"2026-11-14 02:57:10.253233","updated_at":"2026-11-14 02:57:10.253233"},
+{"id":4,"code":"DIV-2","name":"Pelayanan dan Administrasi","is_active":1,"created_at":"2026-11-14 02:57:10.259379","updated_at":"2026-11-14 02:57:10.259379"},
+{"id":5,"code":"DIV-3","name":"Penunjang Medik","is_active":1,"created_at":"2026-11-16 01:20:59.354919","updated_at":"2026-11-16 01:20:59.354919"}
+]

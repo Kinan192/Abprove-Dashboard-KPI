@@ -1,0 +1,11 @@
+[
+{"id":7,"scope_level":"unit","unit_id":5,"division_id":null,"next_version":12,"created_by":9,"created_at":"2026-11-14 02:57:10.401680"},
+{"id":8,"scope_level":"unit","unit_id":6,"division_id":null,"next_version":10,"created_by":9,"created_at":"2026-11-14 02:57:10.408544"},
+{"id":9,"scope_level":"unit","unit_id":7,"division_id":null,"next_version":10,"created_by":9,"created_at":"2026-11-14 02:57:10.415682"},
+{"id":10,"scope_level":"unit","unit_id":8,"division_id":null,"next_version":12,"created_by":9,"created_at":"2026-11-14 02:57:10.421622"},
+{"id":11,"scope_level":"division","unit_id":null,"division_id":3,"next_version":17,"created_by":9,"created_at":"2026-11-14 02:57:10.427215"},
+{"id":12,"scope_level":"division","unit_id":null,"division_id":4,"next_version":17,"created_by":9,"created_at":"2026-11-14 02:57:10.432715"},
+{"id":13,"scope_level":"unit","unit_id":10,"division_id":null,"next_version":7,"created_by":9,"created_at":"2026-11-17 15:47:30.178574"},
+{"id":14,"scope_level":"unit","unit_id":11,"division_id":null,"next_version":7,"created_by":9,"created_at":"2026-11-17 15:47:30.181213"},
+{"id":15,"scope_level":"division","unit_id":null,"division_id":5,"next_version":5,"created_by":9,"created_at":"2026-11-18 01:36:57.403288"}
+]

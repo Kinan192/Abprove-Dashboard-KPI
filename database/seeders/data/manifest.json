@@ -1,0 +1,34 @@
+{
+    "exported_at": "2026-11-24 14:35:09 WIB",
+    "migration": "2026_11_23_000023_add_reviewed_scores",
+    "tables": {
+        "roles": 4,
+        "divisions": 3,
+        "units": 7,
+        "positions": 6,
+        "employees": 31,
+        "employee_placements": 31,
+        "users": 13,
+        "user_roles": 13,
+        "auth_accounts": 13,
+        "scope_assignments": 14,
+        "kpi_scopes": 9,
+        "kpi_templates": 88,
+        "kpi_items": 284,
+        "kpi_workspace_documents": 2,
+        "kpi_workspace_publications": 106,
+        "assessment_cycles": 4,
+        "cycle_categories": 16,
+        "assessments": 20,
+        "assessment_items": 59,
+        "assessment_events": 41,
+        "notification_reads": 0,
+        "reminder_settings": 1,
+        "reminder_emails": 20,
+        "audit_events": 326,
+        "login_events": 109
+    },
+    "files": [
+        "avatars/11/91df7361-895f-4215-9d1f-520a9011c97a.jpg"
+    ]
+}

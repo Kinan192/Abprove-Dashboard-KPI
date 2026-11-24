@@ -95,7 +95,7 @@ BETTER_AUTH_INTERNAL_URL=http://127.0.0.1:3031
 Catatan:
 
 - Biarkan `APP_KEY` dan `BETTER_AUTH_SECRET` kosong. Keduanya dibuat otomatis di langkah 5.
-- Proyek ini tidak menyediakan seeder data contoh: `DatabaseSeeder` hanya mencetak pesan dan tidak membuat data. Akun Admin pertama dibuat pada langkah 5.
+- Data awal (struktur, akun, KPI, periode, penilaian, dan log) tersedia sebagai seeder di `database/seeders/data`. Lihat langkah 5 untuk memakai data tersebut atau memulai dari database kosong.
 - Launcher menjalankan Laravel di port `PORT` (default `8000`, variabel opsional). Jika `PORT` diubah, ubah juga port di `APP_URL`. Jika `BETTER_AUTH_PORT` diubah, ubah juga `BETTER_AUTH_INTERNAL_URL`.
 
 ## 5. Buat kunci, pasang schema, dan buat Admin pertama
@@ -113,6 +113,30 @@ php artisan kpi:create-admin
 - `kpi:auth-key` mengisi `BETTER_AUTH_SECRET` dengan nilai acak 64 karakter. Jika secret 32 karakter atau lebih sudah ada, perintah ini tidak mengubahnya.
 - `migrate` memasang seluruh tabel domain, tabel Better Auth, dan tabel antrean ke database kosong. Tidak ada migrasi CLI Better Auth terpisah. Database harus benar-benar kosong: migrasi `000005` menolak data domain lama dengan `DOMAIN_V2_DATA_CONVERSION_REQUIRED`. Jangan mencoba migrasi instalasi baru pada database berisi data; sebagian migrasi sebelumnya mungkin sudah dijalankan.
 - `kpi:create-admin` meminta nama, email login, kata sandi, dan konfirmasi kata sandi secara interaktif. Kata sandi minimal 12 karakter dan wajib berisi huruf serta angka. Tidak ada akun atau kata sandi bawaan. Perintah ini menolak berjalan jika Admin aktif sudah ada.
+
+### Alternatif: pakai data dari komputer lain (seeder)
+
+Untuk mendapatkan data yang sama dengan komputer pengembangan (organisasi, staf, akun beserta kata sandinya, pola KPI, periode, penilaian, riwayat, dan log), ganti `php artisan migrate` dan `php artisan kpi:create-admin` dengan:
+
+```powershell
+php artisan key:generate
+php artisan kpi:auth-key
+php artisan migrate --seed
+```
+
+- Masuk dengan email/NIP dan kata sandi yang sama seperti di komputer sumber. `kpi:create-admin` tidak diperlukan karena akun Admin ikut tersalin.
+- Seeder hanya berjalan pada database baru yang belum berisi akun, dan versi migrasinya harus sama dengan saat data diekspor (tercatat di `database/seeders/data/manifest.json`). Untuk menimpa database lokal yang sudah berisi data, gunakan `php artisan migrate:fresh --seed` (**menghapus semua data lokal**).
+- Sesi login, token, antrean, dan cache idempoten tidak disalin. Foto profil ikut disalin ke `storage/app/private`.
+
+**Memperbarui data seeder.** Di komputer yang datanya ingin dibagikan, jalankan:
+
+```powershell
+php artisan kpi:export-seed
+```
+
+Perintah ini menulis ulang `database/seeders/data` dari database saat ini. Commit folder tersebut, lalu di komputer lain jalankan `git pull` dan `php artisan migrate:fresh --seed`.
+
+> Folder ini berisi data akun, termasuk hash kata sandi dan email. Hanya simpan di repositori privat, dan jangan ekspor data produksi yang berisi data pribadi asli.
 
 ## 6. Bangun frontend dan jalankan aplikasi
 

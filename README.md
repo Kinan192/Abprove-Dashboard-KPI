@@ -19,7 +19,7 @@ npm.cmd run build
 npm.cmd run start
 ```
 
-`kpi:create-admin` hanya untuk akun **Admin** pertama; kata sandi diminta interaktif. Akun Super HC, Kepala Divisi, dan Kepala Unit dibuat Admin dari menu Akun Pengguna. Tidak ada seeder data contoh. Jangan menjalankan `key:generate` ulang pada instalasi yang sudah memiliki `APP_KEY`.
+`kpi:create-admin` hanya untuk akun **Admin** pertama; kata sandi diminta interaktif. Akun Super HC, Kepala Divisi, dan Kepala Unit dibuat Admin dari menu Akun Pengguna. Untuk memakai data yang sama dengan komputer pengembangan, jalankan `php artisan migrate --seed` pada database kosong sebagai ganti `migrate` + `kpi:create-admin`. Perbarui data seeder dengan `php artisan kpi:export-seed` (lihat [installation.md](installation.md)). Jangan menjalankan `key:generate` ulang pada instalasi yang sudah memiliki `APP_KEY`.
 
 Email pengingat memakai mailer Laravel (SMTP). Isi `MAIL_MAILER=smtp`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, dan `MAIL_FROM_ADDRESS` pada `.env`. Dengan `QUEUE_CONNECTION=sync` email dikirim langsung; dengan `QUEUE_CONNECTION=database` jalankan `php artisan queue:work`.
 

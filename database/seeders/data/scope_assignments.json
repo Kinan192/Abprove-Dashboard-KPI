@@ -1,0 +1,16 @@
+[
+{"id":9,"user_id":9,"role_key":"super_hc","division_id":null,"unit_id":null,"assigned_at":"2026-11-14 02:57:08.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":null},
+{"id":10,"user_id":10,"role_key":"super_hc","division_id":null,"unit_id":null,"assigned_at":"2026-11-14 02:57:09.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":null},
+{"id":11,"user_id":11,"role_key":"kepala_divisi","division_id":3,"unit_id":null,"assigned_at":"2026-11-14 02:57:10.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":12,"user_id":12,"role_key":"kepala_divisi","division_id":4,"unit_id":null,"assigned_at":"2026-11-14 02:57:10.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":13,"user_id":13,"role_key":"kepala_unit","division_id":null,"unit_id":5,"assigned_at":"2026-11-14 02:57:10.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":14,"user_id":14,"role_key":"kepala_unit","division_id":null,"unit_id":6,"assigned_at":"2026-11-14 02:57:10.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":15,"user_id":15,"role_key":"kepala_unit","division_id":null,"unit_id":7,"assigned_at":"2026-11-14 02:57:10.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":16,"user_id":16,"role_key":"kepala_unit","division_id":null,"unit_id":8,"assigned_at":"2026-11-14 02:57:10.000000","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":17,"user_id":17,"role_key":"admin","division_id":null,"unit_id":null,"assigned_at":"2026-11-15 12:48:36.923242","revoked_at":null,"assigned_by":17,"revoked_by":null,"note":null},
+{"id":18,"user_id":18,"role_key":"kepala_unit","division_id":null,"unit_id":9,"assigned_at":"2026-11-16 00:20:10.380268","revoked_at":"2026-11-16 00:23:25.668316","assigned_by":9,"revoked_by":9,"note":"Penetapan awal"},
+{"id":19,"user_id":19,"role_key":"kepala_divisi","division_id":5,"unit_id":null,"assigned_at":"2026-11-16 01:20:59.358177","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":20,"user_id":20,"role_key":"kepala_unit","division_id":null,"unit_id":10,"assigned_at":"2026-11-16 01:20:59.365525","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Penetapan awal"},
+{"id":21,"user_id":21,"role_key":"kepala_unit","division_id":null,"unit_id":11,"assigned_at":"2026-11-16 01:20:59.389944","revoked_at":"2026-11-16 04:49:48.374554","assigned_by":9,"revoked_by":9,"note":"Penetapan awal"},
+{"id":22,"user_id":18,"role_key":"kepala_unit","division_id":null,"unit_id":11,"assigned_at":"2026-11-16 04:49:48.374554","revoked_at":null,"assigned_by":9,"revoked_by":null,"note":"Kanit sebelumnya resign"}
+]
