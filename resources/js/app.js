@@ -67,6 +67,7 @@ async function start() {
                 ? import('./kpi-workspace/index.js')
                 : null,
             $('[data-role-dashboard]') ? import('./abprove/dashboard') : null,
+            $('[data-extensions-root]') ? import('./abprove/extensions') : null,
         ]);
         {
             config.api = createApi(config);
@@ -112,7 +113,7 @@ async function start() {
         }
         const store = createFlowStore(config);
         activeStore = store;
-        const [organization, kpi, insights, kpiWorkspace, dashboard] =
+        const [organization, kpi, insights, kpiWorkspace, dashboard, extensions] =
             await features;
         try {
             await kpiWorkspace?.prepareKpiWorkspace(config, store);
@@ -135,6 +136,7 @@ async function start() {
             return;
         }
         dashboard?.initDashboard(config, store, link);
+        extensions?.initExtensions(config, store);
         const assessments = initFlowAssessments(config, store, link);
         organization?.initOrganization(config, store, link);
         kpi?.initKpi(config, store);

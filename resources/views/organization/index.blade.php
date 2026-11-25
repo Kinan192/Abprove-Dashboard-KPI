@@ -92,7 +92,7 @@
 <x-abprove.dialog id="staff-import-dialog" title="Impor staf">
 <form id="staff-import-form" class="space-y-4" novalidate>
 <div class="org-import-head"><p class="text-sm text-muted">Maks. 500 staf tanpa akun login · 2 MB. Kode jabatan dan unit tersedia di template XLSX.</p><div class="flex flex-wrap gap-2"><button class="btn" type="button" data-import-template="xlsx">Template XLSX</button><button class="btn" type="button" data-import-template="csv">Template CSV</button></div></div>
-<label class="block rounded-xl border border-dashed border-line bg-subtle/60 p-4"><span class="label">File staf (CSV/XLSX)</span><input type="file" name="file" accept=".csv,.xlsx" aria-label="File staf"></label>
+<label class="block rounded-control border border-dashed border-line bg-subtle/60 p-4"><span class="label">File staf (CSV/XLSX)</span><input type="file" name="file" accept=".csv,.xlsx" aria-label="File staf"></label>
 <div data-import-preview class="org-impact" aria-live="polite"></div>
 <p data-form-error hidden class="notice notice-error org-import-error" role="alert"></p>
 </form>

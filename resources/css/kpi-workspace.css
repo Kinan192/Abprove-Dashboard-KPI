@@ -9,7 +9,7 @@
     @apply max-w-full min-w-0;
 }
 .skp-steps ol {
-    @apply m-0 inline-flex max-w-full list-none flex-wrap gap-1 rounded-xl border border-line bg-subtle p-1;
+    @apply m-0 inline-flex max-w-full list-none flex-wrap gap-1 rounded-control border border-line bg-subtle p-1;
 }
 .skp-steps a {
     @apply inline-flex min-h-9 items-center gap-2 rounded-[9px] px-3 py-1 text-[13px] font-medium whitespace-nowrap text-muted no-underline transition-[background-color,color,box-shadow] hover:bg-paper/60 hover:text-ink;
@@ -23,6 +23,7 @@
 .skp-steps a.active .skp-step-no {
     @apply text-link;
 }
+
 /* Small counter beside a stage label, tinted only when it carries a state. */
 .skp-step-count {
     @apply inline-flex min-w-[22px] items-center justify-center rounded-md border border-line bg-paper px-1.5 text-[11px] leading-[18px] font-semibold text-muted tabular-nums;
@@ -36,6 +37,7 @@
 .skp-step-count.info {
     @apply border-info/30 text-info;
 }
+
 /* Period picker: bounded year + month of that year */
 .fx-period-picker {
     @apply ml-auto flex items-center gap-2;
@@ -46,6 +48,7 @@
 .fx-period-picker .field {
     @apply min-h-10 w-auto py-2;
 }
+
 /* Year control: prev/next + numeric input (no growing year list) */
 .skp-year-stepper {
     @apply inline-flex shrink-0 items-center gap-1;
@@ -55,12 +58,11 @@
 }
 .skp-year-stepper .skp-year-input {
     @apply min-h-10 w-[84px] min-w-0 flex-none py-2 text-center tabular-nums;
-    -moz-appearance: textfield;
+    @apply [-moz-appearance:textfield];
 }
 .skp-year-input::-webkit-inner-spin-button,
 .skp-year-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    @apply [-webkit-appearance:none] m-0;
 }
 .fx-period-picker .fx-period-month {
     @apply max-w-[260px] min-w-[200px];
@@ -68,54 +70,45 @@
 .skp-loading {
     @apply py-12;
 }
-/* Progress primitives (readiness, weight totals) */
+
+/* Progress primitives (readiness, weight totals): thin track, amber while
+   incomplete, brand green once ready/optimum. */
 .skp-prototype progress {
-    @apply h-2 w-full min-w-0 flex-1 overflow-hidden rounded-full border-0 bg-subtle;
-    appearance: none;
+    @apply h-1.5 w-full min-w-0 flex-1 appearance-none overflow-hidden rounded-full border-0 bg-track;
 }
 .skp-prototype progress::-webkit-progress-bar {
-    border-radius: 999px;
-    background: var(--color-subtle);
+    @apply rounded-full bg-track;
 }
 .skp-prototype progress::-webkit-progress-value {
-    border-radius: 999px;
-    background: var(--color-warning);
+    @apply rounded-full bg-amber;
 }
 .skp-prototype progress::-moz-progress-bar {
-    border-radius: 999px;
-    background: var(--color-warning);
+    @apply rounded-full bg-amber;
 }
 .skp-prototype .ready progress::-webkit-progress-value {
-    background: var(--color-primary);
+    @apply bg-brand-500;
 }
 .skp-prototype .ready progress::-moz-progress-bar {
-    background: var(--color-primary);
+    @apply bg-brand-500;
 }
 .skp-prototype meter {
-    @apply block h-2 w-full rounded-full border-0 bg-subtle;
-    -moz-appearance: none;
+    @apply block h-1.5 w-full appearance-none rounded-full border-0 bg-track;
 }
 .skp-prototype meter::-webkit-meter-bar {
-    height: 8px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--color-subtle);
+    @apply h-1.5 rounded-full border-0 bg-track;
 }
 .skp-prototype meter::-webkit-meter-optimum-value {
-    border-radius: 999px;
-    background: var(--color-primary);
+    @apply rounded-full bg-brand-500;
 }
 .skp-prototype meter::-webkit-meter-suboptimum-value,
 .skp-prototype meter::-webkit-meter-even-less-good-value {
-    border-radius: 999px;
-    background: var(--color-warning);
+    @apply rounded-full bg-amber;
 }
 .skp-prototype meter::-moz-meter-bar {
-    border-radius: 999px;
-    background: var(--color-warning);
+    @apply rounded-full bg-amber;
 }
 .skp-prototype meter:-moz-meter-optimum::-moz-meter-bar {
-    background: var(--color-primary);
+    @apply bg-brand-500;
 }
 .skp-weight-meter {
     @apply mt-1.5 max-w-[140px];
@@ -123,8 +116,8 @@
 
 /* Readiness of the selected period */
 .skp-readiness {
-    @apply grid items-center gap-x-6 gap-y-3 rounded-2xl border border-line bg-paper px-5 py-4 text-[13px] shadow-[0_1px_2px_rgb(23_43_54/0.04)];
-    grid-template-columns: minmax(0, 1fr) minmax(140px, 220px) auto;
+    @apply grid items-center gap-x-6 gap-y-3 rounded-card border border-line bg-paper px-5 py-4 text-[13px] shadow-[0_1px_2px_rgb(23_43_54/0.04)];
+    @apply grid-cols-[minmax(0,1fr)_minmax(140px,220px)_auto];
 }
 .skp-readiness-copy strong {
     @apply block text-[14px] leading-5 font-semibold;
@@ -157,7 +150,7 @@
 }
 .fx-settings > summary::after {
     @apply size-2 shrink-0 -translate-y-0.5 rotate-45 border-r-[1.5px] border-b-[1.5px] border-muted transition-transform;
-    content: '';
+    @apply content-[''];
 }
 .fx-settings[open] > summary::after {
     @apply translate-y-0.5 -rotate-[135deg];
@@ -189,7 +182,7 @@
 .skp-table-card {
     @apply p-0;
     /* clip keeps the rounded corners without breaking sticky selection bars */
-    overflow: clip;
+    @apply overflow-clip;
 }
 .skp-card-head {
     @apply flex flex-wrap items-center justify-between gap-3 px-5 py-4;
@@ -225,41 +218,38 @@
 body[data-app-shell] .skp-row-actions .skp-link-danger {
     @apply ml-2 text-danger hover:bg-danger-soft hover:text-danger;
 }
+
 /* Pattern table scrolls locally on narrow desktops; the KPI items table keeps inline actions. */
 @media (min-width: 901px) {
     body[data-app-shell] .gp-table.skp-patterns {
-        min-width: 820px;
+        @apply min-w-[820px];
     }
     .gp-table .skp-row-actions {
-        flex-wrap: nowrap;
-        white-space: nowrap;
+        @apply flex-nowrap whitespace-nowrap;
     }
 }
+
 /* Pattern list: compact rows (max two text lines, one-line weight and actions). */
 @media (min-width: 601px) {
     body[data-app-shell] .gp-table.skp-patterns td {
-        padding-top: 8px;
-        padding-bottom: 8px;
+        @apply pt-2 pb-2;
     }
     .skp-patterns th:first-child {
-        width: 28%;
+        @apply w-[28%];
     }
     .skp-patterns th:nth-child(3) {
-        width: 200px;
+        @apply w-50;
     }
     .skp-patterns th:nth-child(4) {
-        width: 150px;
+        @apply w-37.5;
     }
     .skp-patterns .skp-clip {
-        display: block;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        @apply block overflow-hidden text-ellipsis whitespace-nowrap;
     }
 }
 .skp-patterns th:last-child,
 .skp-periods th:last-child {
-    width: 64px;
+    @apply w-16;
 }
 .skp-total {
     @apply flex items-center gap-2 whitespace-nowrap;
@@ -279,7 +269,7 @@ body[data-app-shell] .skp-patterns .skp-holders-link {
     @apply inline-flex items-center gap-2 rounded-full border border-line bg-paper py-1 pr-3 pl-1;
 }
 .skp-import-steps li + li::before {
-    content: '';
+    @apply content-[''];
     @apply mr-1 -ml-1 h-px w-3 bg-line;
 }
 .skp-import-steps span {
@@ -299,7 +289,7 @@ body[data-app-shell] .skp-patterns .skp-holders-link {
 }
 .skp-import-upload {
     @apply grid gap-5;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    @apply grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)];
 }
 .skp-import-upload.dragging .skp-dropzone,
 .skp-import-upload.dragging .skp-import-filecard {
@@ -308,13 +298,14 @@ body[data-app-shell] .skp-patterns .skp-holders-link {
 .skp-import-drop {
     @apply grid min-w-0;
 }
+
 /* Visually hidden but focusable: the dropzone shows its focus ring instead. */
 .skp-import-input {
     @apply absolute size-px overflow-hidden opacity-0;
-    clip-path: inset(50%);
+    @apply [clip-path:inset(50%)];
 }
 .skp-dropzone {
-    @apply relative grid min-h-[168px] cursor-pointer place-items-center content-center gap-1.5 rounded-xl border-2 border-dashed border-line bg-subtle/60 px-5 py-6 text-center transition-colors;
+    @apply relative grid min-h-[168px] cursor-pointer place-items-center content-center gap-1.5 rounded-control border-2 border-dashed border-line bg-subtle/60 px-5 py-6 text-center transition-colors;
 }
 .skp-dropzone svg {
     @apply mb-1 text-accent;
@@ -335,7 +326,7 @@ body[data-app-shell] .skp-patterns .skp-holders-link {
     @apply border-accent outline-2 outline-offset-2 outline-accent;
 }
 .skp-import-filecard {
-    @apply relative flex min-w-0 flex-wrap items-center gap-3 self-start rounded-xl border border-line bg-subtle/60 px-4 py-3 transition-colors;
+    @apply relative flex min-w-0 flex-wrap items-center gap-3 self-start rounded-control border border-line bg-subtle/60 px-4 py-3 transition-colors;
 }
 .skp-import-filecard > svg {
     @apply shrink-0 text-accent;
@@ -381,14 +372,14 @@ body[data-app-shell] .skp-patterns .skp-holders-link {
 }
 .skp-import-bar {
     @apply sticky bottom-0 z-[5] flex flex-wrap items-center justify-between gap-3 border-t border-line bg-paper px-5 py-3;
-    box-shadow: 0 -10px 24px -18px rgb(15 30 38 / 0.35);
+    @apply shadow-[0_-10px_24px_-18px_rgb(15_30_38_/_0.35)];
 }
 .skp-import-bar p {
     @apply min-w-0 flex-1 basis-64 text-[13px] leading-5 text-muted;
 }
 @media (max-width: 860px) {
     .skp-import-upload {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
     }
     .skp-import-template {
         @apply border-t border-l-0 pt-4 pl-0;
@@ -430,38 +421,36 @@ body[data-app-shell] .skp-patterns .skp-holders-link {
 }
 @media (min-width: 601px) {
     body[data-app-shell] .gp-table.skp-import-table {
-        min-width: 960px;
+        @apply min-w-[960px];
     }
     body[data-app-shell] .gp-table.skp-import-table td {
-        padding-top: 8px;
-        padding-bottom: 8px;
-        vertical-align: top;
+        @apply pt-2 pb-2 align-top;
     }
     .skp-import-table th:first-child {
-        width: 64px;
+        @apply w-16;
     }
     .skp-import-table th:nth-child(2) {
-        width: 13%;
+        @apply w-[13%];
     }
     .skp-import-table th:nth-child(3) {
-        width: 19%;
+        @apply w-[19%];
     }
     .skp-import-table th:nth-child(4) {
-        width: 140px;
+        @apply w-35;
     }
     .skp-import-table th:nth-child(5) {
-        width: 80px;
+        @apply w-20;
     }
     /* Formula keeps a readable width; "Cek" only needs room for short messages and the action. */
     .skp-import-table th:nth-child(6) {
-        width: 22%;
+        @apply w-[22%];
     }
     .skp-import-table th:last-child {
-        width: 21%;
+        @apply w-[21%];
     }
 }
 body[data-app-shell] .skp-import-table tr.invalid {
-    background: color-mix(in srgb, var(--color-danger) 5%, transparent);
+    @apply bg-danger/5;
 }
 .skp-import-table code {
     @apply text-[12px];
@@ -474,7 +463,7 @@ body[data-app-shell] .gp-table.skp-import-table tfoot th {
 }
 @media (max-width: 600px) {
     body[data-app-shell] .gp-table.skp-import-table tfoot {
-        display: block;
+        @apply block;
     }
     body[data-app-shell] .gp-table.skp-import-table tfoot tr {
         @apply grid grid-cols-[1fr_auto] gap-2 border-t border-line bg-subtle;
@@ -483,7 +472,7 @@ body[data-app-shell] .gp-table.skp-import-table tfoot th {
         @apply border-0 bg-transparent p-0;
     }
     body[data-app-shell] .gp-table.skp-import-table tfoot td:last-child {
-        grid-column: 1 / -1;
+        @apply col-span-full;
     }
 }
 .skp-import-errors {
@@ -493,22 +482,20 @@ body[data-app-shell] .gp-table.skp-import-table tfoot th {
     @apply mt-1 block text-[12.5px];
 }
 .gp-table small.skp-import-source {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    @apply line-clamp-2;
 }
 .skp-import-preview.stale :is(.skp-import-patterns, .table-wrap) {
     @apply opacity-50;
 }
 @media (min-width: 601px) {
     .skp-import-table.rsab th:first-child {
-        width: 128px;
+        @apply w-32;
     }
 }
 .skp-import-line strong {
     @apply block truncate;
 }
+
 /* RSAB master: worksheet choice */
 .skp-import-sheets {
     @apply grid gap-3;
@@ -518,17 +505,17 @@ body[data-app-shell] .gp-table.skp-import-table tfoot th {
 }
 .skp-import-sheet-list {
     @apply m-0 grid max-h-[320px] min-w-0 content-start gap-1.5 overflow-y-auto border-0 p-0;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    @apply grid-cols-[repeat(auto-fill,minmax(190px,1fr))];
 }
 .skp-import-sheet {
     @apply flex min-w-0 cursor-pointer items-start gap-2 rounded-lg border border-line px-2.5 py-1.5 text-[13px] leading-5;
 }
 .skp-import-sheet[hidden] {
-    display: none;
+    @apply hidden;
 }
 .skp-import-sheet-none {
     @apply m-0 py-2 text-[12.5px] text-muted;
-    grid-column: 1 / -1;
+    @apply col-span-full;
 }
 .skp-import-sheet:has(input:checked) {
     @apply border-accent bg-accent-soft;
@@ -556,28 +543,27 @@ body[data-app-shell] .gp-table.skp-import-table tfoot th {
 }
 .fx-import-source {
     @apply mt-1 text-[12px] leading-[17px] text-muted;
-    overflow-wrap: anywhere;
+    @apply wrap-anywhere;
 }
 @media (min-width: 601px) {
     body[data-app-shell] .gp-table.skp-periods {
-        min-width: 920px;
+        @apply min-w-[920px];
     }
     .skp-periods th:first-child {
-        width: 22%;
+        @apply w-[22%];
     }
     .skp-periods th:nth-child(2) {
-        width: 32%;
+        @apply w-[32%];
     }
     .skp-periods th:nth-child(3) {
-        width: 26%;
+        @apply w-[26%];
     }
     .skp-periods th:nth-child(4) {
-        width: 14%;
+        @apply w-[14%];
     }
 }
 body[data-app-shell] .gp-table.skp-periods td {
-    vertical-align: top;
-    overflow-wrap: normal;
+    @apply align-top wrap-normal;
 }
 .skp-periods .gp-tag {
     @apply whitespace-nowrap text-[12px];
@@ -586,9 +572,7 @@ body[data-app-shell] .gp-table.skp-periods td {
     @apply m-0 grid gap-0.5 text-[12px] leading-[18px];
 }
 .skp-period-schedule > div {
-    display: grid;
-    grid-template-columns: 3.75rem minmax(0, 1fr);
-    gap: 8px;
+    @apply grid grid-cols-[3.75rem_minmax(0,1fr)] gap-2;
 }
 .skp-period-schedule dt {
     @apply text-muted;
@@ -605,10 +589,10 @@ body[data-app-shell] .gp-table.skp-periods td {
 .skp-period-readiness .link {
     @apply min-h-10;
 }
+
 /* Row action menu: three-dot trigger + popover in the top layer (never clipped by table scroll). */
 body[data-app-shell] .gp-table td.skp-menu-cell {
-    text-align: right;
-    vertical-align: middle;
+    @apply text-right align-middle;
 }
 .skp-menu-trigger {
     @apply inline-grid size-10 place-items-center rounded-lg border border-transparent text-muted transition-colors hover:border-line hover:bg-subtle hover:text-ink;
@@ -618,14 +602,11 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 }
 .skp-menu-trigger:focus-visible,
 .skp-menu-item:focus-visible {
-    outline: 2px solid var(--color-link);
-    outline-offset: 1px;
+    @apply outline-2 outline-link outline-offset-1;
 }
 .skp-menu[popover] {
-    position: fixed;
-    inset: auto;
-    margin: 0;
-    @apply max-w-[min(20rem,calc(100vw-16px))] min-w-52 overflow-visible rounded-xl border border-line bg-paper p-1 text-ink shadow-[0_12px_32px_rgb(23_43_54/0.16),0_2px_6px_rgb(23_43_54/0.08)];
+    @apply fixed inset-auto m-0;
+    @apply max-w-[min(20rem,calc(100vw-16px))] min-w-52 overflow-visible rounded-control border border-line bg-paper p-1 text-ink shadow-[0_12px_32px_rgb(23_43_54/0.16),0_2px_6px_rgb(23_43_54/0.08)];
 }
 .skp-menu-item {
     @apply flex min-h-10 w-full items-center rounded-lg px-3 py-2 text-left text-[13px] leading-5 font-medium text-ink no-underline hover:bg-subtle focus:bg-subtle;
@@ -641,7 +622,7 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 .skp-form-card {
     @apply min-w-0 p-0;
     /* clip (not hidden) so the sticky formula review keeps following the scroll */
-    overflow: clip;
+    @apply overflow-clip;
 }
 .skp-form-card > .gp-note {
     @apply mx-5 mt-4;
@@ -682,9 +663,10 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 #skp-period-form > .gp-note {
     @apply mx-5 mb-4;
 }
+
 /* Activation checklist of a new / planned period */
 .fx-period-setup {
-    @apply mx-5 mt-4 rounded-xl border border-line bg-subtle px-4 py-4;
+    @apply mx-5 mt-4 rounded-control border border-line bg-subtle px-4 py-4;
 }
 .fx-period-setup-head {
     @apply flex flex-wrap items-center justify-between gap-2;
@@ -738,16 +720,16 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
     @apply mb-0;
 }
 .skp-items th:first-child {
-    width: 52px;
+    @apply w-13;
 }
 .skp-items th:nth-child(2) {
-    width: 34%;
+    @apply w-[34%];
 }
 .skp-items th:nth-child(5) {
-    width: 128px;
+    @apply w-32;
 }
 .skp-items th:last-child {
-    width: 168px;
+    @apply w-42;
 }
 .skp-items tr.editing {
     @apply bg-accent-soft;
@@ -757,14 +739,14 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 }
 .skp-weight-input {
     @apply min-h-10 w-full text-right;
-    font-variant-numeric: tabular-nums;
+    @apply tabular-nums;
 }
 .skp-form-error {
     @apply mt-3;
 }
 .skp-savebar {
-    @apply sticky bottom-3 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-5 py-3;
-    box-shadow: 0 12px 32px -16px rgb(15 30 38 / 0.28);
+    @apply sticky bottom-3 z-[5] flex flex-wrap items-center justify-between gap-3 rounded-card border border-line bg-paper px-5 py-3;
+    @apply shadow-[0_12px_32px_-16px_rgb(15_30_38_/_0.28)];
 }
 .skp-savebar > div:first-child {
     @apply flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[13px];
@@ -782,7 +764,7 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 /* Apply to staff */
 .skp-apply-pick {
     @apply grid items-start gap-x-6 gap-y-3;
-    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    @apply grid-cols-[minmax(0,420px)_minmax(0,1fr)];
 }
 .skp-apply-pick select {
     @apply min-h-10 w-full;
@@ -811,11 +793,11 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
     @apply gap-2;
 }
 .skp-apply th:first-child {
-    width: 52px;
+    @apply w-13;
 }
 .skp-apply input[type='checkbox'] {
     @apply size-[18px] cursor-pointer align-middle;
-    accent-color: var(--color-primary);
+    @apply accent-primary;
 }
 .skp-apply tr.selected {
     @apply bg-accent-soft;
@@ -834,13 +816,13 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 
 /* Weight check */
 .skp-matrix th:first-child {
-    width: 22%;
+    @apply w-[22%];
 }
 .skp-matrix th:nth-child(5) {
-    width: 150px;
+    @apply w-37.5;
 }
 .skp-matrix th:last-child {
-    width: 150px;
+    @apply w-37.5;
 }
 .skp-matrix .num {
     @apply font-semibold;
@@ -848,36 +830,35 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 
 /* Monitoring: per-status counters reuse the pastel summary tiles. */
 .gp-summary.skp-status-summary {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    @apply grid-cols-5;
 }
 .skp-result-table th:first-child {
-    width: 30%;
+    @apply w-[30%];
 }
 .skp-result-table th:nth-child(3) {
-    width: 26%;
+    @apply w-[26%];
 }
 
 /* KPI formula editor */
 .fx-info-grid,
 .fx-target-grid,
 .fx-category-grid {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    @apply grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4;
 }
 .fx-score-help {
-    @apply mt-4 rounded-[10px] bg-subtle px-3.5 py-2.5 text-[12.5px] leading-5;
+    @apply mt-4 rounded-control bg-subtle px-3.5 py-2.5 text-[12.5px] leading-5;
 }
 .fx-score-help b {
     @apply text-ink;
 }
 .fx-settings {
-    @apply mt-4 rounded-xl border border-line text-[12.5px] text-muted;
+    @apply mt-4 rounded-control border border-line text-[12.5px] text-muted;
 }
 .fx-settings > summary {
     @apply flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 px-3.5 font-semibold text-ink;
 }
 .fx-settings > summary::-webkit-details-marker {
-    display: none;
+    @apply hidden;
 }
 .fx-settings > :not(summary) {
     @apply mx-3.5;
@@ -899,30 +880,30 @@ body[data-app-shell] .gp-table td.skp-menu-cell {
 }
 .fx-formula-grid {
     @apply grid items-start gap-6;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    @apply grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)];
 }
 .fx-variable {
-    @apply mb-2 grid items-center gap-2 rounded-xl border border-line bg-subtle p-2;
-    grid-template-columns: 32px minmax(120px, 1fr) 150px auto;
+    @apply mb-2 grid items-center gap-2 rounded-control border border-line bg-subtle p-2;
+    @apply grid-cols-[32px_minmax(120px,1fr)_150px_auto];
 }
 .fx-variable:has([data-fx-variable-fixed]) {
-    grid-template-columns: 32px minmax(110px, 1fr) 140px 100px auto;
+    @apply grid-cols-[32px_minmax(110px,1fr)_140px_100px_auto];
 }
 .fx-variable > b {
     @apply grid size-8 place-items-center rounded-[9px] bg-accent-soft text-[13px] font-semibold text-link;
-    font-family: ui-monospace, Consolas, monospace;
+    @apply [font-family:ui-monospace,Consolas,monospace];
 }
 .fx-variable .field {
     @apply h-10 min-h-10 min-w-0 px-3 py-2 text-[13px];
 }
 body[data-app-shell] .fx-variable button.link {
-    @apply inline-flex min-h-10 items-center rounded-[10px] px-2.5 text-[12.5px] font-semibold text-danger hover:bg-danger-soft hover:text-danger hover:no-underline;
+    @apply inline-flex min-h-10 items-center rounded-control px-2.5 text-[12.5px] font-semibold text-danger hover:bg-danger-soft hover:text-danger hover:no-underline;
 }
 .fx-add-variable {
     @apply mt-2 mb-5;
 }
 .fx-tokens {
-    @apply my-3 grid gap-2.5 rounded-xl border border-line bg-subtle p-3;
+    @apply my-3 grid gap-2.5 rounded-control border border-line bg-subtle p-3;
 }
 .fx-token-group {
     @apply flex flex-wrap items-center gap-1.5;
@@ -932,24 +913,24 @@ body[data-app-shell] .fx-variable button.link {
 }
 .fx-token {
     @apply inline-flex min-h-[34px] max-w-full items-center rounded-[9px] border border-line bg-paper px-2.5 py-1 text-[12.5px] font-medium whitespace-normal text-ink shadow-[0_1px_2px_rgb(23_43_54/0.04)] transition-colors hover:border-primary/50 hover:bg-accent-soft hover:text-link;
-    overflow-wrap: anywhere;
+    @apply wrap-anywhere;
 }
 #skp-kpi-form [name='formula'] {
     @apply bg-subtle text-[14px];
-    font-family: ui-monospace, Consolas, monospace;
+    @apply [font-family:ui-monospace,Consolas,monospace];
 }
 .fx-human {
-    @apply mt-3 rounded-[10px] border border-line bg-paper px-3.5 py-2.5;
+    @apply mt-3 rounded-control border border-line bg-paper px-3.5 py-2.5;
 }
 .fx-human > span {
     @apply block text-[11.5px] font-semibold text-muted;
 }
 .fx-human > p {
     @apply mt-0.5 text-[13px] leading-5 text-ink;
-    overflow-wrap: anywhere;
+    @apply wrap-anywhere;
 }
 .fx-review {
-    @apply sticky top-3 rounded-2xl border border-line bg-subtle p-4;
+    @apply sticky top-3 rounded-card border border-line bg-subtle p-4;
 }
 .fx-review-heading {
     @apply mb-3 flex flex-wrap items-center justify-between gap-2;
@@ -959,7 +940,7 @@ body[data-app-shell] .fx-variable button.link {
     @apply text-[13.5px] leading-5 font-semibold;
 }
 .fx-issue {
-    @apply mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-[10px] border border-line bg-paper px-3 py-2.5 text-[12.5px] leading-[18px];
+    @apply mb-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-control border border-line bg-paper px-3 py-2.5 text-[12.5px] leading-[18px];
 }
 .fx-issue.error {
     @apply border-transparent bg-danger-soft text-danger;
@@ -974,29 +955,28 @@ body[data-app-shell] .fx-variable button.link {
     @apply mt-3 grid gap-2;
 }
 .fx-recommendations > div {
-    @apply grid items-center gap-x-3 gap-y-1 rounded-[10px] border border-line bg-paper px-3 py-2.5;
-    grid-template-columns: minmax(0, 1fr) auto;
+    @apply grid items-center gap-x-3 gap-y-1 rounded-control border border-line bg-paper px-3 py-2.5;
+    @apply grid-cols-[minmax(0,1fr)_auto];
 }
 .fx-recommendations strong {
     @apply col-start-1 text-[12.5px] font-semibold;
 }
 .fx-recommendations code {
     @apply col-start-1 text-[12px] text-muted;
-    font-family: ui-monospace, Consolas, monospace;
-    overflow-wrap: anywhere;
+    @apply [font-family:ui-monospace,Consolas,monospace] wrap-anywhere;
 }
 .fx-recommendations .btn {
     @apply col-start-2 row-span-2 row-start-1 min-h-9;
 }
 .fx-test {
-    @apply mt-5 rounded-2xl border border-line bg-paper p-4;
+    @apply mt-5 rounded-card border border-line bg-paper p-4;
 }
 .fx-test > .gp-help {
     @apply mt-1;
 }
 .fx-test-inputs {
     @apply my-3 grid gap-3;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    @apply grid-cols-2;
 }
 .fx-test-inputs > label {
     @apply text-[12px] text-muted;
@@ -1006,10 +986,10 @@ body[data-app-shell] .fx-variable button.link {
 }
 .fx-test-stats {
     @apply grid gap-2;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    @apply grid-cols-3;
 }
 .fx-test-stats > div {
-    @apply rounded-xl bg-subtle px-3 py-2.5;
+    @apply rounded-control bg-subtle px-3 py-2.5;
 }
 .fx-test-stats > div:nth-child(2) {
     @apply bg-accent-soft;
@@ -1019,36 +999,35 @@ body[data-app-shell] .fx-variable button.link {
 }
 .fx-test-stats strong {
     @apply mt-1 block text-[17px] leading-6 font-semibold text-ink;
-    font-variant-numeric: tabular-nums;
+    @apply tabular-nums;
 }
 .fx-formula-summary {
     @apply block! overflow-hidden text-ellipsis whitespace-nowrap;
 }
-
 @media (max-width: 1100px) {
     .fx-formula-grid {
-        grid-template-columns: 1fr;
+        @apply grid-cols-[1fr];
     }
     .fx-review {
-        position: static;
+        @apply static;
     }
     .gp-summary.skp-status-summary {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        @apply grid-cols-3;
     }
 }
 @media (max-width: 900px) {
     .skp-readiness {
-        grid-template-columns: 1fr;
+        @apply grid-cols-[1fr];
     }
     .skp-readiness-actions {
-        justify-content: flex-start;
+        @apply justify-start;
     }
     .skp-apply-pick {
-        grid-template-columns: 1fr;
+        @apply grid-cols-[1fr];
     }
     .skp-apply-pick > .gp-help,
     .skp-chosen {
-        padding-top: 0;
+        @apply pt-0;
     }
 }
 @media (max-width: 600px) {
@@ -1075,7 +1054,7 @@ body[data-app-shell] .fx-variable button.link {
         @apply min-h-11 w-[84px] flex-none;
     }
     body[data-app-shell] .gp-table td.skp-menu-cell {
-        text-align: left;
+        @apply text-left;
     }
     .skp-menu-trigger {
         @apply size-11;
@@ -1115,19 +1094,17 @@ body[data-app-shell] .fx-variable button.link {
     .fx-category-grid,
     .fx-test-stats,
     .fx-test-inputs {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
     }
     .fx-variable,
     .fx-variable:has([data-fx-variable-fixed]) {
-        grid-template-columns: 32px minmax(0, 1fr) auto;
+        @apply grid-cols-[32px_minmax(0,1fr)_auto];
     }
     .fx-variable > select {
-        grid-column: 2;
-        grid-row: 2;
+        @apply col-[2] row-[2];
     }
     .fx-variable > [data-fx-variable-fixed] {
-        grid-column: 2;
-        grid-row: 3;
+        @apply col-[2] row-[3];
     }
     .fx-variable .field {
         @apply h-11 min-h-11;
@@ -1140,10 +1117,10 @@ body[data-app-shell] .fx-variable button.link {
     .skp-row-actions a,
     .skp-period-readiness .link,
     .fx-recommendations .btn {
-        min-height: 44px;
+        @apply min-h-11;
     }
     .gp-summary.skp-status-summary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        @apply grid-cols-2;
     }
     .skp-savebar {
         @apply bottom-2;
@@ -1153,20 +1130,19 @@ body[data-app-shell] .fx-variable button.link {
         @apply w-full;
     }
     .skp-savebar meter {
-        width: 100%;
+        @apply w-full;
     }
     .skp-savebar .gp-actions .btn {
-        flex: 1;
+        @apply flex-1;
     }
     body[data-app-shell] .data-table.gp-table.skp-apply tr {
-        grid-template-columns: 32px minmax(0, 1fr);
+        @apply grid-cols-[32px_minmax(0,1fr)];
     }
     body[data-app-shell] .data-table.gp-table.skp-apply td {
-        grid-column: 2;
+        @apply col-[2];
     }
     body[data-app-shell] .data-table.gp-table.skp-apply td:first-child {
-        grid-column: 1;
-        grid-row: 1 / span 4;
+        @apply col-[1] row-[1_/_span_4];
     }
     .skp-apply input[type='checkbox'] {
         @apply size-[22px];

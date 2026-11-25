@@ -23,10 +23,20 @@ function summarizeWorkspace(s, filters) {
         Dikembalikan: 'returned',
         Final: 'final',
     };
-    const mapped = people.map((p) => ({
-        ...p,
-        status: statuses[s.assessment(p.id).status],
-    }));
+    // Closed periods label unfinished work "Tidak dinilai"; analytics keep counting it by its stored state.
+    const mapped = people.map((p) => {
+        const a = s.assessment(p.id);
+        return {
+            ...p,
+            status:
+                statuses[a.status] ||
+                (a.status === 'Tidak dinilai'
+                    ? a.reason || a.id
+                        ? 'returned'
+                        : 'not_started'
+                    : undefined),
+        };
+    });
     const finals = people.filter((p) => s.assessment(p.id).status === 'Final');
     const scores = finals.map((p) => {
         const a = s.assessment(p.id);

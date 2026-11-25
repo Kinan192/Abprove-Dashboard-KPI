@@ -49,7 +49,7 @@ class AssessmentTasks
         return DB::query()->fromSub($this->query($ctx, $cycle), 't')->whereIn('notification_key', $keys)->count() === count($keys);
     }
 
-    /** Navigation badges: KU nilai/pengajuan, KD persetujuan, Super HC rekap. */
+    /** Navigation badges: KU nilai/pengajuan, KD persetujuan, Super HC rekap and pending extension requests. */
     public function navCounts(AccessContext $ctx, object $cycle): array
     {
         $statuses = $this->records->assessments($ctx)->toBase()->where('cycle_id', $cycle->id)
@@ -62,7 +62,8 @@ class AssessmentTasks
                 'pengajuan' => (int) ($statuses['returned'] ?? 0),
             ],
             'kepala_divisi' => ['persetujuan' => (int) ($statuses['submitted'] ?? 0)],
-            default => ['rekap' => (int) ($statuses['final'] ?? 0)],
+            default => ['rekap' => (int) ($statuses['final'] ?? 0),
+                'perpanjangan' => DB::table('deadline_extensions')->where('cycle_id', $cycle->id)->where('status', 'pending')->count()],
         };
     }
 

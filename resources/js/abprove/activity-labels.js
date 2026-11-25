@@ -9,6 +9,7 @@ const resources = {
     cycle: 'periode',
     profile: 'profil',
     assessment: 'penilaian',
+    deadline_extension: 'perpanjangan tenggat',
 };
 const verbs = { created: 'Menambah', updated: 'Mengubah', deleted: 'Menghapus' };
 const exact = {
@@ -26,6 +27,12 @@ const exact = {
     'template.deleted': 'Menghapus perubahan KPI',
     'cycle.saved': 'Mengatur periode dan kategori',
     'cycle.closed': 'Menutup periode',
+    'assessment.auto_finalized': 'Memfinalkan otomatis saat periode ditutup',
+    'extension.requested': 'Meminta perpanjangan tenggat',
+    'extension.cancelled': 'Membatalkan permintaan perpanjangan',
+    'extension.approved': 'Menyetujui perpanjangan tenggat',
+    'extension.rejected': 'Menolak perpanjangan tenggat',
+    'extension.granted': 'Memberi perpanjangan tenggat',
     'cycle.deleted': 'Menghapus periode',
     'employee.placed': 'Menempatkan staf',
     'employee.transferred': 'Memindahkan staf',

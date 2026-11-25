@@ -24,7 +24,7 @@ class FrontendController extends Controller
     {
         $ctx = $r->attributes->get('access_context');
         $page = FrontendPages::page($r->path());
-        $views = ['dashboard', 'score', 'heads', 'approvals', 'submissions', 'history', 'analytics', 'kpis', 'members', 'team', 'detail', 'recap', 'templates', 'template-editor', 'settings', 'organization', 'employees', 'positions', 'audit', 'help', 'notifications', 'import', 'profile', 'divisions', 'units', 'accounts', 'logs', 'reminders'];
+        $views = ['dashboard', 'score', 'heads', 'approvals', 'submissions', 'history', 'analytics', 'kpis', 'members', 'team', 'detail', 'recap', 'templates', 'template-editor', 'settings', 'organization', 'employees', 'positions', 'audit', 'help', 'notifications', 'import', 'profile', 'divisions', 'units', 'accounts', 'logs', 'reminders', 'extensions'];
         abort_unless(in_array($page, $views), 404);
         if ($page === 'detail') {
             app(ScopedRecords::class)->assessments($ctx)->whereKey((int) $r->route('assessment'))->firstOrFail();
@@ -34,7 +34,7 @@ class FrontendController extends Controller
             'history' => 'riwayat','analytics' => 'dashboard','kpis','templates','template-editor' => 'kpi','members','team' => 'tim','recap' => 'rekap',
             'settings' => 'pengaturan','organization','divisions','units' => 'struktur','employees' => 'karyawan','positions' => 'jabatan',
             'audit' => 'aktivitas','help' => 'panduan','notifications' => 'notifikasi','import' => 'impor','profile' => 'profil',
-            'accounts' => 'akun','logs' => 'log','reminders' => 'pengingat',
+            'accounts' => 'akun','logs' => 'log','reminders' => 'pengingat','extensions' => 'perpanjangan',
         };
         if ($ctx->role === 'super_hc' && $view === 'pengajuan') {
             $view = 'rekap';

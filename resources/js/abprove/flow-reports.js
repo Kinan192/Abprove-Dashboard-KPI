@@ -43,6 +43,11 @@ const EXPORT_STATUS = {
         'Dikembalikan untuk diperbaiki; nilai belum berlaku.',
     ],
     not_started: ['Belum diisi', 'Belum ada pengajuan pada bulan tersebut.'],
+    // Row label only (never a summary column): unfinished work of a closed period.
+    not_assessed: [
+        'Tidak dinilai',
+        'Tidak selesai sampai periode ditutup; tidak dihitung dalam rerata.',
+    ],
 };
 const CYCLE_STATUS = {
     planned: 'Direncanakan',
@@ -126,7 +131,19 @@ function periodWorkbook(d, XL, actorName) {
         head = (labels) => labels.map((v) => ({ v, s: ST.head })),
         statusName = (key) => EXPORT_STATUS[key][0],
         finalOnly = d.scope.status === 'final',
-        statuses = finalOnly ? ['final'] : Object.keys(EXPORT_STATUS);
+        statuses = finalOnly
+            ? ['final']
+            : ['final', 'submitted', 'returned', 'not_started'],
+        // In a closed period anything not Final reads "Tidak dinilai".
+        closedMonths = new Set(
+            d.summary.months
+                .filter((m) => m.cycle_status === 'closed')
+                .map((m) => m.month),
+        ),
+        rowStatus = (status, month) =>
+            status !== 'final' && closedMonths.has(month)
+                ? 'not_assessed'
+                : status;
     const periodText =
         d.period.label === d.period.span
             ? d.period.label
@@ -190,7 +207,7 @@ function periodWorkbook(d, XL, actorName) {
             ],
             [],
             [{ v: 'Keterangan', s: ST.lbl }],
-            ...statuses.map((k) => [
+            ...[...statuses, ...(closedMonths.size && !finalOnly ? ['not_assessed'] : [])].map((k) => [
                 text(statusName(k)),
                 text(EXPORT_STATUS[k][1]),
             ]),
@@ -223,8 +240,12 @@ function periodWorkbook(d, XL, actorName) {
             28,
             (r) => (r.template ? `${r.template} · versi ${r.template_version}` : ''),
         ],
-        ['Status', 14, (r) => statusName(r.status)],
-        ['Keterangan status', 34, (r) => EXPORT_STATUS[r.status][1]],
+        ['Status', 14, (r) => statusName(rowStatus(r.status, r.month))],
+        [
+            'Keterangan status',
+            34,
+            (r) => EXPORT_STATUS[rowStatus(r.status, r.month)][1],
+        ],
         ['Nilai total', 12, (r) => r.total, true],
         ['Kategori', 16, (r) => r.category],
         ['Diajukan (WIB)', 18, (r) => r.submitted_at],
@@ -304,7 +325,7 @@ function periodWorkbook(d, XL, actorName) {
                             if (!r) return text('', ST.txtC);
                             return r.status === 'final'
                                 ? num(r.total)
-                                : text(statusName(r.status), ST.stat);
+                                : text(statusName(rowStatus(r.status, m)), ST.stat);
                         }),
                         num(finals.length, ST.num),
                         num(
@@ -356,7 +377,7 @@ function periodWorkbook(d, XL, actorName) {
                         text(r.name),
                         text(KIND_LABEL[r.kind]),
                         text(r.unit),
-                        text(statusName(r.status)),
+                        text(statusName(rowStatus(r.status, r.month))),
                         text(pillar),
                         text(kpi),
                         text(target),

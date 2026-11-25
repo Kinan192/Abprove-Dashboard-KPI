@@ -129,8 +129,12 @@ export function createFlowStore(c) {
     const loaded = (key, finalOnly = false) =>
         coverage.get(key) === 'all' ||
         (finalOnly && coverage.get(key) === 'final');
-    const assessment = (id, key = cycleKey) =>
-        data.assessments[`${id}|${key}`] || {
+    /**
+     * Assessment of a person-month. In a closed period anything not Final reads "Tidak dinilai" (never filled
+     * or left returned): read-only and excluded from averages, which only use Final results.
+     */
+    const assessment = (id, key = cycleKey) => {
+        const found = data.assessments[`${id}|${key}`] || {
             status: loaded(key) ? 'Belum' : NOT_LOADED,
             values: {},
             positive: '',
@@ -138,6 +142,12 @@ export function createFlowStore(c) {
             reason: '',
             snapshot: null,
         };
+        return found.status !== 'Final' &&
+            found.status !== NOT_LOADED &&
+            data.cycles?.find((x) => x.id === key)?.status === 'closed'
+            ? { ...found, status: 'Tidak dinilai' }
+            : found;
+    };
     const placement = (p, key = cycleKey) =>
         p.placements
             .filter((x) => x.from <= key && (!x.until || x.until >= key))
@@ -237,13 +247,18 @@ export function createFlowStore(c) {
         const area = p.type === 'member' ? `unit|${p.unitId}` : `division|${p.divisionId}`;
         return index.byArea.get(area)?.findLast((k) => current(k, key)) || null;
     }
+    // "Tidak dinilai" has no total or category: it is excluded from averages and reports.
     const total = (id, key = cycleKey) => {
         const a = assessment(id, key);
+        if (a.status === 'Tidak dinilai') return null;
         if (a.serverTotal != null) return +a.serverTotal;
         const p = person(id, key);
         return p ? totalValues(a.values, template(p, key)?.items || []) : null;
     };
     const category = (id, key = cycleKey) =>
+        (assessment(id, key).status === 'Tidak dinilai'
+            ? { label: 'Dikecualikan', key: 'none' }
+            : null) ||
         assessment(id, key).category ||
         categorize(
             total(id, key),
@@ -253,22 +268,32 @@ export function createFlowStore(c) {
                 c: 70,
             },
         );
-    function canWrite(kind = 'member') {
+    /**
+     * Empty string when the actor may write, else the reason. Deadlines are the server's effective ones
+     * (`cycle.mine`: schedule plus approved extensions): Kepala Unit submission (`resubmit` until the later
+     * resubmission date), Kepala Divisi approval per unit when `unitId` is known, else the division's latest.
+     */
+    function canWrite(kind = 'member', unitId = null, action = null) {
         const x = cycle();
         if (!x) return 'Periode belum dibuat oleh Super HC.';
         if (x.status !== 'open')
             return x.status === 'closed'
                 ? 'Periode sudah ditutup.'
                 : 'Periode belum dibuka.';
+        const mine = x.mine || {},
+            unitHead = kind === 'member' && c.role === 'ku',
+            due = unitHead
+                ? (action === 'resubmit' ? mine.resubmission : mine.submission) ||
+                  x.submission
+                : (unitId && mine.units?.[String(unitId).replace(/^\D+-/, '')]) ||
+                  mine.approval ||
+                  x.approval;
         const now = Date.now(),
             start = Date.parse(x.opens + '+07:00'),
-            end = Date.parse(
-                (kind === 'member' && c.role === 'ku'
-                    ? x.submission
-                    : x.approval) + '+07:00',
-            );
+            end = Date.parse(due + '+07:00');
         if (now < start) return 'Jadwal pengisian belum dimulai.';
-        if (now > end) return 'Batas waktu untuk peran ini sudah lewat.';
+        if (now > end)
+            return `${unitHead ? 'Batas pengajuan' : 'Batas persetujuan'} sudah lewat. Ajukan perpanjangan kepada Super HC dari Dashboard.`;
         return '';
     }
     const pending = (unitId, divisionId, from = cycleKey) =>

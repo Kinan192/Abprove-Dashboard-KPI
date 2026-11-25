@@ -3,6 +3,7 @@
 namespace App\Queries;
 
 use App\Models\User;
+use App\Services\Assessment\DeadlinePolicy;
 use App\Services\IdentityAccess\AccessContext;
 use App\Services\Reporting\Insights;
 use App\ViewModels\AbproveDesign;
@@ -29,7 +30,7 @@ class WorkspaceQuery
     private const ITEM_COLUMNS = ['assessment_id', 'source_kpi_item_id', 'score', 'computed_score', 'reviewed_score', 'measurement_inputs', 'pillar_snapshot', 'kpi_name_snapshot', 'target_snapshot',
         'weight_percent_snapshot', 'numerator_snapshot', 'denominator_snapshot', 'formula_snapshot', 'definition_snapshot'];
 
-    public function __construct(private ScopedRecords $records, private AssessmentTasks $tasks, private Insights $insights) {}
+    public function __construct(private ScopedRecords $records, private AssessmentTasks $tasks, private Insights $insights, private DeadlinePolicy $deadlines) {}
 
     /**
      * @param  list<string>|null  $only  subset of the profile sections, null for all of them
@@ -135,7 +136,7 @@ class WorkspaceQuery
             $data['kpis'] = $this->kpis($ctx, $employees, $unitHeads, in_array('kpis', $history, true) ? null : [$start, $end, $after]);
         }
         if ($needs('cycles')) {
-            $data['cycles'] = $this->cycles($cycles);
+            $data['cycles'] = $this->cycles($cycles, $ctx);
         }
         if ($needs('assessments')) {
             [$data['assessments'], $templates] = $this->assessments($assessments, $cycles->pluck('assessment_month', 'id'));
@@ -204,15 +205,26 @@ class WorkspaceQuery
         return $kpis->all();
     }
 
-    private function cycles(Collection $cycles): array
+    /**
+     * Cycles with the actor's effective deadlines (`mine`, WIB): Kepala Unit submission (and resubmission until the
+     * approval date), Kepala Divisi approval per unit and for the whole division. Extensions push these later.
+     */
+    private function cycles(Collection $cycles, AccessContext $ctx): array
     {
         $categories = DB::table('cycle_categories')->select('cycle_id', 'code', 'label', 'lower_bound', 'upper_bound')->orderBy('sort_order')->get()->groupBy('cycle_id');
-        $date = fn ($s) => CarbonImmutable::parse($s, 'UTC')->setTimezone('Asia/Jakarta')->format('Y-m-d\TH:i');
+        $date = fn ($s) => ($s instanceof \DateTimeInterface ? CarbonImmutable::instance($s) : CarbonImmutable::parse($s, 'UTC'))->setTimezone('Asia/Jakarta')->format('Y-m-d\TH:i');
 
-        return $cycles->map(function ($x) use ($categories, $date) {
+        return $cycles->map(function ($x) use ($categories, $date, $ctx) {
             $ranges = ($categories[$x->id] ?? collect())->map(fn ($c) => ['code' => $c->code, 'label' => $c->label, 'lower' => (float) $c->lower_bound, 'upper' => $c->upper_bound === null ? null : (float) $c->upper_bound])->values()->all();
 
-            return ['id' => substr($x->assessment_month, 0, 7), 'dbId' => $x->id, 'status' => $x->status, 'opens' => $date($x->opens_at), 'submission' => $date($x->submission_due_at),
+            $mine = match ($ctx->role) {
+                'kepala_unit' => ['submission' => $date($this->deadlines->submission($x, $ctx->unitId)), 'resubmission' => $date($this->deadlines->forAction($x, 'kepala_unit', $ctx->divisionId, $ctx->unitId, 'resubmit'))],
+                'kepala_divisi' => ['approval' => $date($this->deadlines->divisionApproval($x, $ctx->divisionId)),
+                    'units' => DB::table('units')->where('division_id', $ctx->divisionId)->pluck('id')->mapWithKeys(fn ($id) => [(string) $id => $date($this->deadlines->approval($x, $ctx->divisionId, (int) $id))])->all()],
+                default => null,
+            };
+
+            return ['id' => substr($x->assessment_month, 0, 7), 'dbId' => $x->id, 'status' => $x->status, 'mine' => $mine, 'opens' => $date($x->opens_at), 'submission' => $date($x->submission_due_at),
                 'approval' => $date($x->approval_due_at), 'closes' => $date($x->closes_at), 'ranges' => $ranges,
                 'categories' => ['sb' => $ranges[3]['lower'] ?? 90, 'b' => $ranges[2]['lower'] ?? 80, 'c' => $ranges[1]['lower'] ?? 70], 'managed' => (bool) $x->workspace_managed];
         })->all();

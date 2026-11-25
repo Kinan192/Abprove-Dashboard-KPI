@@ -1,378 +1,226 @@
 /* KPI & Periode workspace primitives: heading, stats, tables, tags, forms, notes. */
 .goal-prototype {
-    gap: 16px !important;
+    @apply gap-4!;
 }
 .goal-prototype [data-gp-content] {
-    display: grid;
-    gap: 20px;
-    min-width: 0;
+    @apply grid gap-5 min-w-0;
 }
 .gp-heading {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px 20px;
-    min-width: 0;
-    padding-top: 4px;
+    @apply flex items-end justify-between gap-y-3 gap-x-5 min-w-0 pt-1;
 }
 .gp-heading-copy {
-    min-width: 0;
-    max-width: 760px;
+    @apply min-w-0 max-w-[760px];
 }
+
 /* Small context line above the title (e.g. "Monitoring · Hasil penilaian"). */
 .gp-eyebrow {
-    display: block;
-    margin-bottom: 4px;
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 16px;
-    font-weight: 600;
+    @apply block mb-1 text-muted text-[12px] leading-[16px] font-semibold;
 }
 .gp-heading h1 {
-    font-size: 22px;
-    line-height: 30px;
-    font-weight: 600;
-    letter-spacing: -0.015em;
+    @apply text-[22px] leading-[30px] font-semibold tracking-[-0.015em];
 }
 .gp-heading p {
-    margin-top: 4px;
-    color: var(--color-muted);
-    font-size: 13px;
-    line-height: 20px;
+    @apply mt-1 text-muted text-[13px] leading-[20px];
 }
 .gp-heading h1,
 .gp-heading p {
-    overflow-wrap: anywhere;
+    @apply wrap-anywhere;
 }
 .gp-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    @apply flex items-center gap-2 flex-wrap justify-end;
 }
 .gp-actions .btn {
-    min-height: 40px;
-    white-space: nowrap;
+    @apply min-h-10 whitespace-nowrap;
 }
 .gp-summary {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
+    @apply grid grid-cols-4 gap-3;
 }
-/* Small pastel summary tiles; the tone carries meaning, the number stays ink. */
+
+/* Bento summary tiles (same language as the dashboard metric tiles): neutral
+   surface, the tone lives on a small marker, the number stays ink. */
 .gp-summary > div {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    padding: 14px 16px;
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
-    background: var(--color-paper);
+    --tile-tone: var(--color-faint);
+    @apply flex min-w-0 flex-col gap-1 rounded-card border border-line bg-paper px-4 py-3.5 shadow-card;
 }
 .gp-summary span {
-    color: var(--color-muted);
-    font-size: 12.5px;
-    line-height: 18px;
-    font-weight: 600;
+    @apply flex items-center gap-2 text-[11px] leading-4 font-medium tracking-[0.06em] text-muted uppercase;
+}
+.gp-summary span::before {
+    @apply h-3 w-[3px] shrink-0 rounded-full bg-(--tile-tone) content-[''];
 }
 .gp-summary strong {
-    color: var(--color-ink);
-    font-size: 22px;
-    line-height: 28px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    font-variant-numeric: tabular-nums;
-}
-.gp-summary > .tone-teal,
-.gp-summary > .tone-blue,
-.gp-summary > .tone-amber,
-.gp-summary > .tone-neutral {
-    border-color: transparent;
+    @apply text-[26px] leading-8 font-semibold tracking-[-0.03em] text-ink tabular-nums;
 }
 .gp-summary > .tone-teal {
-    background: var(--color-accent-soft);
-}
-.gp-summary > .tone-teal span {
-    color: var(--color-link);
+    --tile-tone: var(--color-success);
 }
 .gp-summary > .tone-blue {
-    background: var(--color-info-soft);
-}
-.gp-summary > .tone-blue span {
-    color: var(--color-info);
+    --tile-tone: var(--color-info);
 }
 .gp-summary > .tone-amber {
-    background: var(--color-warning-soft);
-}
-.gp-summary > .tone-amber span {
-    color: var(--color-warning);
-}
-.gp-summary > .tone-neutral {
-    background: var(--color-subtle);
+    --tile-tone: var(--color-amber);
 }
 .gp-table {
-    width: 100%;
-    min-width: 720px;
-    table-layout: fixed;
-    background: var(--color-paper);
+    @apply w-full min-w-[720px] table-fixed bg-paper;
 }
 body[data-app-shell] .gp-table th {
-    padding: 10px 16px;
-    background: var(--color-subtle);
-    color: var(--color-muted);
-    font-size: 11.5px;
-    line-height: 16px;
-    font-weight: 600;
-    white-space: normal;
+    @apply py-2.5 px-4 bg-subtle text-muted text-[11.5px] leading-[16px] font-semibold whitespace-normal;
 }
 body[data-app-shell] .gp-table td {
-    padding: 12px 16px;
-    font-size: 13px;
-    line-height: 20px;
-    overflow-wrap: anywhere;
-    vertical-align: middle;
+    @apply py-3 px-4 text-[13px] leading-[20px] wrap-anywhere align-middle;
 }
 body[data-app-shell] .gp-table tbody tr {
-    transition: background-color 120ms ease;
+    @apply [transition:background-color_120ms_ease];
 }
 body[data-app-shell] .gp-table tbody tr:hover {
-    background: color-mix(in srgb, var(--color-subtle) 70%, transparent);
+    @apply bg-subtle/70;
 }
 .gp-table strong {
-    font-weight: 600;
+    @apply font-semibold;
 }
 .gp-table small {
-    display: block;
-    margin-top: 2px;
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 17px;
+    @apply block mt-0.5 text-muted text-[12px] leading-[17px];
 }
 .gp-table .gp-tag + small {
-    margin-top: 4px;
+    @apply mt-1;
 }
 body[data-app-shell] .gp-table td.empty {
     /* The global .empty helper is flex; a colspan cell must stay a table cell. */
-    display: table-cell;
-    padding: 32px 16px;
-    color: var(--color-muted);
-    text-align: center;
-    white-space: normal;
+    @apply table-cell py-8 px-4 text-muted text-center whitespace-normal;
 }
 .gp-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    max-width: 100%;
-    padding: 2px 9px;
-    border-radius: 999px;
-    background: var(--color-subtle);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 14%, transparent);
-    color: var(--color-muted);
-    font-size: 11.5px;
-    line-height: 18px;
-    font-weight: 600;
+    @apply inline-flex items-center gap-1.5 max-w-full py-0.5 px-[9px] rounded-full bg-subtle shadow-[inset_0_0_0_1px_color-mix(in_srgb,currentColor_14%,transparent)] text-muted text-[11.5px] leading-[18px] font-semibold;
 }
 .gp-tag::before {
-    content: '';
-    flex-shrink: 0;
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: currentColor;
+    @apply content-[''] shrink-0 w-1.5 h-1.5 rounded-full bg-current;
 }
 .gp-tag.success {
-    background: var(--color-success-soft);
-    color: var(--color-success);
+    @apply bg-success-soft text-success;
 }
 .gp-tag.warning {
-    background: var(--color-warning-soft);
-    color: var(--color-warning);
+    @apply bg-warning-soft text-warning;
 }
 .gp-tag.info {
-    background: var(--color-info-soft);
-    color: var(--color-info);
+    @apply bg-info-soft text-info;
 }
 .gp-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 20px;
+    @apply grid grid-cols-2 gap-y-4 gap-x-5;
 }
 .gp-wide {
-    grid-column: 1/-1;
+    @apply col-span-full;
 }
 .gp-field {
-    min-width: 0;
+    @apply min-w-0;
 }
 .gp-field .label {
-    margin-bottom: 6px;
-    font-size: 12.5px;
-    line-height: 18px;
-    font-weight: 600;
+    @apply mb-1.5 text-[12.5px] leading-[18px] font-semibold;
 }
 .gp-field .field {
-    min-height: 40px;
-    padding-block: 8px;
-    padding-inline-start: 12px;
-    font-size: 13.5px;
+    @apply min-h-10 py-2 ps-3 text-[13.5px];
 }
 .gp-field input[disabled],
 .gp-field select[disabled],
 .gp-field input[readonly] {
-    background-color: var(--color-subtle);
-    color: var(--color-muted);
+    @apply bg-subtle text-muted;
 }
 .gp-required,
 .gp-field-error {
-    color: var(--color-danger);
+    @apply text-danger;
 }
 .gp-field-error {
-    margin-top: 6px;
-    font-size: 12px;
-    line-height: 18px;
+    @apply mt-1.5 text-[12px] leading-[18px];
 }
 .gp-field [aria-invalid='true'] {
-    border-color: var(--color-danger);
+    @apply border-danger;
 }
 .gp-help {
-    display: block;
-    margin-top: 6px;
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 18px;
+    @apply block mt-1.5 text-muted text-[12px] leading-[18px];
 }
 .gp-note {
-    padding: 11px 14px;
-    border: 1px solid var(--color-line);
-    border-radius: 12px;
-    background: var(--color-subtle);
-    color: var(--color-ink);
-    font-size: 13px;
-    line-height: 20px;
+    @apply py-[11px] px-3.5 border border-line rounded-control bg-subtle text-ink text-[13px] leading-[20px];
 }
 .gp-note.warning {
-    border-color: transparent;
-    background: var(--color-warning-soft);
-    color: var(--color-warning);
+    @apply border-transparent bg-warning-soft text-warning;
 }
 .gp-note.error {
-    border-color: transparent;
-    background: var(--color-danger-soft);
-    color: var(--color-danger);
+    @apply border-transparent bg-danger-soft text-danger;
 }
 .gp-note.success {
-    border-color: transparent;
-    background: var(--color-success-soft);
-    color: var(--color-success);
+    @apply border-transparent bg-success-soft text-success;
 }
 .gp-space {
-    margin-top: 20px;
+    @apply mt-5;
 }
 .gp-empty {
-    padding: 44px 20px;
-    border: 1px dashed var(--color-line);
-    border-radius: 16px;
-    background: var(--color-paper);
-    text-align: center;
+    @apply py-11 px-5 border border-dashed border-line rounded-card bg-paper text-center;
 }
 .gp-empty strong {
-    font-size: 15px;
-    line-height: 22px;
-    font-weight: 600;
+    @apply text-[15px] leading-[22px] font-semibold;
 }
 .gp-empty p {
-    max-width: 520px;
-    margin: 6px auto 0;
-    color: var(--color-muted);
-    font-size: 13px;
-    line-height: 20px;
+    @apply max-w-[520px] mt-1.5 mb-0 mx-auto text-muted text-[13px] leading-[20px];
 }
 .gp-empty-action {
-    margin-top: 16px;
+    @apply mt-4;
 }
 .gp-assessment-total {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    padding: 14px 18px;
-    border-radius: 16px;
-    background: var(--color-accent-soft);
-    color: var(--color-link);
-    font-size: 12.5px;
-    font-weight: 600;
+    @apply flex items-center justify-end flex-wrap gap-y-2 gap-x-4 py-3.5 px-4.5 rounded-card bg-accent-soft text-link text-[12.5px] font-semibold;
 }
 .gp-assessment-total strong {
-    color: var(--color-ink);
-    font-size: 24px;
-    line-height: 30px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
+    @apply text-ink text-[24px] leading-[30px] font-semibold tabular-nums;
 }
 @media (max-width: 1100px) {
     .gp-heading {
-        align-items: flex-start;
-        flex-wrap: wrap;
+        @apply items-start flex-wrap;
     }
     .gp-summary {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        @apply grid-cols-2;
     }
 }
 @media (max-width: 600px) {
     .gp-heading h1 {
-        font-size: 20px;
-        line-height: 27px;
+        @apply text-[20px] leading-[27px];
     }
     .gp-heading {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 14px;
+        @apply flex-col items-stretch gap-3.5;
     }
     .gp-actions {
-        justify-content: flex-start;
+        @apply justify-start;
     }
     .gp-actions .btn {
-        min-height: 44px;
+        @apply min-h-11;
     }
     .gp-summary {
-        gap: 8px;
+        @apply gap-2;
     }
     .gp-summary > div {
-        padding: 12px 14px;
+        @apply py-3 px-3.5;
     }
     .gp-summary strong {
-        font-size: 21px;
-        line-height: 26px;
+        @apply text-[21px] leading-[26px];
     }
     .gp-form-grid {
-        grid-template-columns: 1fr;
+        @apply grid-cols-[1fr];
     }
     /* Rows stack into cards here (app.css): the tabular minimum width would
        push labelled cells past the card, so it only applies above 600px. */
     body[data-app-shell] .data-table.gp-table {
-        min-width: 0;
-        table-layout: auto;
+        @apply min-w-0 table-auto;
     }
     body[data-app-shell] .data-table.gp-table tr {
-        padding: 14px 16px;
+        @apply py-3.5 px-4;
     }
     body[data-app-shell] .gp-table td {
-        width: auto;
-        padding: 0;
+        @apply w-auto p-0;
     }
     body[data-app-shell] .gp-table td,
     body[data-app-shell] .gp-table small {
-        white-space: normal;
-        overflow-wrap: anywhere;
+        @apply whitespace-normal wrap-anywhere;
     }
     body[data-app-shell] .gp-table td.empty {
-        display: block;
-        padding: 20px 0;
+        @apply block py-5 px-0;
     }
     .gp-assessment-total {
-        justify-content: space-between;
+        @apply justify-between;
     }
 }

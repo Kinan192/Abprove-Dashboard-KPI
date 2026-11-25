@@ -3,13 +3,17 @@
 @section('body-attributes') data-app-shell="abprove" data-page="{{ $vm->page }}" data-role="{{ $vm->role }}" @endsection
 @section('body')
 <script id="kpi-config" type="application/json">{!! json_encode($vm->clientConfig(),JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_THROW_ON_ERROR) !!}</script>
-<a href="#main-content" class="fixed -top-20 left-4 z-[100] rounded-[10px] border border-line bg-paper px-4 py-3 font-semibold shadow-lg focus:top-3">Langsung ke konten</a>
-<button id="sidebar-scrim" type="button" class="fixed inset-0 z-40 bg-[rgb(8_32_22/0.45)]" data-action="sidebar-close" aria-label="Tutup navigasi" hidden></button>
+<a href="#main-content" class="fixed -top-20 left-4 z-[100] rounded-control border border-line bg-paper px-4 py-3 font-semibold shadow-lg focus:top-3">Langsung ke konten</a>
+<button id="sidebar-scrim" type="button" class="fixed inset-0 z-40 bg-[rgb(10_20_22/0.42)]" data-action="sidebar-close" aria-label="Tutup navigasi" hidden></button>
 <aside id="sidebar" class="sidebar" aria-label="Navigasi utama">
     <a href="{{ $vm->link('dashboard') }}" class="sidebar-brand" aria-label="ABprove, RS Awal Bros Botania – ke dashboard"><x-abprove.brand/></a>
     <div class="sidebar-scroll">
-        <p class="sidebar-group-label">Menu utama</p>
-        <nav class="sidebar-nav" aria-label="Menu utama">@foreach($vm->navigation() as $item)<a href="{{ $item['href'] }}" class="nav-link {{ $vm->navActive($item['id'])?'active':'' }}" @if($vm->navActive($item['id'])) aria-current="page" @endif><x-abprove.icon :name="$item['icon']"/><span class="nav-label">{{ $item['label'] }}</span>@if(in_array($item['id'],['nilai','pengajuan','persetujuan','rekap']))<span class="nav-label nav-count" data-nav-count="{{ $item['id'] }}"></span>@endif</a>@endforeach</nav>
+        <nav aria-label="Menu utama">
+            @foreach($vm->navigationGroups() as $group => $items)
+            <p class="sidebar-group-label" id="nav-group-{{ $loop->index }}">{{ $group }}</p>
+            <div class="sidebar-nav" role="group" aria-labelledby="nav-group-{{ $loop->index }}">@foreach($items as $item)<a href="{{ $item['href'] }}" class="nav-link {{ $vm->navActive($item['id'])?'active':'' }}" @if($vm->navActive($item['id'])) aria-current="page" @endif><x-abprove.icon :name="$item['icon']"/><span class="nav-label">{{ $item['label'] }}</span>@if(in_array($item['id'],['nilai','pengajuan','persetujuan','rekap','perpanjangan']))<span class="nav-label nav-count" data-nav-count="{{ $item['id'] }}"></span>@endif</a>@endforeach</div>
+            @endforeach
+        </nav>
     </div>
     <div class="sidebar-support">
         <p class="sidebar-group-label">Akun &amp; bantuan</p>

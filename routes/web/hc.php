@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\SuperHc\ActivityController;
 use App\Http\Controllers\SuperHc\CycleController;
@@ -48,3 +49,9 @@ Route::post('/cycles', [CycleController::class, 'store']);
 Route::patch('/cycles/{cycle}', [CycleController::class, 'update'])->whereNumber('cycle');
 Route::delete('/cycles/{cycle}', [CycleController::class, 'destroy'])->whereNumber('cycle');
 Route::post('/cycles/{cycle}/close', [CycleController::class, 'close'])->whereNumber('cycle');
+
+// Deadline extensions (perpanjangan tenggat): page, direct grant and decisions on requests.
+Route::get('/extensions', [FrontendController::class, 'show']);
+Route::post('/extensions/grant', [ExtensionController::class, 'grant']);
+Route::post('/extensions/{extension}/approve', [ExtensionController::class, 'approve'])->whereNumber('extension');
+Route::post('/extensions/{extension}/reject', [ExtensionController::class, 'reject'])->whereNumber('extension');

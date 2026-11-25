@@ -22,7 +22,7 @@ class AbproveDesign
     public const VIEWS = [
         'ku' => ['dashboard', 'nilai', 'pengajuan', 'riwayat', 'kpi', 'tim', 'panduan', 'profil', 'notifikasi'],
         'kd' => ['dashboard', 'persetujuan', 'kpi', 'nilai-kepala', 'tim', 'panduan', 'profil', 'notifikasi'],
-        'hc' => ['dashboard', 'rekap', 'karyawan', 'struktur', 'jabatan', 'kpi', 'pengaturan', 'aktivitas', 'impor', 'panduan', 'profil', 'notifikasi'],
+        'hc' => ['dashboard', 'rekap', 'perpanjangan', 'karyawan', 'struktur', 'jabatan', 'kpi', 'pengaturan', 'aktivitas', 'impor', 'panduan', 'profil', 'notifikasi'],
         'adm' => ['akun', 'log', 'pengingat', 'panduan', 'profil'],
     ];
 
@@ -91,7 +91,7 @@ class AbproveDesign
             'rekap' => 'Rekap penilaian', 'karyawan','struktur','jabatan' => 'Struktur & Staf', 'akun' => 'Akun pengguna',
             'log' => 'Log sistem', 'pengingat' => 'Pengingat email',
             'pengaturan' => 'Pengaturan Periode', 'aktivitas' => 'Riwayat aktivitas', 'impor' => 'Upload master KPI',
-            'panduan' => 'Panduan', 'profil' => 'Profil', 'notifikasi' => 'Notifikasi', default => 'ABprove',
+            'perpanjangan' => 'Perpanjangan tenggat', 'panduan' => 'Panduan', 'profil' => 'Profil', 'notifikasi' => 'Notifikasi', default => 'ABprove',
         };
     }
 
@@ -115,22 +115,42 @@ class AbproveDesign
             'notifikasi' => 'notifications','nilai' => 'score','pengajuan' => 'submissions','riwayat' => 'history','persetujuan' => 'approvals','nilai-kepala' => 'heads',
             'dashboard' => 'dashboard','kpi' => $this->role === 'hc' ? 'kpi-templates' : 'kpis','rekap' => 'recap','karyawan' => 'organization/employees',
             'struktur' => 'organization','jabatan' => 'organization/positions','pengaturan' => 'settings',
-            'aktivitas' => 'audit','impor' => 'import','panduan' => 'help','profil' => 'profile','tim' => $this->role === 'ku' ? 'members' : 'team',default => $view,
+            'aktivitas' => 'audit','perpanjangan' => 'extensions','impor' => 'import','panduan' => 'help','profil' => 'profile','tim' => $this->role === 'ku' ? 'members' : 'team',default => $view,
         };
 
         return url($prefix.'/'.$path).'?month='.$this->month;
     }
 
+    /** Flat menu in sidebar order; the mobile bar takes the first four. */
     public function navigation(): array
     {
         $menu = match ($this->role) {
-            'ku' => [['dashboard', 'Dashboard', 'chart'], ['nilai', 'Isi nilai', 'edit'], ['pengajuan', 'Pengajuan', 'inbox'], ['riwayat', 'Riwayat', 'clock'], ['kpi', 'KPI Unit', 'table'], ['tim', 'Anggota Unit', 'users']],
-            'kd' => [['dashboard', 'Dashboard divisi', 'chart'], ['persetujuan', 'Persetujuan', 'check'], ['kpi', 'KPI Divisi', 'table'], ['nilai-kepala', 'Nilai Kepala Unit', 'clipboard'], ['tim', 'Tim Divisi', 'users']],
-            'hc' => [['dashboard', 'Dashboard', 'chart'], ['rekap', 'Rekap Penilaian', 'check'], ['struktur', 'Struktur & Staf', 'users'], ['kpi', 'KPI & Periode', 'table'], ['aktivitas', 'Riwayat Aktivitas', 'clock']],
-            'adm' => [['akun', 'Akun Pengguna', 'users'], ['log', 'Log Sistem', 'clock'], ['pengingat', 'Pengingat Email', 'bell']],
+            'ku' => [['dashboard', 'Dashboard', 'chart', 'Ringkasan'], ['nilai', 'Isi nilai', 'edit', 'Penilaian'], ['pengajuan', 'Pengajuan', 'inbox', 'Penilaian'], ['riwayat', 'Riwayat', 'clock', 'Penilaian'], ['kpi', 'KPI Unit', 'table', 'Unit'], ['tim', 'Anggota Unit', 'users', 'Unit']],
+            'kd' => [['dashboard', 'Dashboard divisi', 'chart', 'Ringkasan'], ['persetujuan', 'Persetujuan', 'check', 'Penilaian'], ['nilai-kepala', 'Nilai Kepala Unit', 'clipboard', 'Penilaian'], ['kpi', 'KPI Divisi', 'table', 'Divisi'], ['tim', 'Tim Divisi', 'users', 'Divisi']],
+            'hc' => [['dashboard', 'Dashboard', 'chart', 'Ringkasan'], ['rekap', 'Rekap Penilaian', 'check', 'Penilaian'], ['perpanjangan', 'Perpanjangan', 'calendar', 'Penilaian'], ['struktur', 'Struktur & Staf', 'users', 'Master data'], ['kpi', 'KPI & Periode', 'table', 'Master data'], ['aktivitas', 'Riwayat Aktivitas', 'clock', 'Sistem']],
+            'adm' => [['akun', 'Akun Pengguna', 'users', 'Administrasi'], ['log', 'Log Sistem', 'clock', 'Sistem'], ['pengingat', 'Pengingat Email', 'bell', 'Sistem']],
         };
 
-        return collect($menu)->map(fn ($item) => ['id' => $item[0], 'label' => $item[1], 'icon' => $item[2], 'href' => $this->link($item[0])])->all();
+        return collect($menu)->map(fn ($item) => ['id' => $item[0], 'label' => $item[1], 'icon' => $item[2], 'group' => $item[3], 'href' => $this->link($item[0])])->all();
+    }
+
+    /** Sidebar sections: group label => items, in menu order. */
+    public function navigationGroups(): array
+    {
+        return collect($this->navigation())->groupBy('group')->map->all()->all();
+    }
+
+    /** "Selamat siang, Putri" by the WIB hour; academic titles and suffixes are dropped. */
+    public function greeting(): string
+    {
+        $hour = (int) now('Asia/Jakarta')->format('G');
+        $part = match (true) {
+            $hour < 11 => 'pagi', $hour < 15 => 'siang', $hour < 18 => 'sore', default => 'malam',
+        };
+        $name = preg_replace('/^((dr|drg|apt|ns|prof|drs|dra|ir|h|hj)\.\s*)+/i', '', explode(',', $this->actor['nama'])[0]);
+        $first = strtok(trim($name), ' ') ?: '';
+
+        return 'Selamat '.$part.($first !== '' ? ', '.$first : '');
     }
 
     public function navActive(string $id): bool
@@ -180,6 +200,7 @@ class AbproveDesign
             'riwayat' => 'reports.index',
             'tim' => 'team.index',
             'aktivitas' => 'organization.activity',
+            'perpanjangan' => 'extensions.index',
             'panduan' => 'guide.index',
             'notifikasi' => 'notifications.index',
             'profil' => 'profile.index',

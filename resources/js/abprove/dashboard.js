@@ -9,6 +9,7 @@ import {
     Tooltip,
 } from 'chart.js';
 import { $, $$, node, labelCycle, dateTime, status as badge } from './flow-dom';
+import { toast } from './ui';
 import { activityLabel, activitySubject } from './activity-labels';
 
 Chart.register(
@@ -134,17 +135,500 @@ function highlight(host, index) {
     chart.update();
 }
 
+/** Small stroke icons for the metric tiles (same paths as x-abprove.icon). */
+const ICONS = {
+    average: 'M3 3v18h18 M6 15l4-5 5 3 6-9',
+    waiting: 'M12 8v5l4 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0',
+    empty: 'M16 3l5 5 M4 20l4-1L21 6l-5-5L3 14l-1 7z',
+    returned: 'M19 12H5 M11 6l-6 6 6 6',
+    heads: 'M9 4H5v17h14V4h-4 M9 2h6v4H9z M8 11h8 M8 15h8',
+    alert: 'M12 9v4 M12 17h.01 M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+    due: 'M3 5h18v16H3z M3 10h18 M8 3v4 M16 3v4',
+};
+function icon(name, cls = 'icon') {
+    const ns = 'http://www.w3.org/2000/svg',
+        svg = document.createElementNS(ns, 'svg'),
+        path = document.createElementNS(ns, 'path');
+    for (const [key, value] of Object.entries({
+        class: cls,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: 'currentColor',
+        'stroke-width': '1.75',
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        'aria-hidden': 'true',
+    }))
+        svg.setAttribute(key, value);
+    path.setAttribute('d', ICONS[name]);
+    svg.append(path);
+    return svg;
+}
+
+/** WIB "YYYY-MM-DDTHH:mm" from the server → epoch ms. */
+const wib = (value) => Date.parse(value + ':00+07:00');
+/**
+ * The role's own deadline: KU/KD use the server's effective date for their area (schedule + approved
+ * extensions, `d.extension`), Super HC the closing date. `left` is negative once it has passed.
+ */
+function roleDeadline(state) {
+    const { c, d } = state,
+        cycle = d.cycle;
+    if (!cycle || cycle.status === 'closed') return null;
+    if (d.extension) {
+        const at = wib(d.extension.due);
+        return {
+            key: d.extension.key,
+            at: new Date(at).toISOString(),
+            left: at - Date.now(),
+            extended: d.extension.extended,
+        };
+    }
+    const step = cycle.schedule.find((s) => s.key === ROLES[c.role].deadline),
+        left = step ? Date.parse(step.at) - Date.now() : -1;
+    return left > 0 ? { ...step, left } : null;
+}
+/** Short header/banner wording for each role deadline. */
+const DUE_LABEL = {
+    submission: 'Batas pengajuan',
+    approval: 'Batas persetujuan',
+    closes: 'Penutupan periode',
+};
+const dueTone = (left) =>
+    left < 86400000 ? 'danger' : left < 3 * 86400000 ? 'warn' : 'calm';
+/** "lewat 5 hari" / "lewat 3 jam" for a passed deadline. */
+function overdue(ms) {
+    const hours = Math.floor(-ms / 3600000);
+    return hours >= 24
+        ? `lewat ${Math.floor(hours / 24)} hari`
+        : `lewat ${Math.max(1, hours)} jam`;
+}
+
+/**
+ * Header chip: "Batas pengajuan · 2 hari lagi", "Perpanjangan · s.d. 3 Des · 2 hari lagi" or, once passed,
+ * "Batas pengajuan · lewat 5 hari" in red. Hidden without a deadline.
+ */
+function due(state) {
+    const host = $('[data-dashboard-due]'),
+        step = roleDeadline(state);
+    host.hidden = !step;
+    if (!step) {
+        host.replaceChildren();
+        return;
+    }
+    const passed = step.left <= 0,
+        units = state.d.extension?.units || [];
+    // Division deadline passed but some units still have an extended approval window.
+    if (passed && units.length) {
+        const latest = units.map((u) => u.due).sort().at(-1),
+            left = wib(latest) - Date.now();
+        host.dataset.tone = dueTone(left) === 'calm' ? 'warn' : dueTone(left);
+        host.title = units.map((u) => `${u.name} s.d. ${dateTime(new Date(wib(u.due)).toISOString())} WIB`).join(' · ');
+        host.replaceChildren(
+            icon('due'),
+            node('span', `${units.length} unit diperpanjang`, 'dashboard-due-label'),
+            node('strong', `s.d. ${shortDate(new Date(wib(latest)).toISOString())} · ${countdown(left)}`),
+        );
+        return;
+    }
+    host.dataset.tone = passed ? 'danger' : dueTone(step.left);
+    host.title = `${DUE_LABEL[step.key]} · ${dateTime(step.at)} WIB`;
+    host.replaceChildren(
+        icon('due'),
+        node(
+            'span',
+            step.extended ? 'Perpanjangan' : DUE_LABEL[step.key],
+            'dashboard-due-label',
+        ),
+        node(
+            'strong',
+            passed
+                ? overdue(step.left)
+                : step.extended
+                  ? `s.d. ${shortDate(step.at)} · ${countdown(step.left)}`
+                  : countdown(step.left),
+        ),
+    );
+}
+const shortDate = (iso) =>
+    new Intl.DateTimeFormat('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        timeZone: 'Asia/Jakarta',
+    }).format(new Date(iso));
+
+/** Open work for this role; null when nothing waits. */
+function openWork(state) {
+    const { c, d, link } = state,
+        m = d.metrics;
+    if (c.role === 'ku') {
+        const parts = [
+            m.returned && `${fmt(m.returned)} dikembalikan Kepala Divisi`,
+            m.not_started && `${fmt(m.not_started)} belum diisi`,
+        ].filter(Boolean);
+        return parts.length
+            ? {
+                  text: `Penilaian staf: ${parts.join(' · ')}`,
+                  action: 'Isi nilai',
+                  href: link('nilai'),
+              }
+            : null;
+    }
+    if (c.role === 'kd') {
+        const waiting = m.kinds?.member?.submitted || 0,
+            heads = m.kinds?.unit_head?.not_started || 0,
+            parts = [
+                waiting &&
+                    `${fmt(waiting)} pengajuan staf menunggu persetujuan Anda`,
+                heads && `${fmt(heads)} Kepala Unit belum dinilai`,
+            ].filter(Boolean);
+        return parts.length
+            ? {
+                  text: parts.join(' · '),
+                  action: waiting ? 'Buka persetujuan' : 'Nilai Kepala Unit',
+                  href: waiting
+                      ? link('persetujuan', { status: 'Diajukan' })
+                      : link('nilai-kepala'),
+              }
+            : null;
+    }
+    const parts = [
+        m.not_started && `${fmt(m.not_started)} belum diisi`,
+        m.returned && `${fmt(m.returned)} dikembalikan`,
+        m.submitted && `${fmt(m.submitted)} menunggu Kepala Divisi`,
+    ].filter(Boolean);
+    return parts.length
+        ? {
+              text: `Belum Final: ${parts.join(' · ')}`,
+              action: 'Lihat rekap',
+              href: link('rekap', { status: 'all' }),
+          }
+        : null;
+}
+
+/**
+ * Rule-based banner, first match wins:
+ *  - Super HC with extension requests waiting → link to Perpanjangan;
+ *  - KU/KD with a pending request → info, cancel button;
+ *  - KU/KD past the deadline with work left → red, "Ajukan perpanjangan" (plus the rejection note if any);
+ *  - otherwise open work, toned by how close the deadline is. Hidden when the period is closed or idle.
+ */
+function alertBanner(state) {
+    const { c, d, link } = state,
+        host = $('[data-dashboard-alert]'),
+        closed = d.cycle?.status === 'closed',
+        work = closed ? null : openWork(state),
+        x = d.extension,
+        pendingRequests = d.extensions?.pending || 0,
+        body = node('p', null, 'dashboard-alert-text');
+    let tone = 'calm',
+        glyph = 'alert',
+        action = null;
+    if (!closed && c.role === 'hc' && pendingRequests) {
+        tone = 'warn';
+        body.append(
+            node(
+                'strong',
+                `${fmt(pendingRequests)} permintaan perpanjangan menunggu keputusan.`,
+            ),
+        );
+        action = node('a', 'Tinjau permintaan', 'btn btn-small');
+        action.href = link('perpanjangan');
+    } else if (!closed && x?.request?.status === 'pending') {
+        tone = 'info';
+        glyph = 'waiting';
+        body.append(
+            node('strong', 'Permintaan perpanjangan terkirim. '),
+            node(
+                'span',
+                `Diminta sampai ${dateTime(new Date(wib(x.request.requestedDue)).toISOString())} WIB · menunggu keputusan Super HC.`,
+            ),
+        );
+        action = node('button', 'Batalkan permintaan', 'btn btn-small');
+        action.type = 'button';
+        action.dataset.extensionCancel = String(x.request.id);
+    } else if (work && x?.passed && x.units?.length) {
+        // Division window over, but these units were extended: the head can still decide their submissions.
+        tone = 'warn';
+        body.append(
+            node('strong', `Batas persetujuan divisi sudah lewat. `),
+            node(
+                'span',
+                `Pengajuan dari ${x.units.map((u) => `${u.name} (s.d. ${shortDate(new Date(wib(u.due)).toISOString())})`).join(', ')} masih dapat diputuskan.`,
+            ),
+        );
+        action = node('a', 'Buka persetujuan', 'btn btn-small');
+        action.href = link('persetujuan', { status: 'Diajukan' });
+    } else if (work && x?.passed) {
+        tone = 'danger';
+        const rejected = x.request?.status === 'rejected' ? x.request : null;
+        if (rejected)
+            body.append(
+                node('strong', 'Perpanjangan tidak disetujui. '),
+                node(
+                    'span',
+                    `“${rejected.note}” — ${rejected.decider || 'Super HC'}. `,
+                ),
+            );
+        body.append(
+            node(
+                'strong',
+                `${DUE_LABEL[x.key]} sudah lewat · ${work.text.replace(/^Penilaian staf: /, '')}. `,
+            ),
+            node(
+                'span',
+                c.role === 'kd'
+                    ? 'Tanpa perpanjangan, saat periode ditutup pengajuan staf difinalkan otomatis dengan nilai Kepala Unit dan Kepala Unit yang belum dinilai ditandai Tidak dinilai.'
+                    : 'Tanpa perpanjangan, penilaian ini ditandai Tidak dinilai saat periode ditutup.',
+            ),
+        );
+        if (x.canRequest) {
+            action = node('button', 'Ajukan perpanjangan', 'btn btn-small');
+            action.type = 'button';
+            action.dataset.extensionOpen = '';
+        }
+    } else if (work) {
+        const step = roleDeadline(state);
+        tone = step && step.left > 0 ? dueTone(step.left) : 'calm';
+        // The header chip already shows the countdown; the banner only takes its tone.
+        body.append(node('strong', work.text));
+        action = node('a', work.action, 'btn btn-small');
+        action.href = work.href;
+    }
+    host.hidden = !body.childNodes.length;
+    if (host.hidden) {
+        host.replaceChildren();
+        return;
+    }
+    host.dataset.tone = tone;
+    host.replaceChildren(icon(glyph), body, ...(action ? [action] : []));
+}
+
+/**
+ * "Ajukan perpanjangan" dialog (KU/KD): facts of the area, quick +3/+7 day choices or a date (capped at the
+ * next period's deadline), required reason. Sends POST /extensions and reloads the dashboard.
+ */
+function extensionDialog(state, reload) {
+    const dialog = $('[data-extension-dialog]');
+    if (!dialog || !state.d.extension) return;
+    const { c, d } = state,
+        x = d.extension,
+        input = $('[data-extension-due]', dialog),
+        reason = $('[data-extension-reason]', dialog),
+        error = $('[data-extension-error]', dialog),
+        m = d.metrics;
+    const local = (ms) => {
+        const t = new Date(ms + 7 * 3600000);
+        return t.toISOString().slice(0, 16);
+    };
+    const base = Math.max(Date.now(), wib(x.due));
+    const pick = (days) => {
+        const target = new Date(base + days * 86400000);
+        const value = local(target.getTime()).slice(0, 10) + 'T23:59';
+        input.value = value > x.max ? x.max : value;
+        for (const b of $$('[data-extension-days]', dialog))
+            b.classList.toggle('active', Number(b.dataset.extensionDays) === days);
+    };
+    $('[data-extension-area]', dialog).textContent = c.actor?.scopeName || '–';
+    $('[data-extension-current]', dialog).textContent =
+        `${dateTime(new Date(wib(x.due)).toISOString())} WIB`;
+    $('[data-extension-work]', dialog).textContent =
+        c.role === 'ku'
+            ? `${fmt(m.not_started)} belum diisi · ${fmt(m.returned)} dikembalikan`
+            : `${fmt(m.kinds?.member?.submitted)} menunggu persetujuan · ${fmt(m.kinds?.unit_head?.not_started)} Kepala Unit belum dinilai`;
+    $('[data-extension-max]', dialog).textContent =
+        `Paling lambat ${dateTime(new Date(wib(x.max)).toISOString())} WIB (batas periode berikutnya).`;
+    input.min = local(Date.now());
+    input.max = x.max;
+    pick(7);
+    reason.value = '';
+    error.hidden = true;
+    dialog.onclick = (event) => {
+        const days = event.target.closest('[data-extension-days]')?.dataset.extensionDays;
+        if (days) pick(Number(days));
+    };
+    input.oninput = () => {
+        for (const b of $$('[data-extension-days]', dialog))
+            b.classList.remove('active');
+    };
+    $('[data-extension-form]', dialog).onsubmit = async (event) => {
+        event.preventDefault();
+        error.hidden = true;
+        if (reason.value.trim().length < 20) {
+            error.textContent = 'Alasan minimal 20 karakter.';
+            error.hidden = false;
+            reason.focus();
+            return;
+        }
+        const submit = $('[data-extension-submit]', dialog);
+        submit.disabled = true;
+        try {
+            await c.api.request('/extensions', 'POST', {
+                cycle_id: d.cycle.id,
+                due: input.value,
+                reason: reason.value.trim(),
+            });
+            dialog.close();
+            toast('Permintaan perpanjangan terkirim ke Super HC.');
+            reload();
+        } catch (e) {
+            error.textContent = e.message;
+            error.hidden = false;
+        } finally {
+            submit.disabled = false;
+        }
+    };
+    dialog.showModal();
+    reason.focus();
+}
+
+/** SVG completion ring; the dash offset is the unfinished share. */
+function ring(percent) {
+    const ns = 'http://www.w3.org/2000/svg',
+        svg = document.createElementNS(ns, 'svg'),
+        r = 42,
+        length = 2 * Math.PI * r;
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('class', 'dashboard-ring');
+    svg.setAttribute('aria-hidden', 'true');
+    for (const [cls, offset] of [
+        ['dashboard-ring-track', 0],
+        [
+            'dashboard-ring-value',
+            length * (1 - Math.min(100, percent || 0) / 100),
+        ],
+    ]) {
+        const circle = document.createElementNS(ns, 'circle');
+        for (const [key, value] of Object.entries({
+            cx: 50,
+            cy: 50,
+            r,
+            class: cls,
+            'stroke-dasharray': length,
+            'stroke-dashoffset': offset,
+        }))
+            circle.setAttribute(key, String(value));
+        svg.append(circle);
+    }
+    return svg;
+}
+
+/** Bento hero: completion ring beside the status mix of every subject in scope. */
+function hero(state) {
+    const { c, d, link } = state,
+        m = d.metrics,
+        tile = node('section', null, 'dashboard-card dashboard-hero'),
+        head = node('div', null, 'dashboard-hero-head'),
+        figure = node('div', null, 'dashboard-hero-figure'),
+        center = node('div', null, 'dashboard-ring-center'),
+        side = node('div', null, 'dashboard-hero-side'),
+        stack = node('div', null, 'dashboard-hero-stack'),
+        legend = node('ul', null, 'dashboard-hero-legend'),
+        body = node('div', null, 'dashboard-hero-body'),
+        more = node(
+            'a',
+            c.role === 'ku' ? 'Lihat pengajuan' : 'Lihat progres',
+            'link dashboard-hero-link',
+        );
+    tile.setAttribute('aria-label', 'Ketuntasan periode');
+    head.append(
+        node('span', 'Ketuntasan', 'dashboard-card-label'),
+        node(
+            'span',
+            m.total
+                ? `${fmt(m.final)} dari ${fmt(m.total)} subjek sudah Final`
+                : 'Belum ada subjek dalam cakupan',
+            'dashboard-hero-sub',
+        ),
+    );
+    center.append(node('strong', pct(m.completion)), node('span', 'Final'));
+    figure.append(ring(m.completion), center);
+    // A closed period only has Final results and "Tidak dinilai" (everything left unfinished at closing).
+    const closed = d.cycle?.status === 'closed',
+        parts = closed
+            ? [
+                  ['final', 'Final', m.final || 0],
+                  [
+                      'not_started',
+                      'Tidak dinilai',
+                      (m.not_started || 0) + (m.returned || 0) + (m.submitted || 0),
+                  ],
+              ]
+            : STATUS_ORDER.map((key) => [key, STATUSES[key].label, m[key] || 0]);
+    for (const [key, label, value] of parts) {
+        const li = node('li'),
+            dot = node('i');
+        if (value) {
+            const seg = node('span');
+            seg.dataset.status = key;
+            seg.style.flexGrow = String(value);
+            stack.append(seg);
+        }
+        dot.dataset.status = key;
+        li.append(dot, node('span', label), node('strong', fmt(value)));
+        legend.append(li);
+    }
+    stack.setAttribute('role', 'img');
+    stack.setAttribute(
+        'aria-label',
+        STATUS_ORDER.map((key) => `${STATUSES[key].label} ${m[key] || 0}`).join(
+            ', ',
+        ),
+    );
+    more.href =
+        c.role === 'ku'
+            ? link('pengajuan', { status: 'all' })
+            : '#dashboard-progress';
+    side.append(stack, legend);
+    body.append(figure, side);
+    tile.append(head, body, more);
+    return tile;
+}
+
 /** Open work gets a warning dot only when non-zero; the card tone stays positional. */
 const attention = (value) => Boolean(value);
-/** Four current-period totals; no month-to-month comparison. */
+/** Closed period tiles: average, Final, "Tidak dinilai" (excluded from the average) and the closing date. */
+function closedItems(state) {
+    const { c, d, link } = state,
+        m = d.metrics,
+        none = (m.not_started || 0) + (m.returned || 0) + (m.submitted || 0),
+        list = { ku: 'pengajuan', kd: 'persetujuan', hc: 'rekap' }[c.role],
+        closes = d.cycle.schedule.find((step) => step.key === 'closes');
+    return [
+        {
+            label: 'Final',
+            icon: 'average',
+            value: fmt(m.final),
+            unit: m.total ? `dari ${fmt(m.total)}` : '',
+            hint: 'Hasil resmi periode ini',
+            href: link(list, { status: 'Final' }),
+        },
+        {
+            label: 'Tidak dinilai',
+            icon: 'empty',
+            value: fmt(none),
+            hint: 'Tidak selesai saat ditutup · dikecualikan dari rerata',
+            href: link(list, { status: 'Tidak dinilai' }),
+        },
+        {
+            label: 'Periode ditutup',
+            icon: 'waiting',
+            value: closes ? shortDate(closes.at) : '–',
+            hint: 'Data hanya dapat dibaca',
+            href: link(list, { status: 'all' }),
+        },
+    ];
+}
+
+/** Bento: completion hero plus four current-period tiles; no month-to-month comparison. */
 function cards(state) {
     const { c, d, link } = state,
         m = d.metrics,
         role = ROLES[c.role];
-    const open = m.not_started + m.returned;
     const items = [
         {
-            label: 'Rerata keseluruhan',
+            label: 'Rerata nilai',
+            icon: 'average',
             value: fmt(m.average),
             unit: m.average == null ? '' : '/100',
             hint: m.final
@@ -152,33 +636,32 @@ function cards(state) {
                 : 'Belum ada hasil Final',
             href: role.report(link),
         },
-        {
-            label: 'Ketuntasan',
-            value: pct(m.completion),
-            hint: m.total
-                ? `${m.final} dari ${m.total} subjek sudah Final`
-                : 'Belum ada subjek dalam cakupan',
-            // KU has no progress table here: its staff statuses live on Pengajuan.
-            href:
-                c.role === 'ku'
-                    ? link('pengajuan', { status: 'all' })
-                    : '#dashboard-progress',
-        },
     ];
-    if (c.role === 'ku')
+    if (d.cycle?.status === 'closed') items.push(...closedItems(state));
+    else if (c.role === 'ku')
         items.push(
             {
                 label: 'Menunggu Kepala Divisi',
+                icon: 'waiting',
                 value: fmt(m.submitted),
                 hint: 'Sudah Anda ajukan',
                 href: link('pengajuan', { status: 'Diajukan' }),
             },
             {
-                label: 'Perlu diisi',
-                value: fmt(open),
-                hint: `${m.not_started} belum diisi · ${m.returned} dikembalikan`,
+                label: 'Belum diisi',
+                icon: 'empty',
+                value: fmt(m.not_started),
+                hint: 'Staf yang belum dinilai',
                 href: link('nilai'),
-                attention: attention(open),
+                attention: attention(m.not_started),
+            },
+            {
+                label: 'Dikembalikan',
+                icon: 'returned',
+                value: fmt(m.returned),
+                hint: 'Perbaiki lalu ajukan ulang',
+                href: link('nilai'),
+                attention: attention(m.returned),
             },
         );
     else if (c.role === 'kd') {
@@ -186,7 +669,8 @@ function cards(state) {
             heads = m.kinds?.unit_head;
         items.push(
             {
-                label: 'Menunggu persetujuan Anda',
+                label: 'Menunggu persetujuan',
+                icon: 'waiting',
                 value: fmt(member?.submitted),
                 hint: 'Pengajuan staf dari Kepala Unit',
                 href: link('persetujuan', { status: 'Diajukan' }),
@@ -194,29 +678,50 @@ function cards(state) {
             },
             {
                 label: 'Kepala Unit belum dinilai',
+                icon: 'heads',
                 value: fmt(heads?.not_started),
-                hint: heads ? `dari ${heads.total} Kepala Unit` : 'Tidak ada Kepala Unit',
+                hint: heads
+                    ? `dari ${heads.total} Kepala Unit`
+                    : 'Tidak ada Kepala Unit',
                 href: link('nilai-kepala'),
                 attention: attention(heads?.not_started),
+            },
+            {
+                label: 'Dikembalikan',
+                icon: 'returned',
+                value: fmt(m.returned),
+                hint: 'Menunggu perbaikan Kepala Unit',
+                href: link('persetujuan', { status: 'Dikembalikan' }),
             },
         );
     } else
         items.push(
             {
-                label: 'Menunggu persetujuan KD',
+                label: 'Menunggu Kepala Divisi',
+                icon: 'waiting',
                 value: fmt(m.submitted),
                 hint: 'Diajukan Kepala Unit',
                 href: link('rekap', { status: 'Diajukan' }),
             },
             {
-                label: 'Belum diisi / dikembalikan',
-                value: fmt(open),
-                hint: `${m.not_started} belum diisi · ${m.returned} dikembalikan`,
-                href: link('rekap', { status: 'all' }),
-                attention: attention(open),
+                label: 'Belum diisi',
+                icon: 'empty',
+                value: fmt(m.not_started),
+                hint: 'Belum dinilai atasan',
+                href: link('rekap', { status: 'Belum' }),
+                attention: attention(m.not_started),
+            },
+            {
+                label: 'Dikembalikan',
+                icon: 'returned',
+                value: fmt(m.returned),
+                hint: 'Dikembalikan Kepala Divisi',
+                href: link('rekap', { status: 'Dikembalikan' }),
+                attention: attention(m.returned),
             },
         );
     $('[data-dashboard-cards]').replaceChildren(
+        hero(state),
         ...items.map((item, index) => {
             const a = node('a', null, 'dashboard-card'),
                 value = node('strong', item.value, 'dashboard-card-value');
@@ -227,6 +732,7 @@ function cards(state) {
                 value.append(node('small', item.unit, 'dashboard-card-unit'));
             a.append(
                 node('span', item.label, 'dashboard-card-label'),
+                icon(item.icon, 'icon dashboard-card-icon'),
                 value,
                 node('span', item.hint, 'dashboard-card-hint'),
             );
@@ -234,7 +740,6 @@ function cards(state) {
         }),
     );
 }
-
 /**
  * Final results split by their snapshot category (best category first, as
  * returned by the API). The denominator is Final results only; categories
@@ -713,6 +1218,8 @@ function render(root, state) {
         blank(root, 'Belum ada periode penilaian.');
         return;
     }
+    due(state);
+    alertBanner(state);
     cards(state);
     distribution(state);
     histogram(state);
@@ -724,6 +1231,10 @@ function render(root, state) {
 }
 /** Clears every data host and both charts; safe for errors and no-cycle months. */
 function blank(root, message) {
+    for (const host of $$('[data-dashboard-due],[data-dashboard-alert]', root)) {
+        host.hidden = true;
+        host.replaceChildren();
+    }
     for (const host of $$('[data-dashboard-chart]', root)) clearChart(host);
     for (const list of $$('[data-dashboard-tasks],[data-dashboard-indicators],[data-dashboard-activities]', root))
         emptyItem(list, message);
@@ -773,6 +1284,15 @@ export function initDashboard(c, s, link) {
             root.dashboardState = { c, d: data, link };
             render(root, root.dashboardState);
             root.dataset.state = 'ready';
+            // Email link "Ajukan perpanjangan" (?extension=request) opens the dialog once.
+            if (
+                !askedFromLink &&
+                new URLSearchParams(location.search).get('extension') === 'request' &&
+                data.extension?.canRequest
+            ) {
+                askedFromLink = true;
+                extensionDialog(root.dashboardState, load);
+            }
         } catch (e) {
             if (current !== sequence || e.name === 'AbortError') return;
             root.dashboardState = null;
@@ -783,8 +1303,27 @@ export function initDashboard(c, s, link) {
             if (current === sequence) root.setAttribute('aria-busy', 'false');
         }
     }
-    root.addEventListener('click', (event) => {
+    let askedFromLink = false;
+    root.addEventListener('click', async (event) => {
         if (event.target.closest('[data-dashboard-reload]')) load();
+        if (event.target.closest('[data-extension-open]') && ready())
+            extensionDialog(root.dashboardState, load);
+        const cancel = event.target.closest('[data-extension-cancel]');
+        if (cancel) {
+            cancel.disabled = true;
+            try {
+                await c.api.request(
+                    `/extensions/${cancel.dataset.extensionCancel}/cancel`,
+                    'POST',
+                    {},
+                );
+                toast('Permintaan perpanjangan dibatalkan.');
+                load();
+            } catch (e) {
+                toast(e.message, true);
+                cancel.disabled = false;
+            }
+        }
         const view = event.target.closest(
             '.dashboard-distribution-tabs [data-panel-tab]',
         )?.dataset.panelTab;
@@ -819,7 +1358,10 @@ export function initDashboard(c, s, link) {
     if (VIEWS.includes(saved))
         $(`.dashboard-distribution-tabs [data-panel-tab="${saved}"]`, root)?.click();
     setInterval(() => {
-        if (ready()) agenda(root.dashboardState);
+        if (!ready()) return;
+        agenda(root.dashboardState);
+        due(root.dashboardState);
+        alertBanner(root.dashboardState);
     }, 60000);
     load();
 }

@@ -1,260 +1,168 @@
 /* Admin pages: accounts, logs, reminder emails. Builds on shared card, table,
    segmented-control and status styles; only admin-specific cells live here. */
 .admin-page .table-tools {
-    flex-wrap: wrap;
+    @apply flex-wrap;
 }
 
 /* Card title with a small live counter beside it ("Daftar akun · 24 akun"). */
 .admin-card-title {
-    display: flex;
-    min-width: 0;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 2px 10px;
+    @apply flex min-w-0 flex-wrap items-baseline gap-y-0.5 gap-x-2.5;
 }
 .admin-count {
-    color: var(--color-muted);
-    font-size: 12.5px;
-    line-height: 18px;
-    font-variant-numeric: tabular-nums;
+    @apply text-muted text-[12.5px] leading-[18px] tabular-nums;
 }
 .admin-count:empty {
-    display: none;
+    @apply hidden;
 }
 
 /* Desktop tables keep every column readable and scroll inside their card. */
 @media (min-width: 901px) {
     body[data-app-shell] .admin-accounts-table {
-        min-width: 1180px;
+        @apply min-w-[1180px];
     }
     body[data-app-shell] .admin-log-table {
-        min-width: 920px;
+        @apply min-w-[920px];
     }
     body[data-app-shell] .admin-recipient-table {
-        min-width: 980px;
+        @apply min-w-[980px];
     }
 }
+
 /* Auto layout: fixed widths for identity, email and actions; break-word (not
    anywhere) keeps long emails from shrinking their column's minimum width. */
 .admin-accounts-table th:first-child {
-    width: 220px;
+    @apply w-55;
 }
 .admin-accounts-table th:nth-child(2) {
-    width: 220px;
-    min-width: 200px;
+    @apply w-55 min-w-50;
 }
 .admin-accounts-table th:last-child {
-    width: 260px;
+    @apply w-65;
 }
 .admin-accounts-table .reference-person strong {
-    overflow-wrap: break-word;
+    @apply wrap-break-word;
 }
 .admin-email {
-    color: var(--color-muted);
-    overflow-wrap: break-word;
+    @apply text-muted wrap-break-word;
 }
 .admin-role {
-    font-weight: 600;
-    white-space: nowrap;
+    @apply font-semibold whitespace-nowrap;
 }
 .admin-time {
-    font-size: 12.5px;
-    white-space: nowrap;
+    @apply text-[12.5px] whitespace-nowrap;
+}
+.admin-row-actions {
+    @apply inline-flex flex-nowrap items-center justify-end gap-0.5 whitespace-nowrap;
 }
 
-.admin-row-actions {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 2px;
-    white-space: nowrap;
-}
 /* Destructive action: red text, separated from the neutral actions. */
 .admin-row-actions .admin-action-danger {
-    position: relative;
-    margin-left: 9px;
-    color: var(--color-danger);
-    font-weight: 600;
+    @apply relative ml-[9px] text-danger font-semibold;
 }
 .admin-row-actions .admin-action-danger::before {
-    content: '';
-    position: absolute;
-    top: 8px;
-    bottom: 8px;
-    left: -6px;
-    width: 1px;
-    background: var(--color-line);
+    @apply content-[''] absolute top-2 bottom-2 -left-1.5 w-px bg-line;
 }
 body[data-app-shell] .data-table .admin-action-danger:hover {
-    background: var(--color-danger-soft);
-    color: var(--color-danger);
+    @apply bg-danger-soft text-danger;
 }
 .admin-action-danger:focus-visible {
-    outline-color: var(--color-danger);
+    @apply outline-danger;
 }
-
 .admin-ellipsis {
-    max-width: 260px;
-    overflow: hidden;
-    color: var(--color-muted);
-    font-size: 12.5px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @apply max-w-65 overflow-hidden text-muted text-[12.5px] text-ellipsis whitespace-nowrap;
 }
 
 /* Detail dialogs (audit log, organization record, activity): summary block
    above the before/after comparison or history. */
 .detail-summary {
-    padding: 14px 16px;
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
-    background: var(--color-subtle);
+    @apply py-3.5 px-4 border border-line rounded-card bg-subtle;
 }
 .admin-diff td:first-child {
-    color: var(--color-muted);
-    font-family: ui-monospace, Consolas, monospace;
-    font-size: 12px;
+    @apply text-muted [font-family:ui-monospace,Consolas,monospace] text-[12px];
 }
 .admin-changed td {
-    background: var(--color-warning-soft);
+    @apply bg-warning-soft;
 }
 .admin-changed td:last-child {
-    font-weight: 600;
+    @apply font-semibold;
 }
 
 /* Reminder form and recipient preview. */
 .admin-reminder-form {
-    display: grid;
-    gap: 16px;
+    @apply grid gap-4;
 }
 .admin-reminder-grid {
-    display: grid;
-    gap: 16px;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-/* Automatic reminder settings: enable switch beside the title, target checkboxes, next schedule. */
-.admin-auto-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px 16px;
-}
-.admin-auto-targets {
-    display: grid;
-    min-width: 0;
-    gap: 8px;
-    margin: 0;
-    padding: 0;
-    border: 0;
-}
-.admin-auto-targets label {
-    display: flex;
-    min-height: 36px;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    cursor: pointer;
-}
-.admin-auto-upcoming ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 4px 0 0;
-    padding: 0;
-    list-style: none;
-}
-.admin-auto-upcoming li {
-    padding: 4px 10px;
-    border: 1px solid var(--color-line);
-    border-radius: 999px;
-    background: var(--color-subtle);
-    font-size: 12.5px;
-    font-variant-numeric: tabular-nums;
-}
-.admin-auto-actions {
-    display: flex;
-    justify-content: flex-end;
-}
-.admin-select-all {
-    display: inline-flex;
-    min-height: 36px;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px;
-    border: 1px solid var(--color-line);
-    border-radius: 10px;
-    background: var(--color-subtle);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-.admin-select-all:has(input:checked) {
-    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-line));
-    background: var(--color-accent-soft);
-    color: var(--color-link);
-}
-.admin-recipient-table th:first-child {
-    width: 48px;
-}
-.admin-recipient-table tbody tr:has([data-recipient]:checked) {
-    background: color-mix(in srgb, var(--color-accent-soft) 55%, transparent);
-}
-.admin-row-muted td {
-    color: var(--color-muted);
-}
-.admin-send-bar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px 16px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--color-line);
-    background: color-mix(in srgb, var(--color-subtle) 50%, transparent);
+    @apply grid gap-4 grid-cols-[repeat(auto-fit,minmax(240px,1fr))];
 }
 
+/* Automatic reminder settings: enable switch beside the title, target checkboxes, next schedule. */
+.admin-auto-head {
+    @apply flex flex-wrap items-center justify-between gap-y-2 gap-x-4;
+}
+.admin-auto-targets {
+    @apply grid min-w-0 gap-2 m-0 p-0 border-0;
+}
+.admin-auto-targets label {
+    @apply flex min-h-9 items-center gap-2 text-[13px] cursor-pointer;
+}
+.admin-auto-upcoming ul {
+    @apply flex flex-wrap gap-1.5 mt-1 mb-0 mx-0 p-0 list-none;
+}
+.admin-auto-upcoming li {
+    @apply py-1 px-2.5 border border-line rounded-full bg-subtle text-[12.5px] tabular-nums;
+}
+.admin-auto-actions {
+    @apply flex justify-end;
+}
+.admin-select-all {
+    @apply inline-flex min-h-9 items-center gap-2 py-0 px-3 border border-line rounded-control bg-subtle text-[13px] font-semibold cursor-pointer;
+}
+.admin-select-all:has(input:checked) {
+    @apply border-[color-mix(in_srgb,var(--color-primary)_35%,var(--color-line))] bg-accent-soft text-link;
+}
+.admin-recipient-table th:first-child {
+    @apply w-12;
+}
+.admin-recipient-table tbody tr:has([data-recipient]:checked) {
+    @apply bg-accent-soft/55;
+}
+.admin-row-muted td {
+    @apply text-muted;
+}
+.admin-send-bar {
+    @apply flex flex-wrap items-center justify-between gap-y-2.5 gap-x-4 py-3 px-4 border-t border-t-line bg-subtle/50;
+}
 .admin-page tbody[aria-busy='true'] {
-    opacity: 0.55;
+    @apply opacity-55;
 }
 
 /* Tables stack into cards at 900px and below: give row actions the full card
    width and let them wrap so every action stays reachable. */
 @media (max-width: 900px) {
     body[data-app-shell] .admin-page .data-table td:has(> .admin-row-actions) {
-        grid-column: 1 / -1;
-        text-align: left;
+        @apply col-span-full text-left;
     }
     .admin-row-actions {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        gap: 4px 8px;
-        white-space: normal;
+        @apply flex flex-wrap justify-start gap-y-1 gap-x-2 whitespace-normal;
     }
     .admin-row-actions > button {
-        display: inline-flex;
-        min-height: 44px;
-        align-items: center;
+        @apply inline-flex min-h-11 items-center;
     }
     .admin-row-actions .admin-action-danger {
-        margin-left: auto;
+        @apply ml-auto;
     }
     .admin-row-actions .admin-action-danger::before {
-        display: none;
+        @apply hidden;
     }
     .admin-ellipsis {
-        max-width: none;
-        white-space: normal;
+        @apply max-w-none whitespace-normal;
     }
 }
 @media (max-width: 600px) {
     .admin-select-all {
-        width: 100%;
-        min-height: 44px;
+        @apply w-full min-h-11;
     }
     .admin-send-bar .btn {
-        width: 100%;
+        @apply w-full;
     }
 }

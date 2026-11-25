@@ -1,4 +1,4 @@
-ABprove | KPI Kinerja
+ABprove | KPI Kinerja · RS Awal Bros Botania
 PENGINGAT PENILAIAN BULANAN — {{ $period }}
 
 Yth. {{ $recipientName }},
@@ -23,7 +23,7 @@ Ringkasan berdasarkan data saat pengingat dikirim. Lihat aplikasi untuk progres 
 {{ $overdue ? 'TENGGAT TELAH LEWAT' : ($isUnitHead ? 'BATAS PENGAJUAN' : 'BATAS TINDAK LANJUT') }}
 {{ $dueLabel }}
 @if ($overdue)
-Silakan hubungi Admin atau Super HC untuk tindak lanjut jadwal penilaian.
+Ajukan perpanjangan kepada Super HC. Tanpa perpanjangan, penilaian yang belum selesai ditandai Tidak dinilai saat periode ditutup.
 @endif
 
 @endif

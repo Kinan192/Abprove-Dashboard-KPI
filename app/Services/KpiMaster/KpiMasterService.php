@@ -7,6 +7,8 @@ use App\Models\AssessmentCycle;
 use App\Models\KpiItem;
 use App\Models\KpiTemplate;
 use App\Queries\ScopedRecords;
+use App\Services\Assessment\AssessmentService;
+use App\Services\Assessment\DeadlinePolicy;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\AccessContext;
 use Carbon\CarbonImmutable;
@@ -197,16 +199,30 @@ class KpiMasterService
         return $result;
     }
 
+    /**
+     * Closes a period. Not allowed while an approved deadline extension still runs. Submissions waiting for the
+     * division head are finalised automatically; returned and never-filled assessments stay unfinished and read
+     * as "Tidak dinilai" (excluded from averages). Pending extension requests expire.
+     */
     public function close(AccessContext $ctx, int $id): array
     {
         $cycle = AssessmentCycle::whereKey($id)->lockForUpdate()->firstOrFail();
-        if (DB::table('assessments')->where('cycle_id', $id)->where('status', '<>', 'final')->exists()) {
-            throw new BusinessRule('CYCLE_IN_USE', 'Masih ada penilaian yang belum Final. Selesaikan keputusan Kepala Divisi sebelum menutup periode.', 422);
+        if ($cycle->status === 'closed') {
+            throw new BusinessRule('CYCLE_CLOSED', 'Periode sudah ditutup.', 422);
+        }
+        $running = app(DeadlinePolicy::class)->lastExtension($id);
+        if ($running && $running->isFuture()) {
+            throw new BusinessRule('EXTENSION_RUNNING', 'Masih ada perpanjangan tenggat yang berjalan sampai '.$running->setTimezone('Asia/Jakarta')->locale('id')->translatedFormat('d F Y H.i').' WIB.', 422);
         }
         $before = $cycle->toArray();
+        $finalized = app(AssessmentService::class)->autoFinalize($ctx, $id);
+        $expired = DB::table('deadline_extensions')->where('cycle_id', $id)->where('status', 'pending')->update([
+            'status' => 'expired', 'decided_by' => $ctx->userId, 'decided_at' => now(), 'decision_note' => 'Periode ditutup sebelum diputuskan.',
+            'decider_name_snapshot' => DB::table('users')->where('id', $ctx->userId)->value('name'),
+        ]);
         $cycle->status = 'closed';
         $cycle->save();
-        $result = $this->cycleDetail($id);
+        $result = $this->cycleDetail($id) + ['auto_finalized' => $finalized, 'expired_requests' => $expired];
         $this->audit->record($ctx, 'assessment_cycle', $id, 'cycle.closed', $before, $result);
 
         return $result;

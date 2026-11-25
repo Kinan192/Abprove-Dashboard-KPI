@@ -1,283 +1,168 @@
 /* Table chrome shared by every list: toolbar, filter dialog, footer and pagination. */
 .table-card > .table-wrap,
 .card-toolbar + .table-wrap {
-    border: 0;
-    border-radius: 0;
+    @apply border-0 rounded-none;
 }
 .card-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px 16px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--color-line);
+    @apply flex flex-wrap items-center justify-between gap-y-2.5 gap-x-4 py-3 px-4 border-b border-b-line;
 }
 .card-toolbar .table-tools {
-    margin-left: auto;
+    @apply ml-auto;
 }
 .table-tools {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
+    @apply flex flex-wrap items-center gap-2.5;
 }
 .table-tools > input[type='search'] {
-    flex: 0 1 300px;
-    width: 300px;
-    max-width: 300px;
-    margin-left: auto;
+    @apply flex-[0_1_300px] w-75 max-w-75 ml-auto;
 }
 .list-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px 24px;
-    padding: 12px 16px;
-    border-top: 1px solid var(--color-line);
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 18px;
+    @apply flex flex-wrap items-center justify-between gap-y-2.5 gap-x-6 py-3 px-4 border-t border-t-line text-muted text-[12px] leading-[18px];
 }
 .table-row-actions .v2-row-action,
 .admin-row-actions .v2-row-action {
-    margin-left: 0;
+    @apply ml-0;
 }
 .list-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px 14px;
-    min-height: 40px;
-    margin-top: 8px;
-    color: var(--color-muted);
-    font-size: 12px;
+    @apply flex flex-wrap items-center justify-between gap-y-2 gap-x-3.5 min-h-10 mt-2 text-muted text-[12px];
 }
 .list-pagination:has([data-page-prev]:disabled):has([data-page-next]:disabled) {
-    display: none;
+    @apply hidden;
 }
 .list-pagination[data-table-pagination]:has([data-page-prev]:disabled):has(
         [data-page-next]:disabled
     ) {
-    display: flex;
+    @apply flex;
 }
 .table-card > .list-pagination {
-    margin-top: 0;
-    padding: 10px 16px;
-    border-top: 1px solid var(--color-line);
+    @apply mt-0 py-2.5 px-4 border-t border-t-line;
 }
 .list-pagination [data-page-summary] {
-    white-space: nowrap;
+    @apply whitespace-nowrap;
 }
 .list-pagination .pagination-button {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--color-line);
-    border-radius: 10px;
-    background: var(--color-paper);
-    color: var(--color-ink);
-    transition: background-color 0.15s;
+    @apply grid place-items-center w-9 h-9 border border-line rounded-control bg-paper text-ink transition-[background-color] duration-150;
 }
 .list-pagination .pagination-button:hover:not(:disabled) {
-    background: var(--color-subtle);
+    @apply bg-subtle;
 }
 .list-pagination button:disabled {
-    opacity: 0.4;
-    cursor: default;
+    @apply opacity-40 cursor-default;
 }
 .table-page-size {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-    color: var(--color-muted);
-    font-size: 12px;
+    @apply inline-flex items-center gap-2 ml-auto text-muted text-[12px];
 }
 .table-page-size .field {
-    width: 76px;
-    min-height: 36px;
-    padding-block: 6px;
+    @apply w-19 min-h-9 py-1.5;
 }
 .table-page-size[hidden] {
-    display: none;
+    @apply hidden;
 }
 .gp-pagination {
-    flex-wrap: wrap;
+    @apply flex-wrap;
 }
 .gp-pagination .table-page-size {
-    margin-left: auto;
+    @apply ml-auto;
 }
+
 /* Direct filters: each criterion is a labelled select that applies on change.
    `.inline-filter` (admin/KPI toolbars) shares the same look. */
 .table-filter-control {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+    @apply flex flex-wrap items-center gap-2 min-w-0;
 }
 .table-filter-control .org-date-range {
-    display: contents;
+    @apply contents;
 }
 .table-filter-control > label,
 .table-filter-control .org-date-range > label,
 .inline-filter {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-width: 0;
-    max-width: 100%;
-    min-height: 40px;
-    padding-left: 12px;
-    border: 1px solid var(--color-line);
-    border-radius: 10px;
-    background: var(--color-paper);
-    color: var(--color-muted);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 16px;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-        border-color 0.15s,
-        background-color 0.15s,
-        box-shadow 0.15s;
+    @apply inline-flex items-center gap-1 min-w-0 max-w-full min-h-10 pl-3 border border-line rounded-control bg-paper text-muted text-[12px] font-medium leading-[16px] whitespace-nowrap cursor-pointer transition-[border-color,background-color,box-shadow] duration-150;
 }
 .table-filter-control > label:hover,
 .table-filter-control .org-date-range > label:hover,
 .inline-filter:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+    @apply border-primary/35;
 }
 .table-filter-control > label[data-filter-active] {
-    border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
-    background: var(--color-accent-soft);
-    color: var(--color-link);
+    @apply border-primary/55 bg-accent-soft text-link;
 }
 .table-filter-control > label:focus-within,
 .table-filter-control .org-date-range > label:focus-within,
 .inline-filter:focus-within {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
+    @apply border-primary shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-primary)_18%,transparent)];
 }
 .table-filter-control > label > .field,
 .table-filter-control .org-date-range > label > .field,
 .inline-filter > .field {
-    width: auto;
-    min-width: 0;
-    max-width: 240px;
-    min-height: 38px;
-    padding: 0 10px 0 2px;
-    border: 0;
-    border-radius: 0 9px 9px 0;
-    background-color: transparent;
-    box-shadow: none;
-    color: var(--color-ink);
-    font-size: 13px;
-    font-weight: 600;
-    text-overflow: ellipsis;
-    cursor: pointer;
+    @apply w-auto min-w-0 max-w-60 min-h-9.5 py-0 pr-2.5 pl-0.5 border-0 [border-radius:0_9px_9px_0] bg-transparent shadow-none text-ink text-[13px] font-semibold text-ellipsis cursor-pointer;
 }
 .table-filter-control > label > select.field,
 .inline-filter > select.field {
-    padding-right: 30px;
-    background-position: right 10px center;
+    @apply pr-7.5 [background-position:right_10px_center];
 }
 .table-filter-control > label > .field:focus,
 .table-filter-control .org-date-range > label > .field:focus,
 .inline-filter > .field:focus {
-    outline: none;
-    box-shadow: none;
+    @apply outline-none shadow-none;
 }
 .table-filter-reset.btn {
-    min-height: 40px;
-    padding-inline: 10px;
-    color: var(--color-link);
+    @apply min-h-10 px-2.5 text-link;
 }
 .table-filter-count {
-    min-width: 18px;
-    padding: 0 5px;
-    border-radius: 999px;
-    background: var(--color-primary);
-    color: #fff;
-    font-size: 10.5px;
-    line-height: 18px;
-    text-align: center;
+    @apply min-w-4.5 py-0 px-[5px] rounded-full bg-primary text-white text-[10.5px] leading-[18px] text-center;
 }
 @media (max-width: 600px) {
     .table-filter-control {
-        width: 100%;
+        @apply w-full;
     }
     .table-filter-control > label,
     .table-filter-control .org-date-range > label,
     .inline-filter {
-        flex: 1 1 100%;
+        @apply flex-[1_1_100%];
     }
     .table-filter-control > label > .field,
     .table-filter-control .org-date-range > label > .field,
     .inline-filter > .field {
-        flex: 1;
-        max-width: none;
+        @apply flex-1 max-w-none;
     }
 }
 @media (min-width: 901px) {
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) {
-        min-width: 680px;
+        @apply min-w-[680px];
     }
 }
 @media (min-width: 601px) and (max-width: 900px) {
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) {
-        display: block;
-        min-width: 0;
+        @apply block min-w-0;
     }
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) thead {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
+        @apply absolute w-px h-px overflow-hidden [clip-path:inset(50%)];
     }
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) tbody {
-        display: block;
+        @apply block;
     }
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) tr {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px 16px;
-        padding: 16px;
-        border-bottom: 1px solid var(--color-line);
+        @apply grid grid-cols-[1fr_1fr] gap-y-2.5 gap-x-4 p-4 border-b border-b-line;
     }
     body[data-app-shell]
         .data-table:not(.score-table):not(.gp-table)
         tr:last-child {
-        border-bottom: 0;
+        @apply border-b-0;
     }
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) td {
-        display: block;
-        min-width: 0;
-        padding: 0;
-        border: 0;
+        @apply block min-w-0 p-0 border-0;
     }
     body[data-app-shell]
         .data-table:not(.score-table):not(.gp-table)
         td:first-child {
-        grid-column: 1 / -1;
+        @apply col-span-full;
     }
     body[data-app-shell]
         .data-table:not(.score-table):not(.gp-table)
         td[data-label]:not(:first-child)::before {
-        content: attr(data-label);
-        display: block;
-        margin-bottom: 3px;
-        color: var(--color-muted);
-        font-size: 11px;
-        line-height: 16px;
+        @apply content-[attr(data-label)] block mb-[3px] text-muted text-[11px] leading-[16px];
     }
     body[data-app-shell] .data-table:not(.score-table):not(.gp-table) .numeric {
-        text-align: left;
+        @apply text-left;
     }
     body[data-app-shell]
         .data-table:not(.score-table):not(.gp-table)
@@ -285,186 +170,174 @@
     body[data-app-shell]
         .data-table:not(.score-table):not(.gp-table)
         .table-row-actions {
-        justify-content: flex-start;
+        @apply justify-start;
     }
 }
 @media (max-width: 1100px) {
     .card-toolbar .table-tools {
-        width: 100%;
-        margin-left: 0;
+        @apply w-full ml-0;
     }
     .card-toolbar .table-tools > input[type='search'] {
-        flex: 1 1 180px;
-        width: auto;
-        max-width: none;
+        @apply flex-[1_1_180px] w-auto max-w-none;
     }
 }
 @media (max-width: 600px) {
     .table-tools > input[type='search'] {
-        flex: 1;
-        min-width: 140px;
-        max-width: none;
+        @apply flex-1 min-w-35 max-w-none;
     }
     .list-pagination {
-        min-height: 44px;
+        @apply min-h-11;
     }
     .list-pagination[data-table-pagination] {
-        justify-content: space-between;
+        @apply justify-between;
     }
     .list-pagination .pagination-button {
-        width: 44px;
-        height: 44px;
+        @apply w-11 h-11;
     }
     .table-page-size {
-        margin-left: 0;
+        @apply ml-0;
     }
     .table-page-size .field {
-        min-height: 44px;
+        @apply min-h-11;
     }
     .table-filter-fields {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 12px;
+        @apply grid-cols-[minmax(0,1fr)] gap-3;
     }
     .table-filter-header {
-        align-items: flex-start;
-        gap: 10px;
-        padding: 16px;
+        @apply items-start gap-2.5 p-4;
     }
     .table-filter-header p {
-        max-width: 200px;
+        @apply max-w-50;
     }
     .table-filter-symbol {
-        width: 32px;
-        height: 32px;
+        @apply w-8 h-8;
     }
     .table-filter-dialog .table-filter-body {
-        padding: 16px;
+        @apply p-4;
     }
     .table-filter-dialog .table-filter-footer {
-        gap: 10px;
-        padding: 12px 16px;
+        @apply gap-2.5 py-3 px-4;
     }
     .table-filter-chip {
-        min-height: 44px;
+        @apply min-h-11;
     }
 }
 
 /* Workflow pages: score sheet summary, sticky score actions, report cards. */
 body[data-app-shell] .score-summary {
-    margin-top: 16px;
-    padding: 12px 16px;
-    border: 1px solid var(--color-line);
-    border-radius: 14px;
-    background: var(--color-paper);
+    @apply mt-4 py-3 px-4 border border-line rounded-card bg-paper;
 }
 body[data-app-shell] .score-summary [data-total] {
-    font-size: 24px;
-    line-height: 30px;
+    @apply text-[24px] leading-[30px];
 }
 .mobile-person-select .label {
-    flex-shrink: 0;
-    margin: 0;
+    @apply shrink-0 m-0;
 }
+
 /* Review dialog: the read-only sheet fits the dialog width instead of
    scrolling; numeric columns stay compact so the KPI name keeps ~180px. */
 #review-dialog .score-table,
 #review-dialog .score-table.score-review-comparison {
-    min-width: 0;
+    @apply min-w-0;
 }
 #review-dialog .score-table th:first-child {
-    width: 40px;
+    @apply w-10;
 }
 #review-dialog .score-table th:nth-child(3) {
-    width: 64px;
+    @apply w-16;
 }
 #review-dialog .score-table th:nth-child(4) {
-    width: 168px;
+    @apply w-42;
 }
 #review-dialog .score-table th:nth-child(5) {
-    width: 72px;
+    @apply w-18;
 }
 #review-dialog .score-table th:nth-child(6) {
-    width: 120px;
+    @apply w-30;
 }
 @media (min-width: 1251px) {
     #review-dialog .score-table th,
     #review-dialog .score-table td {
-        padding-inline: 12px;
+        @apply px-3;
     }
 }
 .reference-report .reference-report-toolbar {
-    align-items: center;
+    @apply items-center;
 }
 .reference-report .reference-pair {
-    gap: 20px;
+    @apply gap-5;
 }
 .reference-report .card > div > .table-wrap {
-    border: 0;
-    border-radius: 0;
+    @apply border-0 rounded-none;
 }
 .reference-report .card .list-pagination {
-    margin-top: 0;
-    padding: 10px 16px;
-    border-top: 1px solid var(--color-line);
+    @apply mt-0 py-2.5 px-4 border-t border-t-line;
 }
 @media (min-width: 601px) {
     .score-pane > .score-footer {
-        position: sticky;
-        bottom: 16px;
-        z-index: 3;
-        box-shadow: 0 10px 28px -18px rgb(15 30 38 / 0.4);
+        @apply sticky bottom-4 z-3 shadow-[0_10px_28px_-18px_rgb(15_30_38_/_0.4)];
     }
 }
+
 /* Month matrices keep their columns and scroll inside the card on small screens. */
 @media (max-width: 900px) {
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) {
-        display: table;
-        min-width: 100%;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table) {
+        @apply table min-w-full;
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table):has(thead th:nth-child(8)) {
-        min-width: 760px;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table):has(
+            thead th:nth-child(8)
+        ) {
+        @apply min-w-[760px];
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) thead {
-        position: static;
-        width: auto;
-        height: auto;
-        overflow: visible;
-        clip-path: none;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        thead {
+        @apply static w-auto h-auto overflow-visible [clip-path:none];
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) tbody {
-        display: table-row-group;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        tbody {
+        @apply table-row-group;
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) tr {
-        display: table-row;
-        padding: 0;
-        border: 0;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        tr {
+        @apply table-row p-0 border-0;
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) td {
-        display: table-cell;
-        padding: 8px 3px;
-        border-bottom: 1px solid var(--color-line);
-        font-size: 11px;
-        text-align: center;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        td {
+        @apply table-cell py-2 px-[3px] border-b border-b-line text-[11px] text-center;
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) td:first-child {
-        position: sticky;
-        left: 0;
-        z-index: 1;
-        width: 40%;
-        padding: 8px 12px;
-        background: var(--color-paper);
-        text-align: left;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        td:first-child {
+        @apply sticky left-0 z-1 w-[40%] py-2 px-3 bg-paper text-left;
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) td.empty {
-        position: static;
-        text-align: center;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        td.empty {
+        @apply static text-center;
     }
-    body[data-app-shell] .reference-report .data-table.reference-heat:not(.score-table):not(.gp-table) td[data-label]::before {
-        content: none;
+    body[data-app-shell]
+        .reference-report
+        .data-table.reference-heat:not(.score-table):not(.gp-table)
+        td[data-label]::before {
+        @apply content-none;
     }
 }
 @media (max-width: 600px) {
     body[data-app-shell] .score-summary {
-        padding: 12px;
+        @apply p-3;
     }
 }

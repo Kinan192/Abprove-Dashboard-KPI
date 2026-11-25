@@ -1,107 +1,100 @@
+@reference './app.css';
+
 /* Assessment review corrections, per-KPI notes and history timeline (flow-assessments.js). */
 .assessment-kpi-note {
-    margin-top: 6px;
-    padding: 6px 8px;
-    border-left: 3px solid var(--color-warning);
-    border-radius: 6px;
-    background: var(--color-warning-soft);
-    font-size: 12px;
-    line-height: 18px;
-    white-space: pre-line;
+    @apply mt-1.5 py-1.5 px-2 border-l-3 border-l-warning rounded-md bg-warning-soft text-[12px] leading-[18px] whitespace-pre-line;
 }
 .assessment-kpi-note-field {
-    display: block;
-    margin-top: 8px;
+    @apply block mt-2;
 }
 .assessment-kpi-note-label {
-    display: block;
-    margin-bottom: 4px;
-    font-size: 12px;
-    font-weight: 600;
+    @apply block mb-1 text-[12px] font-semibold;
 }
 .assessment-kpi-note-field textarea {
-    min-height: 56px;
-    font-size: 13px;
+    @apply min-h-14 text-[13px];
 }
 .assessment-score-change {
-    display: block;
-    margin-top: 4px;
-    font-size: 11px;
-    color: var(--color-warning);
-    white-space: normal;
+    @apply block mt-1 text-[11px] text-warning whitespace-normal;
 }
+
 /* Division head reviewed score under the unit head's proposal. */
 .assessment-review-field {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    margin-top: 6px;
+    @apply flex items-center justify-end gap-1.5 mt-1.5;
 }
 .assessment-review-label {
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
+    @apply text-[12px] font-semibold whitespace-nowrap;
 }
 .assessment-row-adjusted > td {
-    background: var(--color-warning-soft);
+    @apply bg-warning-soft;
 }
 .assessment-history-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
+    @apply flex flex-wrap items-center gap-1.5;
 }
 .assessment-history-tag {
-    border: 1px solid var(--color-line);
-    border-radius: 999px;
-    padding: 0 8px;
-    font-size: 11px;
-    color: var(--color-muted);
+    @apply border border-line rounded-full py-0 px-2 text-[11px] text-muted;
 }
 .assessment-history-actor {
-    margin-top: 2px;
-    color: var(--color-ink);
+    @apply mt-0.5 text-ink;
 }
 .assessment-history-subtitle {
-    margin-top: 8px;
-    font-weight: 600;
+    @apply mt-2 font-semibold;
 }
 .assessment-history-notes {
-    margin-top: 4px;
-    display: grid;
-    gap: 4px;
+    @apply mt-1 grid gap-1;
 }
 .assessment-history-notes > li {
-    border-radius: 8px;
-    padding: 6px 8px;
-    background: var(--color-subtle);
-    white-space: pre-line;
+    @apply rounded-lg py-1.5 px-2 bg-subtle whitespace-pre-line;
 }
 .assessment-history-notes strong {
-    display: block;
+    @apply block;
 }
 .assessment-history-items {
-    margin-top: 8px;
+    @apply mt-2;
 }
 .assessment-history-table {
-    margin-top: 6px;
-    width: 100%;
-    border-collapse: collapse;
+    @apply mt-1.5 w-full border-collapse;
 }
 .assessment-history-table th,
 .assessment-history-table td {
-    border-bottom: 1px solid var(--color-line);
-    padding: 4px 6px;
-    text-align: left;
-    vertical-align: top;
+    @apply border-b border-b-line py-1 px-1.5 text-left align-top;
 }
 .assessment-history-table .numeric {
-    text-align: right;
-    white-space: nowrap;
+    @apply text-right whitespace-nowrap;
 }
 .assessment-history-legacy {
-    margin-top: 6px;
-    font-style: italic;
-    color: var(--color-muted);
+    @apply mt-1.5 italic text-muted;
+}
+
+/* Division head review: one decision mode at a time. Approve shows the sheet read-only, correct adds the
+   "Nilai KD" fields, return either flags KPIs (checkbox + required note) or returns the whole sheet. */
+.review-modes {
+    @apply mb-4 grid gap-2;
+}
+.review-mode-help {
+    @apply text-xs leading-[18px] text-muted;
+}
+#review-dialog:not([data-review-mode='correct']) .assessment-review-field {
+    @apply hidden;
+}
+#review-dialog:not([data-review-mode='return'][data-review-scope='items']) [data-item-note-wrap] {
+    @apply hidden;
+}
+.assessment-review-field .score-input {
+    @apply w-28;
+}
+.assessment-kpi-flag {
+    @apply flex w-fit cursor-pointer items-center gap-2 text-[12.5px] font-medium;
+}
+.assessment-kpi-note-field:not(:has([data-item-flag]:checked)) [data-item-note-input] {
+    @apply hidden;
+}
+.assessment-kpi-note-field [data-item-note-input] {
+    @apply mt-2;
+}
+/* Unit head revising a per-KPI return: KPIs without a note stay locked. */
+.assessment-kpi-held {
+    @apply mt-1.5 text-xs text-faint;
+}
+tr[data-held] [data-kpi-name] {
+    @apply text-muted;
 }

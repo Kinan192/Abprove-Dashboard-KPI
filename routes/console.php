@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\User;
+use App\Services\Assessment\DeadlineExtensionService;
 use App\Services\Audit\AuditWriter;
 use App\Services\IdentityAccess\ScopeResolver;
 use App\Services\Notification\AutoReminderService;
@@ -98,3 +99,10 @@ Artisan::command('kpi:auto-reminders {--dry-run : Tampilkan rencana tanpa mencat
     })->purpose('Mengirim email pengingat KPI otomatis sesuai jadwal H- Admin (dijalankan scheduler tiap menit).');
 
 Schedule::command('kpi:auto-reminders')->everyMinute()->withoutOverlapping(30);
+
+Artisan::command('kpi:deadline-notices', function (DeadlineExtensionService $extensions) {
+    $sent = $extensions->notifyOverdue();
+    $this->info("Email tenggat lewat: {$sent} terkirim.");
+})->purpose('Mengirim email satu kali per area saat tenggat KU/KD lewat dan masih ada penilaian belum selesai.');
+
+Schedule::command('kpi:deadline-notices')->everyFifteenMinutes()->withoutOverlapping(30);

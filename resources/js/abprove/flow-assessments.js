@@ -31,6 +31,7 @@ const HISTORY_ACTIONS = {
     adjusted: 'Mengoreksi nilai sebelum Final',
     returned: 'Mengembalikan untuk perbaikan',
     approved: 'Menetapkan Final',
+    auto_finalized: 'Difinalkan otomatis saat periode ditutup',
 };
 const HISTORY_STATUS = {
     submitted: 'Diajukan',
@@ -80,6 +81,9 @@ export function initFlowAssessments(c, s, link) {
         // Division head working copy of the reviewed submission: unit head proposals, saved and drafted KD
         // scores and per-KPI notes.
         reviewWorking = null,
+        // Decision mode of the open review ('approve' | 'correct' | 'return') and the return scope.
+        reviewMode = 'approve',
+        returnScope = 'items',
         reviewSequence = 0,
         peopleTab = 'all',
         statusTab =
@@ -88,7 +92,7 @@ export function initFlowAssessments(c, s, link) {
             'all';
     const requestedStatus = new URLSearchParams(location.search).get('status');
     if (
-        ['all', 'Belum', 'Diajukan', 'Dikembalikan', 'Final'].includes(
+        ['all', 'Belum', 'Diajukan', 'Dikembalikan', 'Final', 'Tidak dinilai'].includes(
             requestedStatus,
         )
     ) {
@@ -115,7 +119,11 @@ export function initFlowAssessments(c, s, link) {
     const editable = (p) =>
         p &&
         ['Belum', 'Dikembalikan'].includes(s.assessment(p.id).status) &&
-        !s.canWrite(p.type) &&
+        !s.canWrite(
+            p.type,
+            p.unitId,
+            s.assessment(p.id).status === 'Dikembalikan' ? 'resubmit' : null,
+        ) &&
         s.unit(p.unitId)?.active &&
         s.division(p.divisionId)?.active;
     function updateUnitFilter() {
@@ -170,9 +178,13 @@ export function initFlowAssessments(c, s, link) {
         const locked = readOnly;
         const instructions = $('[data-score-instructions]', sheet);
         instructions.hidden = locked && !review;
-        if (review)
-            instructions.textContent =
-                'Usulan Kepala Unit tetap tersimpan. Isi Nilai KD pada KPI yang dikoreksi; catatan opsional. Kembalikan perlu catatan KPI atau catatan umum.';
+        // A return with KPI notes reopens only those KPIs for the unit head; the others stay locked.
+        const reopened =
+            !locked && !review && a.status === 'Dikembalikan' && a.itemNotes
+                ? Object.keys(a.itemNotes)
+                : [];
+        if (reopened.length)
+            instructions.textContent = `Perbaiki ${reopened.length} KPI yang diberi catatan Kepala Divisi, lalu ajukan ulang. KPI lain terkunci.`;
         const concise = c.role === 'ku' && c.page === 'nilai';
         sheet.dataset.person = p.id;
         text(sheet, '[data-initials]', initials(p.name));
@@ -208,7 +220,11 @@ export function initFlowAssessments(c, s, link) {
                 ? 'Final. Nilai, bobot dan kategori tersimpan pada snapshot dan hanya dapat dibaca.'
                 : a.status === 'Diajukan'
                   ? 'Pengajuan sedang menunggu Kepala Divisi. Angka terkunci.'
-                  : s.canWrite(p.type) || 'Lembar hanya dapat dibaca.';
+                  : s.canWrite(
+                        p.type,
+                        p.unitId,
+                        a.status === 'Dikembalikan' ? 'resubmit' : null,
+                    ) || 'Lembar hanya dapat dibaca.';
         const compare =
             readOnly && c.role === 'kd' && root.matches('[data-review-mount]');
         const previousKey = previousMonth(key),
@@ -238,9 +254,12 @@ export function initFlowAssessments(c, s, link) {
             const input = $('[data-score]', row),
                 cell = input.closest('td'),
                 proposal = a.proposals?.[i] ?? a.values[i];
+            const held = reopened.length > 0 && !reopened.includes(String(item.id));
+            if (held) row.dataset.held = '';
+            $('[data-item-held]', row).hidden = !held;
             input.dataset.score = i;
             input.value = a.values[i] ?? '';
-            input.disabled = locked;
+            input.disabled = locked || held;
             input.closest('label').hidden = locked;
             text(row, '[data-score-label]', `Nilai ${item.name}`);
             const output = $('[data-read-score]', row);
@@ -259,7 +278,7 @@ export function initFlowAssessments(c, s, link) {
                     field.dataset.measurement = i;
                     field.dataset.variable = variable.key;
                     field.setAttribute('aria-label', `${item.name}: ${variable.label}`);
-                    field.readOnly = locked || variable.source === 'fixed';
+                    field.readOnly = locked || held || variable.source === 'fixed';
                     if (variable.source === 'fixed') a.inputs[i][`variable_${variable.key}`] = variable.value;
                     field.value = a.inputs[i][`variable_${variable.key}`] ?? '';
                     label.append(field);
@@ -309,10 +328,14 @@ export function initFlowAssessments(c, s, link) {
             const noteWrap = $('[data-item-note-wrap]', row);
             noteWrap.hidden = !review;
             if (review) {
-                const field = $('[data-item-note-input]', noteWrap);
+                const field = $('[data-item-note-input]', noteWrap),
+                    flag = $('[data-item-flag]', noteWrap);
                 field.dataset.itemNoteInput = item.id;
                 field.value = a.reviewNotes?.[item.id] || '';
                 field.setAttribute('aria-label', `Catatan untuk KPI ${item.name}`);
+                flag.dataset.itemFlag = item.id;
+                flag.checked = !!a.flags?.has(String(item.id));
+                flag.setAttribute('aria-label', `KPI ${item.name} perlu diperbaiki`);
             }
             const definition = (r) =>
                 JSON.stringify([
@@ -702,7 +725,7 @@ export function initFlowAssessments(c, s, link) {
         if (!a.snapshot) return 'Lembar pengajuan belum termuat. Muat ulang halaman.';
         if (key !== s.cycleKey)
             return `Pengajuan periode ${labelCycle(key)}. Buka periode tersebut untuk memutuskan.`;
-        const closed = s.canWrite();
+        const closed = s.canWrite('member', p.unitId);
         if (!closed) return '';
         const x = s.cycle();
         return `${closed}${x?.status === 'open' && x.approval ? ` Batas persetujuan ${dateTime(x.approval)} WIB.` : ''} Nilai KD, pengembalian dan Final tidak tersedia.`;
@@ -748,8 +771,18 @@ export function initFlowAssessments(c, s, link) {
                 reviewed: [...saved],
                 draft: saved.map((v) => (v == null ? '' : String(v))),
                 reviewNotes: keep?.notes || {},
+                flags: new Set(
+                    Object.entries(keep?.notes || {})
+                        .filter(([, note]) => note.trim())
+                        .map(([id]) => String(id)),
+                ),
             };
         }
+        // Opens on "Koreksi nilai" when KD scores were saved before, else on "Setujui".
+        reviewMode = reviewWorking?.saved.some((v) => v != null)
+            ? 'correct'
+            : 'approve';
+        returnScope = 'items';
         const sheet = renderScore(
             $('[data-review-mount]'),
             p,
@@ -808,7 +841,57 @@ export function initFlowAssessments(c, s, link) {
             b.disabled = !allowed;
             b.title = block || '';
         }
+        const modes = $('[data-review-modes]');
+        if (modes) modes.hidden = !allowed;
+        if (allowed) applyReviewMode();
         open('review-dialog');
+    }
+    /**
+     * Division head decision modes of the open review: "Setujui" (read-only, Final), "Koreksi nilai" (Nilai KD
+     * fields, save or Final with them) and "Kembalikan" (flag KPIs with a required note, or return the whole
+     * sheet with a required reason). Field visibility follows data attributes on the dialog (CSS).
+     */
+    const MODE_HELP = {
+        approve: 'Tetapkan Final dengan nilai usulan Kepala Unit. Lembar hanya dibaca.',
+        correct: 'Isi Nilai KD pada KPI yang Anda koreksi; kosongkan untuk memakai usulan Kepala Unit. Usulan tetap tercatat di riwayat.',
+        items: 'Centang KPI yang perlu diperbaiki dan tulis catatannya. Kepala Unit hanya dapat mengubah KPI yang dicentang.',
+        all: 'Seluruh lembar dibuka kembali untuk Kepala Unit. Tulis alasan pengembalian.',
+    };
+    function applyReviewMode() {
+        const dialog = $('#review-dialog');
+        if (!dialog || c.role !== 'kd') return;
+        dialog.dataset.reviewMode = reviewMode;
+        dialog.dataset.reviewScope = returnScope;
+        for (const b of $$('[data-review-mode]', dialog))
+            b.classList.toggle('active', b.dataset.reviewMode === reviewMode);
+        for (const b of $$('[data-review-scope]', dialog))
+            b.classList.toggle('active', b.dataset.reviewScope === returnScope);
+        $('[data-review-scope-wrap]', dialog).hidden = reviewMode !== 'return';
+        text(
+            dialog,
+            '[data-review-mode-help]',
+            MODE_HELP[reviewMode === 'return' ? returnScope : reviewMode],
+        );
+        const instructions = $('[data-review-mount] [data-score-instructions]');
+        if (instructions) instructions.hidden = true;
+        const label = $('[data-review-reason-label]', dialog);
+        if (label)
+            label.innerHTML =
+                reviewMode === 'return' && returnScope === 'all'
+                    ? 'Alasan pengembalian'
+                    : `${reviewMode === 'return' ? 'Catatan umum' : 'Catatan untuk riwayat'} <span class="font-normal text-muted">(opsional)</span>`;
+        const show = { approve: ['final'], correct: ['save-review', 'final'], return: ['return'] }[reviewMode];
+        for (const action of ['return', 'final', 'save-review']) {
+            const b = $(`[data-flow-action="${action}"]`, dialog);
+            if (b) b.hidden = !show.includes(action);
+        }
+        text(
+            dialog,
+            '[data-flow-action="final"]',
+            reviewMode === 'correct' ? 'Tetapkan Final dengan Nilai KD' : 'Tetapkan Final',
+        );
+        text(dialog, '[data-flow-action="return"]', 'Kembalikan ke Kepala Unit');
+        $('[data-review-mount] [data-score-error]')?.setAttribute('hidden', '');
     }
     /** One timeline entry: frozen actor identity, transition, notes and per-KPI changes. */
     function historyEntry(h) {
@@ -1075,23 +1158,46 @@ export function initFlowAssessments(c, s, link) {
         if (returned) {
             if (!single)
                 return toast('Buka pengajuan untuk mengembalikannya dengan catatan.', true);
-            const notes = Object.entries(single.reviewNotes)
-                    .map(([id, note]) => ({ source_kpi_item_id: +id, note: note.trim() }))
-                    .filter((x) => x.note),
-                reason = reviewReason();
-            if (!notes.length && !reason)
-                return reviewError('Isi catatan pada KPI yang perlu diperbaiki atau catatan umum.');
+            const reason = reviewReason();
+            let notes = [];
+            if (returnScope === 'items') {
+                const items = single.snapshot.items.filter((item) =>
+                    single.flags.has(String(item.id)),
+                );
+                if (!items.length)
+                    return reviewError('Centang minimal satu KPI yang perlu diperbaiki, atau pilih "Seluruh penilaian".');
+                const empty = items.filter((item) => !(single.reviewNotes[item.id] || '').trim());
+                if (empty.length)
+                    return reviewError(`Tulis catatan untuk KPI: ${empty.map((item) => item.name).join(', ')}.`);
+                notes = items.map((item) => ({
+                    source_kpi_item_id: +item.id,
+                    note: single.reviewNotes[item.id].trim(),
+                }));
+            } else if (!reason) return reviewError('Tulis alasan pengembalian seluruh penilaian.');
             body = { reason: reason || null, item_notes: notes };
-            extra = `${notes.length ? `${notes.length} catatan KPI dikirim ke Kepala Unit. ` : ''}${draftChanged(single) ? 'Nilai KD yang belum disimpan tidak dipakai. ' : ''}Kepala Unit memperbaiki lalu mengajukan ulang.`;
+            extra = `${notes.length ? `Hanya ${notes.length} KPI yang dibuka untuk diperbaiki. ` : 'Seluruh lembar dibuka kembali. '}${draftChanged(single) ? 'Nilai KD yang belum disimpan tidak dipakai. ' : ''}Kepala Unit memperbaiki lalu mengajukan ulang.`;
         } else {
-            const plan = single ? reviewPlan() : { reviews: [], reason: '' };
+            // "Setujui" finalises with the proposals (plus KD scores saved earlier); drafts count only when correcting.
+            const plan =
+                single && reviewMode === 'correct'
+                    ? reviewPlan()
+                    : { reviews: [], reason: single ? reviewReason() : '' };
+            if (single && reviewMode !== 'correct' && draftChanged(single))
+                extra = 'Nilai KD yang belum disimpan tidak dipakai. ';
             if (!plan) return;
             if (!plan.reviews.length && rows.some((p) => s.total(p.id) == null))
                 return toast('Ada pengajuan tidak lengkap. Periksa kembali.', true);
             if (plan.reviews.length) body.reviews = plan.reviews;
             if (plan.reason) body.reason = plan.reason;
-            const total = single ? totalValues(single.values, single.snapshot.items) : null;
-            extra = `${plan.reviews.length ? `Nilai KD pada ${plan.reviews.length} KPI ikut disimpan. ` : ''}${total != null ? `Total ${number(total)}. ` : ''}Angka akan terkunci dan menjadi hasil resmi.`;
+            const total = single
+                ? totalValues(
+                      reviewMode === 'correct'
+                          ? single.values
+                          : single.saved.map((v, i) => v ?? single.proposals[i]),
+                      single.snapshot.items,
+                  )
+                : null;
+            extra = `${extra || ''}${plan.reviews.length ? `Nilai KD pada ${plan.reviews.length} KPI ikut disimpan. ` : ''}${total != null ? `Total ${number(total)}. ` : ''}Angka akan terkunci dan menjadi hasil resmi.`;
         }
         const answer = await confirm(
             `${returned ? 'Kembalikan' : 'Tetapkan Final'} ${rows.length} penilaian: ${rows.map((p) => p.name).join(', ')}? ${extra}`,
@@ -1134,7 +1240,14 @@ export function initFlowAssessments(c, s, link) {
     document.addEventListener('input', (e) => {
         const reviewMount = e.target.closest('[data-review-mount]');
         if (reviewMount && reviewWorking) {
-            if (e.target.matches('[data-item-note-input]'))
+            if (e.target.matches('[data-item-flag]')) {
+                const id = String(e.target.dataset.itemFlag);
+                if (e.target.checked) reviewWorking.flags.add(id);
+                else reviewWorking.flags.delete(id);
+                $('[data-score-error]', reviewMount).hidden = true;
+                if (e.target.checked)
+                    e.target.closest('[data-item-note-wrap]').querySelector('[data-item-note-input]').focus();
+            } else if (e.target.matches('[data-item-note-input]'))
                 reviewWorking.reviewNotes[e.target.dataset.itemNoteInput] =
                     e.target.value;
             else if (e.target.matches('[data-review-score]')) {
@@ -1293,6 +1406,13 @@ export function initFlowAssessments(c, s, link) {
         const r = e.target.closest('[data-review-person]');
         if (r)
             review(r.dataset.reviewPerson, r.dataset.reviewCycle || s.cycleKey);
+        const mode = e.target.closest('[data-review-mode]')?.dataset.reviewMode,
+            scope = e.target.closest('[data-review-scope]')?.dataset.reviewScope;
+        if ((mode || scope) && reviewWorking) {
+            if (mode) reviewMode = mode;
+            if (scope) returnScope = scope;
+            applyReviewMode();
+        }
         const action =
             e.target.closest('[data-flow-action]')?.dataset.flowAction;
         if (action === 'final') await decide([reviewed]);

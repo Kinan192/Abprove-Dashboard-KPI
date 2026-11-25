@@ -1,1081 +1,770 @@
 /* Geometry and composition follow ABprove_KPI_Kinerja.html and the JPG comparison. */
 .searchable-select {
-    position: relative;
+    @apply relative;
 }
 .searchable-select > input {
-    padding-right: 32px;
+    @apply pr-8;
 }
 .searchable-select::after {
-    content: '';
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    width: 7px;
-    height: 7px;
-    border-right: 1.5px solid var(--color-muted);
-    border-bottom: 1.5px solid var(--color-muted);
-    transform: rotate(45deg);
-    pointer-events: none;
+    @apply content-[''] absolute right-[15px] top-[15px] w-[7px] h-[7px] border-r-[1.5px] border-r-muted border-b-[1.5px] border-b-muted transform-[rotate(45deg)] pointer-events-none;
 }
 body[data-app-shell] [data-searchable-native] {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    min-height: 0;
-    padding: 0;
-    margin: -1px;
-    clip-path: inset(50%);
-    overflow: hidden;
+    @apply absolute w-px h-px min-h-0 p-0 -m-px [clip-path:inset(50%)] overflow-hidden;
 }
 .searchable-select-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    inset-inline: 0;
-    z-index: 60;
-    max-height: min(300px, 40vh);
-    overflow-y: auto;
-    padding: 4px;
-    border-radius: 12px;
-    box-shadow: 0 16px 40px -16px rgb(15 30 38 / 0.3);
+    @apply absolute top-[calc(100%_+_4px)] inset-x-0 z-60 max-h-[min(300px,40vh)] overflow-y-auto p-1 rounded-control shadow-[0_16px_40px_-16px_rgb(15_30_38_/_0.3)];
 }
 .searchable-select-menu[popover] {
-    position: fixed;
-    inset: auto;
-    margin: 0;
+    @apply fixed inset-auto m-0;
 }
 .searchable-select-option {
-    padding: 9px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    overflow-wrap: anywhere;
+    @apply py-[9px] px-2.5 rounded-lg text-[13px] cursor-pointer wrap-anywhere;
 }
 .searchable-select-option:hover,
 .searchable-select-option.active {
-    background: var(--color-subtle);
-    color: var(--color-ink);
+    @apply bg-subtle text-ink;
 }
 .searchable-select-hint {
-    padding: 10px 12px;
-    border-top: 1px solid var(--color-line);
+    @apply py-2.5 px-3 border-t border-t-line;
 }
 body[data-app-shell] [data-flow-organization] .org-table td.empty {
-    text-align: center;
-    vertical-align: middle;
-    height: 160px;
+    @apply text-center align-middle h-40;
 }
 .decision-timeline > li {
-    position: relative;
-    border-left: 2px solid var(--color-line);
-    margin-left: 5px;
-    padding: 0 0 16px 16px;
-    line-height: 19px;
+    @apply relative border-l-2 border-l-line ml-[5px] pt-0 pb-4 pr-0 pl-4 leading-[19px];
 }
 .decision-timeline > li::before {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: 5px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-brand);
+    @apply content-[''] absolute -left-[5px] top-[5px] w-2 h-2 rounded-full bg-brand;
 }
 .decision-timeline .decision-note {
-    background: var(--color-subtle);
-    border-radius: 8px;
-    padding: 8px 10px;
+    @apply bg-subtle rounded-lg py-2 px-2.5;
 }
 .decision-timeline > .empty {
-    border: 0;
-    margin-left: 0;
-    padding: 12px;
+    @apply border-0 ml-0 p-3;
 }
 .decision-timeline > .empty::before {
-    display: none;
+    @apply hidden;
 }
 body[data-app-shell] [data-previous-cell] [data-previous]::before {
-    content: none;
+    @apply content-none;
 }
 body[data-app-shell] [data-previous-cell] [data-previous] {
-    font-size: 13px;
+    @apply text-[13px];
 }
 .reference-kpi-history > summary {
-    list-style: none;
+    @apply list-none;
 }
 .reference-kpi-history > summary::-webkit-details-marker {
-    display: none;
+    @apply hidden;
 }
 .reference-kpi-history[open] > summary svg:last-child {
-    transform: rotate(180deg);
+    @apply transform-[rotate(180deg)];
 }
+
 /* Status text stays explicit in rails, tables, filters and progress captions. */
 body[data-app-shell] [data-status],
 body[data-app-shell] [data-flow-status]:not([data-flow-status='all']) {
-    font-weight: 600;
+    @apply font-semibold;
 }
 body[data-app-shell] [data-status='Belum'],
 body[data-app-shell] [data-status='Belum diisi'],
 body[data-app-shell] [data-flow-status='Belum'] {
-    color: var(--color-muted);
+    @apply text-muted;
 }
 body[data-app-shell] [data-status='Diajukan'],
 body[data-app-shell] [data-flow-status='Diajukan'] {
-    color: var(--color-info);
+    @apply text-info;
 }
 body[data-app-shell] [data-status='Dikembalikan'],
 body[data-app-shell] [data-flow-status='Dikembalikan'] {
-    color: var(--color-warning);
+    @apply text-warning;
 }
 body[data-app-shell] [data-status='Final'],
 body[data-app-shell] [data-status='Disetujui'],
 body[data-app-shell] [data-flow-status='Final'] {
-    color: color-mix(in srgb, var(--color-success) 92%, var(--color-ink));
+    @apply text-[color-mix(in_srgb,var(--color-success)_92%,var(--color-ink))];
 }
 .workspace-tabs {
-    flex-wrap: wrap;
-    width: fit-content;
+    @apply flex-wrap w-fit;
 }
 body[data-app-shell] .compact-workspace .reference-heat td:first-child {
-    padding: 4px 10px;
+    @apply py-1 px-2.5;
 }
 .compact-workspace .reference-heat .reference-person small {
-    margin-top: 0;
-    line-height: 16px;
+    @apply mt-0 leading-[16px];
 }
 body[data-app-shell] .compact-workspace .reference-heat td {
-    font-size: 11px;
+    @apply text-[11px];
 }
 body[data-app-shell] .compact-workspace .reference-ranking-table td {
-    padding: 6px 10px;
+    @apply py-1.5 px-2.5;
 }
 .reference-report .reference-ranking-table .reference-person strong {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
 }
 .reference-report [data-staff-findings] .reference-feed-item {
-    padding: 6px 0;
+    @apply py-1.5 px-0;
 }
 .reference-report [data-staff-findings] .reference-feed-item p {
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 20px;
+    @apply line-clamp-1 leading-[20px];
 }
 .reference-report .reference-feed-item .reference-feed-body > div:first-child {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    @apply overflow-hidden text-ellipsis whitespace-nowrap;
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th {
-    width: auto;
+    @apply w-auto;
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(1) {
-    width: 22%;
+    @apply w-[22%];
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(2) {
-    width: 13%;
+    @apply w-[13%];
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(3) {
-    width: 15%;
+    @apply w-[15%];
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(4) {
-    width: 15%;
+    @apply w-[15%];
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(5) {
-    width: 13%;
+    @apply w-[13%];
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(6) {
-    width: 7%;
+    @apply w-[7%];
 }
 body[data-app-shell] [data-org-kind='staff'] .org-table th:nth-child(7) {
-    width: 15%;
+    @apply w-[15%];
 }
 body[data-app-shell] .reference-kpi-table .icon-button {
-    width: 24px;
-    height: 32px;
+    @apply w-6 h-8;
 }
 .reference-ranking-table th:first-child {
-    width: 12%;
+    @apply w-[12%];
 }
 .reference-ranking-table th:nth-child(2) {
-    width: 46%;
+    @apply w-[46%];
 }
 .reference-ranking-table th:nth-child(3) {
-    width: 18%;
+    @apply w-[18%];
 }
 .reference-ranking-table th:nth-child(4) {
-    width: 24%;
+    @apply w-[24%];
 }
 [data-ranking-v4] .table-wrap {
-    border: 0;
-    border-radius: 0;
+    @apply border-0 rounded-none;
 }
 .reference-progress-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+    @apply absolute w-px h-px overflow-hidden [clip-path:inset(50%)];
 }
 .reference-kpi-name input {
-    background: transparent;
-    border-color: transparent;
-    padding-left: 0;
-    font-size: 20px;
+    @apply bg-transparent border-transparent pl-0 text-[20px];
 }
 .reference-kpi-name input:focus {
-    background: var(--color-paper);
-    border-color: var(--color-line);
+    @apply bg-paper border-line;
 }
 .reference-kpi-history {
-    border: 0;
+    @apply border-0;
 }
 .reference-setting-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--color-line);
+    @apply flex items-center justify-between gap-5 py-3.5 px-4 border-b border-b-line;
 }
 .reference-setting-row:last-child {
-    border-bottom: 0;
+    @apply border-b-0;
 }
 .reference-setting-value {
-    border: 1px solid var(--color-line);
-    border-radius: 10px;
-    padding: 8px 12px;
-    min-width: 150px;
-    text-align: right;
-    font-size: 13px;
+    @apply border border-line rounded-control py-2 px-3 min-w-37.5 text-right text-[13px];
 }
 .reference-settings .reference-setting-rows {
-    max-width: 900px;
+    @apply max-w-[900px];
 }
 .reference-setting-row:nth-child(1) strong {
-    color: var(--color-success);
+    @apply text-success;
 }
 .reference-setting-row:nth-child(2) strong {
-    color: var(--color-info);
+    @apply text-info;
 }
 .reference-setting-row:nth-child(3) strong {
-    color: var(--color-warning);
+    @apply text-warning;
 }
 .reference-setting-row:nth-child(4) strong {
-    color: var(--color-link);
+    @apply text-link;
 }
 body[data-app-shell] .reference-kpi-definition {
-    gap: 20px;
+    @apply gap-5;
 }
 body[data-app-shell] .reference-kpi-definition [data-kpi-editor] {
-    gap: 16px;
+    @apply gap-4;
 }
 .reference-kpi-table tfoot tr:not(:last-child) td {
-    background: var(--color-paper);
+    @apply bg-paper;
 }
 .reference-ranking-table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+    @apply absolute w-px h-px overflow-hidden [clip-path:inset(50%)];
 }
 .reference-ranking-table td:first-child {
-    width: 10%;
+    @apply w-[10%];
 }
 .reference-ranking-table td:nth-child(2) {
-    width: 48%;
+    @apply w-[48%];
 }
 .reference-ranking-table td:nth-child(3) {
-    width: 18%;
+    @apply w-[18%];
 }
 .reference-ranking-table td:nth-child(4) {
-    width: 24%;
+    @apply w-[24%];
 }
 .reference-ranking-table .link {
-    color: var(--color-ink);
-    width: 100%;
+    @apply text-ink w-full;
 }
 body[data-role='ku'] [data-flow-editor] [data-previous] {
-    display: none;
+    @apply hidden;
 }
 .reference-home-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 28px;
-    align-items: start;
+    @apply grid grid-cols-[minmax(0,1fr)_320px] gap-7 [align-items:start];
 }
 .reference-pair {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px;
-    align-items: stretch;
+    @apply grid grid-cols-2 gap-8 items-stretch;
 }
 .reference-report .reference-pair > .card {
-    display: flex;
-    flex-direction: column;
+    @apply flex flex-col;
 }
 .reference-report .reference-pair > .card > .reference-feed {
-    flex: 1;
+    @apply flex-1;
 }
 .reference-return-count {
-    padding: 4px 10px;
-    border-radius: 20px;
-    color: var(--color-warning);
-    background: var(--color-warning-soft);
-    font-size: 12px;
+    @apply py-1 px-2.5 rounded-[20px] text-warning bg-warning-soft text-[12px];
 }
 .reference-return-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    border-left: 3px solid var(--color-warning);
-    padding: 18px 20px;
+    @apply flex items-center justify-between gap-5 border-l-3 border-l-warning py-4.5 px-5;
 }
 .reference-return-card .return-note {
-    margin-top: 8px;
-    color: var(--color-muted);
-    line-height: 22px;
+    @apply mt-2 text-muted leading-[22px];
 }
 .reference-cycle,
 .reference-approval-task,
 .reference-head-task {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 28px;
-    padding: 22px 24px;
+    @apply flex items-center flex-wrap gap-7 py-5.5 px-6;
 }
 .reference-steps {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    max-width: 560px;
-    margin-top: 22px;
+    @apply grid grid-cols-3 max-w-[560px] mt-5.5;
 }
 .reference-home [data-reference-closes]:empty {
-    min-height: 20px;
+    @apply min-h-5;
 }
 .reference-home .reference-steps:empty {
-    min-height: 49px;
+    @apply min-h-[49px];
 }
 @media (max-width: 600px) {
     .reference-home .reference-steps:empty {
-        min-height: 66px;
+        @apply min-h-16.5;
     }
 }
 .reference-steps > div {
-    position: relative;
-    border-top: 2px solid var(--color-line);
-    padding: 12px 14px 0 0;
-    font-size: 12px;
-    color: var(--color-muted);
+    @apply relative border-t-2 border-t-line pt-3 pb-0 pr-3.5 pl-0 text-[12px] text-muted;
 }
 .reference-steps > div::before {
-    content: '';
-    position: absolute;
-    top: -6px;
-    left: 0;
-    width: 10px;
-    height: 10px;
-    border: 2px solid var(--color-primary);
-    border-radius: 50%;
-    background: var(--color-paper);
+    @apply content-[''] absolute -top-1.5 left-0 w-2.5 h-2.5 border-2 border-primary rounded-full bg-paper;
 }
 .reference-steps b {
-    display: block;
-    color: var(--color-ink);
+    @apply block text-ink;
 }
 .reference-ring {
     --completion: 0%;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: conic-gradient(
-        var(--color-primary) var(--completion),
-        var(--color-line) 0
-    );
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
+    @apply w-15 h-15 rounded-full [background:conic-gradient(_var(--color-primary)_var(--completion),var(--color-line)_0_)] grid place-items-center shrink-0;
 }
 .reference-ring span {
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    background: var(--color-paper);
-    border-radius: 50%;
-    font-size: 13px;
-    font-weight: 600;
+    @apply grid place-items-center w-12 h-12 bg-paper rounded-full text-[13px] font-semibold;
 }
 .reference-bar {
-    display: flex;
-    height: 7px;
-    overflow: hidden;
-    border-radius: 5px;
-    background: var(--color-subtle);
+    @apply flex h-[7px] overflow-hidden rounded-[5px] bg-subtle;
 }
 .reference-bar > span {
-    display: block;
-    height: 100%;
+    @apply block h-full;
 }
 .reference-bar .final {
-    background: var(--color-success);
+    @apply bg-success;
 }
 .reference-bar .submitted {
-    background: var(--color-info);
+    @apply bg-info;
 }
 .reference-bar .returned {
-    background: var(--color-warning);
+    @apply bg-warning;
 }
 .reference-bar .not-started {
-    background: color-mix(in srgb, var(--color-muted) 45%, var(--color-line));
+    @apply bg-[color-mix(in_srgb,var(--color-muted)_45%,var(--color-line))];
 }
 .reference-progress-caption {
-    margin-top: 7px;
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 18px;
+    @apply mt-[7px] text-muted text-[12px] leading-[18px];
 }
 .reference-progress-table th:first-child {
-    width: 34%;
+    @apply w-[34%];
 }
 .reference-progress-table td:first-child {
-    width: 34%;
+    @apply w-[34%];
 }
 .reference-progress-table td:last-child {
-    width: 130px;
+    @apply w-32.5;
 }
 .reference-person strong {
-    overflow-wrap: normal;
+    @apply wrap-normal;
 }
 .reference-home [data-reference-next] th:first-child {
-    width: 34%;
+    @apply w-[34%];
 }
 .reference-home [data-reference-next] th:nth-child(2) {
-    width: 18%;
+    @apply w-[18%];
 }
 .reference-home [data-reference-next] th:nth-child(3) {
-    width: 16%;
+    @apply w-[16%];
 }
 .reference-home [data-reference-next] th:nth-child(4) {
-    width: 16%;
+    @apply w-[16%];
 }
 .reference-home [data-reference-next] th:nth-child(5) {
-    width: 16%;
+    @apply w-[16%];
 }
 .reference-return-card > .btn {
-    flex-shrink: 0;
-    white-space: nowrap;
+    @apply shrink-0 whitespace-nowrap;
 }
 .reference-category-visual {
-    min-height: 36px;
-    display: flex;
-    align-items: center;
+    @apply min-h-9 flex items-center;
 }
 .reference-category-visual .reference-bar {
-    width: 100%;
+    @apply w-full;
 }
 .reference-progress-table th:last-child {
-    width: 130px;
+    @apply w-32.5;
 }
 .reference-progress-table strong {
-    font-weight: 600;
+    @apply font-semibold;
 }
 .reference-progress-group > .section-heading {
-    margin-bottom: 6px;
+    @apply mb-1.5;
 }
 .reference-progress-group > .section-heading > div {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 6px;
+    @apply flex flex-wrap items-baseline gap-1.5;
 }
 body[data-app-shell] .reference-home [data-home-progress].page-stack {
-    gap: 16px;
+    @apply gap-4;
 }
 .reference-progress-group .section-title {
-    font-size: 14px;
+    @apply text-[14px];
 }
 .reference-submission-progress {
-    margin-top: 16px;
+    @apply mt-4;
 }
 .reference-submission-progress p {
-    text-align: right;
-    color: var(--color-muted);
-    margin-bottom: 7px;
-    font-size: 12px;
+    @apply text-right text-muted mb-[7px] text-[12px];
 }
 .reference-submission-progress progress {
-    appearance: none;
-    display: block;
-    width: 100%;
-    height: 8px;
-    border: 0;
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--color-subtle);
+    @apply appearance-none block w-full h-2 border-0 rounded-lg overflow-hidden bg-subtle;
 }
 .reference-submission-progress progress::-webkit-progress-bar {
-    background: var(--color-subtle);
+    @apply bg-subtle;
 }
 .reference-submission-progress progress::-webkit-progress-value {
-    background: var(--color-primary);
+    @apply bg-primary;
 }
 .reference-submission-progress progress::-moz-progress-bar {
-    background: var(--color-primary);
+    @apply bg-primary;
 }
 .reference-followups {
-    margin-top: 14px;
+    @apply mt-3.5;
 }
 .reference-followups > div {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--color-line);
-    font-size: 13px;
+    @apply flex justify-between gap-4 py-2.5 px-0 border-b border-b-line text-[13px];
 }
 .reference-followups dt {
-    color: var(--color-muted);
+    @apply text-muted;
 }
 .reference-followups dd {
-    font-weight: 600;
+    @apply font-semibold;
 }
 [data-home-kpi] > div {
-    margin-top: 14px;
+    @apply mt-3.5;
 }
 .reference-person {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
+    @apply flex items-center gap-2.5 min-w-0;
 }
 .reference-person > div {
-    min-width: 0;
+    @apply min-w-0;
 }
 .reference-person .avatar {
-    flex-shrink: 0;
+    @apply shrink-0;
 }
 .reference-person strong {
-    display: block;
-    font-weight: 600;
+    @apply block font-semibold;
 }
 .reference-person small {
-    display: block;
-    color: var(--color-muted);
-    margin-top: 2px;
-    font-size: 11.5px;
-    line-height: 17px;
+    @apply block text-muted mt-0.5 text-[11.5px] leading-[17px];
 }
 .reference-feed {
-    padding: 0 16px;
+    @apply py-0 px-4;
 }
 .reference-feed > .reference-feed-item {
-    display: flex;
-    align-items: start;
-    gap: 12px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--color-line);
+    @apply flex [align-items:start] gap-3 py-3.5 px-0 border-b border-b-line;
 }
 .reference-feed > .reference-feed-item:last-child {
-    border-bottom: 0;
+    @apply border-b-0;
 }
 .reference-feed-item .reference-feed-body {
-    min-width: 0;
-    flex: 1;
+    @apply min-w-0 flex-1;
 }
 .reference-feed-item p {
-    line-height: 22px;
-    color: var(--color-muted);
+    @apply leading-[22px] text-muted;
 }
 .reference-feed-item .feed-meta {
-    font-size: 12px;
+    @apply text-[12px];
 }
 .reference-feed-item button {
-    color: var(--color-ink);
-    font-weight: 600;
-    text-align: left;
+    @apply text-ink font-semibold text-left;
 }
 .reference-feed-icon {
-    width: 28px;
-    height: 28px;
-    flex-shrink: 0;
-    display: grid;
-    place-items: center;
-    border-radius: 8px;
-    background: var(--color-info-soft);
-    color: var(--color-info);
-    font-size: 21px;
+    @apply w-7 h-7 shrink-0 grid place-items-center rounded-lg bg-info-soft text-info text-[21px];
 }
 .reference-feed-icon.negative {
-    color: var(--color-warning);
-    background: var(--color-warning-soft);
-    font-size: 16px;
+    @apply text-warning bg-warning-soft text-[16px];
 }
 .reference-feed-icon.positive {
-    color: var(--color-success);
-    background: var(--color-success-soft);
+    @apply text-success bg-success-soft;
 }
 .reference-feed-kind {
-    display: inline-block;
-    margin-right: 6px;
-    padding: 0 7px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 18px;
+    @apply inline-block mr-1.5 py-0 px-[7px] rounded-full text-[11px] font-semibold leading-[18px];
 }
 .reference-feed-kind.negative {
-    color: var(--color-warning);
-    background: var(--color-warning-soft);
+    @apply text-warning bg-warning-soft;
 }
 .reference-feed-kind.positive {
-    color: var(--color-success);
-    background: var(--color-success-soft);
+    @apply text-success bg-success-soft;
 }
 .reference-report-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: start;
-    gap: 10px;
+    @apply flex flex-wrap [align-items:start] gap-2.5;
 }
 .notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border: 2px solid var(--color-paper);
-    border-radius: 999px;
-    background: var(--color-primary);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    box-sizing: content-box;
+    @apply absolute -top-[5px] -right-[5px] inline-flex items-center justify-center min-w-4.5 h-4.5 py-0 px-[5px] border-2 border-paper rounded-full bg-primary text-white text-[10px] font-bold leading-none tabular-nums whitespace-nowrap box-content;
 }
 .reference-rank-position strong {
-    display: block;
-    font-variant-numeric: tabular-nums;
+    @apply block tabular-nums;
 }
 .reference-rank-position small {
-    display: block;
-    color: var(--color-muted);
-    font-size: 11px;
-    white-space: nowrap;
+    @apply block text-muted text-[11px] whitespace-nowrap;
 }
 body[data-app-shell] .reference-heat th,
 body[data-app-shell] .reference-heat td {
-    font-size: 11px;
-    padding: 8px 3px;
-    text-align: center;
-    overflow-wrap: normal;
+    @apply text-[11px] py-2 px-[3px] text-center wrap-normal;
 }
 body[data-app-shell] .reference-heat th:first-child,
 body[data-app-shell] .reference-heat td:first-child {
-    text-align: left;
-    width: 30%;
-    padding: 10px 12px;
-    overflow-wrap: anywhere;
+    @apply text-left w-[30%] py-2.5 px-3 wrap-anywhere;
 }
 body[data-app-shell] .reference-heat td:first-child strong {
-    font-size: 12px;
+    @apply text-[12px];
 }
 .reference-heat .heat-cell {
-    border-radius: 0;
-    width: 100%;
-    min-width: 0;
-    min-height: 32px;
-    padding: 6px 1px;
-    font-size: 11px;
+    @apply rounded-none w-full min-w-0 min-h-8 py-1.5 px-px text-[11px];
 }
 .reference-heat .reference-selected-month {
-    background: var(--color-success-soft);
+    @apply bg-success-soft;
 }
 .reference-heat td.month-empty {
-    color: var(--color-muted);
+    @apply text-muted;
 }
 .reference-kpi-definition .kpi-definition-meta {
-    display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(170px, 1fr) minmax(
-            170px,
-            1fr
-        );
-    gap: 20px;
+    @apply grid grid-cols-[minmax(0,1.6fr)_minmax(170px,1fr)_minmax(_170px,1fr_)] gap-5;
 }
 .section-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    width: fit-content;
-    max-width: 100%;
+    @apply flex flex-wrap w-fit max-w-full;
 }
 .section-tabs a {
-    text-decoration: none;
+    @apply no-underline;
 }
 .coverage-link {
-    display: block;
-    text-decoration: none;
+    @apply block no-underline;
 }
 .coverage-link:hover,
 .coverage-link:focus-visible {
-    border-color: var(--color-brand);
+    @apply border-brand;
 }
 .coverage-link::after {
-    content: 'Buka indikator KPI';
-    display: block;
-    margin-top: 16px;
-    font-size: 13px;
-    color: var(--color-link);
-    font-weight: 600;
+    @apply content-['Buka_indikator_KPI'] block mt-4 text-[13px] text-link font-semibold;
 }
 body[data-app-shell] .reference-kpi-table th {
-    width: auto;
+    @apply w-auto;
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(1) {
-    width: 4%;
+    @apply w-[4%];
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(2) {
-    width: 13%;
+    @apply w-[13%];
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(3) {
-    width: 23%;
+    @apply w-[23%];
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(4),
 body[data-app-shell] .reference-kpi-table th:nth-child(5),
 body[data-app-shell] .reference-kpi-table th:nth-child(6) {
-    width: 12%;
+    @apply w-[12%];
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(7) {
-    width: 9%;
+    @apply w-[9%];
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(8) {
-    width: 8%;
+    @apply w-[8%];
 }
 body[data-app-shell] .reference-kpi-table th:nth-child(9) {
-    width: 7%;
+    @apply w-[7%];
 }
 .reference-kpi-table .field {
-    width: 100%;
-    min-width: 0;
-    border-color: transparent;
-    background-color: transparent;
-    padding: 5px 3px;
-    border-radius: 6px;
+    @apply w-full min-w-0 border-transparent bg-transparent py-[5px] px-[3px] rounded-md;
 }
 .reference-kpi-table .field:hover {
-    border-color: var(--color-line);
+    @apply border-line;
 }
 .reference-kpi-table .field:focus {
-    border-color: var(--color-primary);
-    background-color: var(--color-paper);
+    @apply border-primary bg-paper;
 }
 .reference-kpi-table [data-item-name] {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    @apply line-clamp-2;
 }
 .reference-kpi-table tfoot td {
-    background: var(--color-subtle);
-    font-weight: 650;
+    @apply bg-subtle font-[650];
 }
 body[data-app-shell][data-role='hc'] .reference-kpi-table .kpi-table-summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 4px 20px;
+    @apply flex items-center justify-between flex-wrap gap-y-1 gap-x-5;
 }
 body[data-app-shell][data-role='hc'] .reference-kpi-table .kpi-table-actions {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px 20px;
+    @apply flex items-center flex-wrap gap-y-1 gap-x-5;
 }
-body[data-app-shell][data-role='hc'] .reference-kpi-table .kpi-table-actions button {
-    min-height: 32px;
+body[data-app-shell][data-role='hc']
+    .reference-kpi-table
+    .kpi-table-actions
+    button {
+    @apply min-h-8;
 }
 @media (min-width: 901px) {
     body[data-app-shell][data-role='hc'] .reference-kpi-table th {
-        padding: 7px 8px;
+        @apply py-[7px] px-2;
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table tbody td {
-        padding: 4px 8px;
+        @apply py-1 px-2;
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table .field {
-        height: 32px;
-        min-height: 32px;
-        padding: 4px;
-        line-height: 20px;
+        @apply h-8 min-h-8 p-1 leading-[20px];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table tfoot td {
-        padding: 4px 8px;
+        @apply py-1 px-2;
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(1) {
-        width: 3%;
+        @apply w-[3%];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(2) {
-        width: 12%;
+        @apply w-[12%];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(3) {
-        width: 24%;
+        @apply w-[24%];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(4),
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(5) {
-        width: 13%;
+        @apply w-[13%];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(6) {
-        width: 15%;
+        @apply w-[15%];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(7),
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(8) {
-        width: 7%;
+        @apply w-[7%];
     }
     body[data-app-shell][data-role='hc'] .reference-kpi-table th:nth-child(9) {
-        width: 6%;
+        @apply w-[6%];
     }
 }
 @media (max-width: 900px) {
-    body[data-app-shell][data-role='hc'] .reference-kpi-table .kpi-table-actions button {
-        min-height: 44px;
+    body[data-app-shell][data-role='hc']
+        .reference-kpi-table
+        .kpi-table-actions
+        button {
+        @apply min-h-11;
     }
 }
 body[data-app-shell] .workspace-v4 .data-table td p {
-    margin-top: 1px;
-    line-height: 16px;
+    @apply mt-px leading-[16px];
 }
 .table-row-actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 10px;
-    white-space: nowrap;
+    @apply flex justify-end items-center gap-2.5 whitespace-nowrap;
 }
 body[data-app-shell] .table-row-actions .v2-row-action {
-    margin-left: 0;
-    min-height: 32px;
+    @apply ml-0 min-h-8;
 }
 @media (min-width: 901px) {
     body[data-app-shell] [data-flow-list] th:nth-last-child(6) {
-        width: 30%;
+        @apply w-[30%];
     }
     body[data-app-shell] [data-flow-list] th:nth-last-child(5) {
-        width: 21%;
+        @apply w-[21%];
     }
     body[data-app-shell] [data-flow-list] th:nth-last-child(4) {
-        width: 16%;
+        @apply w-[16%];
     }
     body[data-app-shell] [data-flow-list] th:nth-last-child(3) {
-        width: 9%;
+        @apply w-[9%];
     }
     body[data-app-shell] [data-flow-list] th:nth-last-child(2) {
-        width: 14%;
+        @apply w-[14%];
     }
     body[data-app-shell] [data-flow-list] th:last-child {
-        width: 10%;
+        @apply w-[10%];
     }
     body[data-app-shell][data-role='kd'] [data-flow-list] th:nth-child(2) {
-        width: 26%;
+        @apply w-[26%];
     }
     body[data-app-shell] [data-flow-list] .reference-person span.block {
-        font-size: 11px;
-        line-height: 16px;
+        @apply text-[11px] leading-[16px];
     }
 }
 body[data-app-shell] .workspace-v4 .reference-person p,
 body[data-app-shell] .workspace-v4 .reference-person span.block {
-    margin-top: 1px;
-    line-height: 16px;
+    @apply mt-px leading-[16px];
 }
 .workspace-v4 .list-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px 16px;
+    @apply flex flex-wrap items-center justify-between gap-y-2 gap-x-4;
 }
 .workspace-v4 .list-footer [data-list-count] {
-    font-size: 12px;
+    @apply text-[12px];
 }
 @media (max-width: 1250px) {
     .reference-home-grid {
-        grid-template-columns: minmax(0, 1fr) 280px;
-        gap: 20px;
+        @apply grid-cols-[minmax(0,1fr)_280px] gap-5;
     }
 }
 @media (max-width: 1000px) {
     .reference-home-grid,
     .reference-pair {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
     }
     .reference-home-grid > aside {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 20px;
+        @apply grid grid-cols-2 gap-5;
     }
     .reference-kpi-definition .kpi-definition-meta {
-        grid-template-columns: minmax(0, 1fr) 1fr;
+        @apply grid-cols-[minmax(0,1fr)_1fr];
     }
 }
 @media (max-width: 600px) {
     body[data-app-shell][data-role='hc'] .reference-ranking-table td {
-        width: auto;
-        padding: 0;
+        @apply w-auto p-0;
     }
     body[data-app-shell] .reference-kpi-table .icon-button {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
+        @apply w-11 h-11 min-w-11;
     }
     .reference-progress-table td:first-child,
     .reference-progress-table td:last-child {
-        width: auto;
+        @apply w-auto;
     }
     .reference-setting-row {
-        padding: 12px;
-        gap: 12px;
+        @apply p-3 gap-3;
     }
     .reference-setting-value {
-        min-width: 0;
-        max-width: 54%;
+        @apply min-w-0 max-w-[54%];
     }
     .reference-home-grid > aside,
     .reference-kpi-definition .kpi-definition-meta {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        @apply grid-cols-2;
     }
     .reference-kpi-definition .kpi-definition-meta {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
     }
     .reference-home-grid > aside {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
     }
     .reference-return-card {
-        flex-wrap: wrap;
+        @apply flex-wrap;
     }
     .reference-cycle,
     .reference-approval-task,
     .reference-head-task {
-        padding: 18px;
-        gap: 16px;
+        @apply p-4.5 gap-4;
     }
     .reference-cycle .btn {
-        width: 100%;
+        @apply w-full;
     }
     .reference-steps {
-        gap: 10px;
+        @apply gap-2.5;
     }
     .reference-steps > div {
-        padding-right: 0;
+        @apply pr-0;
     }
     .reference-heat .heat-cell {
-        min-height: 44px;
+        @apply min-h-11;
     }
     body[data-app-shell] .reference-heat td:first-child {
-        width: auto;
-        padding: 0;
+        @apply w-auto p-0;
     }
     body[data-app-shell] .reference-heat td {
-        font-size: 12px;
-        text-align: left;
-        padding: 0;
+        @apply text-[12px] text-left p-0;
     }
     body[data-app-shell] .reference-heat .numeric {
-        text-align: left;
+        @apply text-left;
     }
     .reference-feed {
-        padding: 0 12px;
+        @apply py-0 px-3;
     }
     body[data-app-shell] .reference-kpi-table td {
-        padding: 0;
+        @apply p-0;
     }
 }
 
 /* Shared KPI and period workspace layout. */
 .kpi-page-heading,
 .period-page-heading {
-    align-items: flex-start;
+    @apply items-start;
 }
 .kpi-workspace-head {
-    align-items: flex-start;
+    @apply items-start;
 }
 .kpi-workspace .kpi-editor-form {
-    gap: 0;
+    @apply gap-0;
 }
 .kpi-workspace .table-wrap {
-    border: 0;
-    border-radius: 0;
+    @apply border-0 rounded-none;
 }
 .kpi-workspace .kpi-workspace-footer {
-    padding: 12px 16px;
-    border-top: 1px solid var(--color-line);
+    @apply py-3 px-4 border-t border-t-line;
 }
 .kpi-workspace .reference-kpi-history {
-    border: 0;
-    padding: 0;
+    @apply border-0 p-0;
 }
 .kpi-workspace .kpi-definition-meta {
-    margin-top: 12px;
+    @apply mt-3;
 }
 .period-tabs-row {
-    justify-content: flex-start;
+    @apply justify-start;
 }
 .kpi-workspace .inline-filter .field {
-    min-width: 220px;
+    @apply min-w-55;
 }
 @media (max-width: 600px) {
     .kpi-page-heading,
     .period-page-heading,
     .kpi-workspace .card-toolbar {
-        align-items: stretch;
+        @apply items-stretch;
     }
 }
-
 .kpi-flow-hint {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 8px;
-    margin: -6px 0 0;
-    padding: 9px 12px;
-    border: 1px solid var(--color-line);
-    border-radius: 10px;
-    background: var(--color-subtle);
-    color: var(--color-muted);
-    font-size: 12px;
-    line-height: 18px;
+    @apply flex flex-wrap gap-y-1 gap-x-2 -mt-1.5 mb-0 mx-0 py-[9px] px-3 border border-line rounded-control bg-subtle text-muted text-[12px] leading-[18px];
 }
 .kpi-form-section + .kpi-form-section {
-    padding-top: 16px;
-    border-top: 1px solid var(--color-line);
+    @apply pt-4 border-t border-t-line;
 }
 .kpi-form-title {
-    margin: 0 0 10px;
-    color: var(--color-muted);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    @apply mt-0 mb-2.5 mx-0 text-muted text-[11px] font-bold tracking-[0.08em] uppercase;
 }
 .kpi-form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    @apply grid grid-cols-2 gap-3;
 }
 .kpi-form-span {
-    grid-column: 1 / -1;
+    @apply col-span-full;
 }
 @media (max-width: 600px) {
     .kpi-form-grid {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
     }
 }

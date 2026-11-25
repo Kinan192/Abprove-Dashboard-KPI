@@ -21,7 +21,7 @@ class AssessmentService
     /** Action => history event. */
     private const EVENTS = ['resubmit' => 'resubmitted', 'withdraw' => 'withdrawn', 'adjust' => 'adjusted', 'return' => 'returned', 'approve' => 'approved'];
 
-    public function __construct(private ScopedRecords $records, private AuditWriter $audit, private AssessmentHistory $history) {}
+    public function __construct(private ScopedRecords $records, private AuditWriter $audit, private AssessmentHistory $history, private DeadlinePolicy $deadlines) {}
 
     public function form(AccessContext $ctx, array $data): array
     {
@@ -53,10 +53,10 @@ class AssessmentService
     public function store(AccessContext $ctx, array $data): array
     {
         $cycle = AssessmentCycle::whereKey($data['cycle_id'])->lockForUpdate()->firstOrFail();
-        $this->window($cycle, $ctx);
         $heads = $ctx->role === 'kepala_divisi';
         $form = $this->form($ctx, $data);
         $p = (object) $form['subject'];
+        $this->window($cycle, $ctx, (int) $p->division_id, (int) $p->unit_id);
         DB::table('divisions')->where('id', $p->division_id)->lockForUpdate()->firstOrFail();
         DB::table('units')->where('id', $p->unit_id)->lockForUpdate()->firstOrFail();
         DB::table($heads ? 'users' : 'employees')->where('id', $p->id)->lockForUpdate()->firstOrFail();
@@ -135,7 +135,7 @@ class AssessmentService
             throw new BusinessRule('FINAL_IMMUTABLE', 'Nilai Final hanya baca.');
         }
         $cycle = AssessmentCycle::whereKey($a->cycle_id)->lockForUpdate()->firstOrFail();
-        $this->window($cycle, $ctx);
+        $this->window($cycle, $ctx, (int) $a->division_id, (int) $a->unit_id, $action);
         if (in_array($action, self::SCORER_ACTIONS, true) ? (int) $a->unit_id !== $ctx->unitId : (int) $a->division_id !== $ctx->divisionId) {
             throw new BusinessRule('SCOPE_CHANGED', 'Penilaian berada di luar area tanggung jawab Anda.');
         }
@@ -153,7 +153,8 @@ class AssessmentService
         }
         if ($action === 'resubmit') {
             $this->status($a, 'returned');
-            $this->rescore($a, $data);
+            // A return with KPI notes reopens only those KPIs; a return without them reopens the whole sheet.
+            $this->rescore($a, $data, array_map('intval', array_keys($a->return_notes ?? [])));
             $a->positive_finding = $data['positive_finding'] ?? null;
             $a->negative_finding = $data['negative_finding'] ?? null;
             $a->status = 'submitted';
@@ -199,13 +200,38 @@ class AssessmentService
      * Rescores the captured sheet with the same formula and weight validation as a new submission (unit head
      * revision of a returned assessment). Reviewed scores of the previous submission no longer apply.
      */
-    private function rescore(Assessment $a, array $data): void
+    /**
+     * @param  list<int>  $reopened  source KPI ids the division head returned with a note; when given, every other
+     *                               KPI must keep its submitted score (it is locked for the unit head)
+     */
+    private function rescore(Assessment $a, array $data, array $reopened = []): void
     {
         $items = $a->items()->lockForUpdate()->get();
         $values = $this->scores($items->map(fn ($item) => (object) [
             'id' => $item->source_kpi_item_id, 'weight_percent' => $item->weight_percent_snapshot, 'workspace_definition' => $item->definition_snapshot,
         ]), $data);
+        if ($reopened) {
+            // Locked KPIs keep the submitted proposal whatever the client sent; the total is rebuilt from it.
+            $total = '0';
+            foreach ($items as $item) {
+                $id = (int) $item->source_kpi_item_id;
+                if (! in_array($id, $reopened, true)) {
+                    $values['scores'][$id] = self::proposal($item);
+                }
+                $total = bcadd($total, self::weighted((string) $values['scores'][$id], (string) $item->weight_percent_snapshot), 6);
+            }
+            $values['total'] = $total;
+        }
         foreach ($items as $item) {
+            if ($reopened && ! in_array((int) $item->source_kpi_item_id, $reopened, true)) {
+                // Locked KPI keeps the unit head's submitted score; earlier KD corrections no longer apply.
+                if ($item->reviewed_score !== null) {
+                    $item->reviewed_score = null;
+                    $item->save();
+                }
+
+                continue;
+            }
             $value = $values['scores'][$item->source_kpi_item_id];
             $item->score = (int) round($value);
             $item->computed_score = ($item->definition_snapshot['method'] ?? null) === 'formula' ? $value : null;
@@ -312,7 +338,9 @@ class AssessmentService
                 $inputs[$item->id] = $computed['inputs'];
             } else {
                 $raw = $input[$item->id]['score'] ?? null;
-                if (! preg_match('/^\d+$/D', (string) $raw) || $raw < 10 || $raw > 100) throw new BusinessRule('INVALID_SCORE', 'Nilai manual harus bilangan bulat 10–100.', 422);
+                if (! preg_match('/^\d+$/D', (string) $raw) || $raw < 10 || $raw > 100) {
+                    throw new BusinessRule('INVALID_SCORE', 'Nilai manual harus bilangan bulat 10–100.', 422);
+                }
                 $value = (int) $raw;
                 $inputs[$item->id] = ['value' => $value];
             }
@@ -331,6 +359,34 @@ class AssessmentService
     {
         // Any active head of the assessment's division may finalize, including a successor of the routed reviewer.
         abort_unless($ctx->role === 'kepala_divisi' && (int) $a->division_id === $ctx->divisionId, 403);
+        $this->seal($a, $ctx->userId, $ctx->assignmentId, DB::table('users')->where('id', $ctx->userId)->value('name'));
+    }
+
+    /**
+     * Period close: every submission still waiting for the division head becomes Final with the score in force
+     * (the unit head's proposal, or the division head's saved corrections). The routed reviewer stays the
+     * finalizer of record (no assignment), the name snapshot says it was automatic and the history keeps
+     * the closing Super HC as actor. Returned and missing assessments are left as they are: "Tidak dinilai".
+     */
+    public function autoFinalize(AccessContext $ctx, int $cycleId): int
+    {
+        $count = 0;
+        foreach (Assessment::where('cycle_id', $cycleId)->where('status', 'submitted')->lockForUpdate()->get() as $a) {
+            $before = $a->load('items')->toArray();
+            $this->seal($a, (int) $a->reviewer_user_id, null, 'Otomatis saat periode ditutup');
+            $a->lock_version++;
+            $a->save();
+            $after = $a->fresh()->load('items')->toArray();
+            $this->audit->record($ctx, 'assessment', $a->id, 'assessment.auto_finalized', $before, $after, 'Periode ditutup');
+            $this->history->record($ctx, 'auto_finalized', $before, $after, ['note' => 'Difinalkan otomatis saat periode ditutup.']);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    private function seal(Assessment $a, int $userId, ?int $assignmentId, ?string $name): void
+    {
         $category = DB::table('cycle_categories')->where('cycle_id', $a->cycle_id)->where('lower_bound', '<=', $a->total_score_raw)
             ->where(fn ($q) => $q->whereNull('upper_bound')->orWhere('upper_bound', '>', $a->total_score_raw))->get();
         if ($category->count() !== 1) {
@@ -339,9 +395,9 @@ class AssessmentService
         $c = $category->first();
         $a->status = 'final';
         $a->finalized_at = now();
-        $a->finalized_by = $ctx->userId;
-        $a->finalized_assignment_id = $ctx->assignmentId;
-        $a->finalized_by_name_snapshot = DB::table('users')->where('id', $ctx->userId)->value('name');
+        $a->finalized_by = $userId;
+        $a->finalized_assignment_id = $assignmentId;
+        $a->finalized_by_name_snapshot = $name;
         $a->category_code_snapshot = $c->code;
         $a->category_label_snapshot = $c->label;
         $a->category_lower_snapshot = $c->lower_bound;
@@ -355,11 +411,18 @@ class AssessmentService
         }
     }
 
-    private function window(AssessmentCycle $cycle, AccessContext $ctx): void
+    /**
+     * Writes need an open cycle that has started and the actor's effective deadline for the assessment's area
+     * (schedule plus approved extensions, see DeadlinePolicy). The closing date no longer blocks on its own:
+     * an extension may run past it, and Super HC closes the period explicitly.
+     */
+    private function window(AssessmentCycle $cycle, AccessContext $ctx, ?int $divisionId, ?int $unitId, ?string $action = null): void
     {
-        $deadline = $ctx->role === 'kepala_unit' ? 'submission_due_at' : 'approval_due_at';
-        if ($cycle->status !== 'open' || now()->lt($cycle->opens_at) || now()->gt($cycle->$deadline) || now()->gt($cycle->closes_at)) {
-            throw new BusinessRule('CYCLE_NOT_WRITABLE', 'Periode belum dibuka atau tenggat telah lewat.');
+        if ($cycle->status !== 'open' || now()->lt($cycle->opens_at)) {
+            throw new BusinessRule('CYCLE_NOT_WRITABLE', 'Periode belum dibuka atau sudah ditutup.');
+        }
+        if (now()->gt($this->deadlines->forAction($cycle, $ctx->role, $divisionId, $unitId, $action))) {
+            throw new BusinessRule('CYCLE_NOT_WRITABLE', 'Tenggat untuk area ini telah lewat. Ajukan perpanjangan kepada Super HC.');
         }
     }
 }

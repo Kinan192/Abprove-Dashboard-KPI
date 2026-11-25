@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\FrontendDataController;
 use App\Http\Controllers\NotificationController;
@@ -24,6 +25,7 @@ foreach (['unit' => 'kepala_unit', 'division' => 'kepala_divisi', 'hc' => 'super
         Route::get('/dashboard', DashboardController::class);
         if ($role === 'super_hc') {
             Route::get('/activities/{activity}', [ActivityController::class, 'show'])->whereNumber('activity');
+            Route::get('/extensions', [ExtensionController::class, 'overview']);
         }
     });
     Route::prefix($prefix)->middleware(['context:'.$role, 'frontend', 'schema.v2'])->group(function () use ($role) {
@@ -41,6 +43,10 @@ foreach (['unit' => 'kepala_unit', 'division' => 'kepala_divisi', 'hc' => 'super
         Route::get('/profile', [ProfileController::class, 'show']);
         Route::get('/profile/photo', [ProfileController::class, 'photo'])->withoutMiddleware('frontend');
         Route::post('/profile', [ProfileController::class, 'update']);
+        if ($role !== 'super_hc') {
+            Route::post('/extensions', [ExtensionController::class, 'store']);
+            Route::post('/extensions/{extension}/cancel', [ExtensionController::class, 'cancel'])->whereNumber('extension');
+        }
         if ($role === 'kepala_unit') {
             Route::get('/score', [FrontendController::class, 'show']);
             Route::get('/submissions', [FrontendController::class, 'show']);

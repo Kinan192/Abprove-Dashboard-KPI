@@ -16,19 +16,24 @@ $sections = $ku ? ['agenda', 'categories', 'indicators'] : ['categories', 'agend
 @endphp
 <div class="page-content role-dashboard" data-role-dashboard="{{ $vm->role }}" data-state="loading" aria-busy="true">
     <header class="dashboard-heading">
-        <div>
-            <h2 class="lead">Ringkasan kinerja</h2>
-            <p class="dashboard-caption"><span data-dashboard-month>{{ $vm->monthLabel() }}</span> · {{ $copy['scope'] }}</p>
+        <div class="min-w-0">
+            <h2 class="lead">{{ $vm->greeting() }}</h2>
+            <p class="dashboard-caption">Ringkasan kinerja <span data-dashboard-month>{{ $vm->monthLabel() }}</span> · {{ $copy['scope'] }}</p>
         </div>
         <div class="dashboard-heading-actions">
+            {{-- Role deadline countdown (dashboard.js), refreshed every minute. --}}
+            <p class="dashboard-due" data-dashboard-due hidden></p>
             <button type="button" class="btn" data-dashboard-reload aria-label="Muat ulang ringkasan"><x-abprove.icon name="refresh"/><span>Muat ulang</span></button>
             <a @class(['btn', 'btn-primary' => ! $ku]) href="{{ $vm->link($copy['report']) }}" data-dashboard-report>Laporan lengkap<x-abprove.icon name="chevron" class="-rotate-90"/></a>
         </div>
     </header>
     <p class="notice notice-error" data-dashboard-error role="alert" hidden>Ringkasan belum dapat dimuat. Periksa koneksi lalu pilih Muat ulang.</p>
     <p class="notice notice-warning" data-dashboard-empty hidden>Periode penilaian belum dibuat oleh Super HC. Ringkasan akan muncul setelah periode tersedia.</p>
+    {{-- Rule-based attention banner: open work for this role plus the nearest relevant deadline. --}}
+    <div class="dashboard-alert" data-dashboard-alert role="status" hidden></div>
 
     <section class="dashboard-cards" data-dashboard-cards aria-label="Indikator utama" aria-live="polite">
+        <div class="dashboard-card dashboard-hero" data-skeleton><span class="dashboard-card-label">Memuat…</span><strong class="dashboard-card-value">–</strong><span class="dashboard-card-hint">&nbsp;</span></div>
         @foreach(['mint', 'sky', 'lilac', 'amber'] as $tone)<div class="dashboard-card" data-tone="{{ $tone }}" data-skeleton><span class="dashboard-card-label">Memuat…</span><strong class="dashboard-card-value">–</strong><span class="dashboard-card-hint">&nbsp;</span></div>@endforeach
     </section>
 
@@ -132,4 +137,36 @@ $sections = $ku ? ['agenda', 'categories', 'indicators'] : ['categories', 'agend
         @endforeach
     </div>
 </div>
+@if($vm->role !== 'hc')
+{{-- Deadline extension request (dashboard.js extensionDialog): facts, quick dates capped by the next period, reason. --}}
+<dialog class="modal-dialog narrow" data-extension-dialog aria-labelledby="extension-dialog-title">
+    <form class="dialog-shell" data-extension-form novalidate>
+        <div class="dialog-header"><h2 id="extension-dialog-title" class="dialog-title">Ajukan perpanjangan</h2><button type="button" class="icon-button -mr-2" data-dialog-close aria-label="Tutup"><x-abprove.icon name="close"/></button></div>
+        <div class="dialog-body grid gap-4">
+            <dl class="record-detail rounded-control border border-line p-3">
+                <dt>Periode</dt><dd>{{ $vm->monthLabel() }}</dd>
+                <dt>Area</dt><dd data-extension-area>–</dd>
+                <dt>Tenggat saat ini</dt><dd data-extension-current>–</dd>
+                <dt>Belum selesai</dt><dd data-extension-work>–</dd>
+            </dl>
+            <div>
+                <label class="label" for="extension-due">Perlu waktu sampai</label>
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="seg" role="group" aria-label="Pilihan cepat"><button type="button" data-extension-days="3">+3 hari</button><button type="button" data-extension-days="7">+7 hari</button></div>
+                    <input id="extension-due" class="field w-auto min-w-[200px] flex-1" type="datetime-local" required data-extension-due>
+                </div>
+                <p class="mt-1.5 text-xs leading-[18px] text-muted" data-extension-max></p>
+            </div>
+            <label class="block">
+                <span class="label">Alasan keterlambatan</span>
+                <textarea class="field min-h-24" rows="3" maxlength="1000" required data-extension-reason placeholder="Jelaskan kenapa penilaian belum selesai dan apa yang masih dikerjakan."></textarea>
+                <span class="mt-1.5 block text-xs leading-[18px] text-muted">Wajib, minimal 20 karakter. Dibaca Super HC dan tercatat di Riwayat Aktivitas.</span>
+            </label>
+            <p class="notice"><x-abprove.icon name="bell"/><span>Super HC menerima email dan pemberitahuan di dashboard. Anda diberi tahu setelah permintaan diputuskan.</span></p>
+            <p class="notice notice-error" data-extension-error role="alert" hidden></p>
+        </div>
+        <div class="dialog-footer"><button type="button" class="btn" data-dialog-close>Batal</button><button type="submit" class="btn btn-primary" data-extension-submit>Kirim permintaan</button></div>
+    </form>
+</dialog>
+@endif
 @endsection

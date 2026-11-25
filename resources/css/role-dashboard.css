@@ -15,65 +15,44 @@
    getComputedStyle(document.documentElement); they must stay plain colours
    (the category ramp is blended in JS, so its ends must be #rrggbb). */
 :root {
-    --dashboard-final: #0f8456;
-    --dashboard-final-hover: #0b6b45;
+    /* Status colours follow the badges: Final in brand tosca, Diajukan in soft
+       blue (info), Dikembalikan in amber, Belum diisi in slate. */
+    --dashboard-final: #03b1c0;
+    --dashboard-final-hover: #00939f;
     /* Text drawn on top of a --dashboard-final bar. */
     --dashboard-on-final: #ffffff;
-    --dashboard-submitted: #4caf7f;
-    --dashboard-returned: #d99a2b;
-    --dashboard-pending: #cddcd3;
+    --dashboard-submitted: #8fb3ef;
+    --dashboard-returned: #e7a13a;
+    --dashboard-pending: #cfd8da;
     /* Category doughnut: best category → lowest category. */
-    --dashboard-category-high: #0b6b45;
-    --dashboard-category-low: #a9dcc0;
+    --dashboard-category-high: #0b6670;
+    --dashboard-category-low: #bff1f5;
     --dashboard-donut: 132px;
     /* Histogram plot height; the host needs it (maintainAspectRatio off). */
-    --dashboard-histogram: 140px;
+    --dashboard-histogram: 150px;
 }
 [data-theme='dark'] {
-    --dashboard-final: #4cc48c;
-    --dashboard-final-hover: #6ad9a0;
-    --dashboard-on-final: #0a1812;
-    --dashboard-submitted: #2b7f59;
+    --dashboard-final: #1fb5c3;
+    --dashboard-final-hover: #45c9d5;
+    --dashboard-on-final: #0a0f10;
+    --dashboard-submitted: #4a6fb0;
     --dashboard-returned: #e2a94f;
-    --dashboard-pending: #2c4237;
-    --dashboard-category-high: #7fe0ad;
-    --dashboard-category-low: #2a5c45;
+    --dashboard-pending: #2d383a;
+    --dashboard-category-high: #9ce6ed;
+    --dashboard-category-low: #164a50;
 }
-/* Metric card pastels: muted tint, tinted border, darker accent for the dot
-   and label. Dark theme keeps the hue on a deep tint with a light accent. */
+
+/* Metric tiles: neutral bento tiles; each marker repeats its status colour
+   from the hero bar (average in tosca, waiting blue, not started slate,
+   returned amber), so one colour always means one state. */
 .role-dashboard {
-    --card-mint: #e2f4ea;
-    --card-mint-line: #c2e6d2;
-    --card-mint-ink: #0b6b45;
-    --card-sky: #e3effa;
-    --card-sky-line: #c6dcf1;
-    --card-sky-ink: #24598f;
-    --card-lilac: #eee8f8;
-    --card-lilac-line: #dacfef;
-    --card-lilac-ink: #5b3f9c;
-    --card-amber: #fbf0db;
-    --card-amber-line: #f0dbb0;
-    --card-amber-ink: #8a5300;
-}
-[data-theme='dark'] .role-dashboard {
-    --card-mint: #143427;
-    --card-mint-line: #1f4d3a;
-    --card-mint-ink: #8fe3b6;
-    --card-sky: #152a3f;
-    --card-sky-line: #23415f;
-    --card-sky-ink: #a3c8ef;
-    --card-lilac: #251f3a;
-    --card-lilac-line: #3a3159;
-    --card-lilac-ink: #c9b8f2;
-    --card-amber: #33291a;
-    --card-amber-line: #54421f;
-    --card-amber-ink: #f0bd72;
+    --card-mint-ink: var(--dashboard-final);
+    --card-sky-ink: var(--dashboard-submitted);
+    --card-lilac-ink: var(--color-faint);
+    --card-amber-ink: var(--dashboard-returned);
 }
 body[data-app-shell] .role-dashboard.page-content {
-    @apply m-0 grid min-w-0 content-start gap-3;
-    container: dashboard / inline-size;
-    padding-top: 12px;
-    padding-bottom: 12px;
+    @apply m-0 grid min-w-0 content-start gap-3 py-4 @container/dashboard;
 }
 
 /* Heading and panel heads */
@@ -81,19 +60,16 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply flex flex-wrap items-end justify-between gap-x-6 gap-y-3;
 }
 .role-dashboard .dashboard-heading .lead {
-    @apply text-[22px] leading-7 font-semibold tracking-[-0.02em] text-ink;
+    @apply text-[24px] leading-8 font-semibold tracking-[-0.03em] text-ink;
 }
 .role-dashboard .dashboard-heading .dashboard-caption {
     @apply mt-0.5 text-[13px] leading-5;
 }
 .role-dashboard .dashboard-heading [data-dashboard-month] {
-    @apply font-semibold text-ink;
+    @apply font-medium text-ink;
 }
 .role-dashboard .dashboard-heading-actions {
     @apply flex shrink-0 gap-2;
-}
-.role-dashboard .dashboard-heading-actions .btn {
-    @apply min-h-10 rounded-[10px] px-4;
 }
 .role-dashboard .btn svg {
     @apply size-4;
@@ -108,54 +84,44 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply min-w-0 flex-[1_1_180px];
 }
 .role-dashboard .dashboard-panel-head .section-title {
-    @apply text-[15px] leading-[22px] font-semibold text-ink;
+    @apply text-[14px] leading-5 font-semibold tracking-[-0.01em] text-ink;
 }
 .role-dashboard .dashboard-panel-head > .link {
-    @apply -my-1.5 -mr-2 inline-flex min-h-10 shrink-0 items-center rounded-[10px] px-3 text-[13px] font-semibold transition-colors hover:bg-accent-soft hover:no-underline;
+    @apply -my-1 -mr-2 inline-flex min-h-8 shrink-0 items-center rounded-md px-2.5 text-[12.5px] font-medium transition-colors hover:bg-accent-soft hover:no-underline;
 }
 .role-dashboard .dashboard-panel {
-    @apply flex min-w-0 flex-col gap-2.5 rounded-2xl border border-line bg-paper px-4 py-3.5;
+    @apply flex min-w-0 flex-col gap-3 rounded-card border border-line bg-paper p-4 shadow-card;
 }
 .role-dashboard .dashboard-loading,
 .role-dashboard .dashboard-empty {
     @apply list-none py-2 text-[13px] leading-5 text-muted;
 }
 .role-dashboard .dashboard-empty {
-    @apply rounded-xl bg-subtle px-4 py-3 text-center;
+    @apply rounded-control border border-dashed border-line-strong px-4 py-3 text-center;
 }
 .role-dashboard :is(ol, ul, div)[tabindex='0']:focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
 }
 
-/* Segmented pills (analysis views, highlights, indicator order): green
-   selection on a quiet track; keyboard handled by initPanels(). */
-.role-dashboard .seg {
-    @apply gap-0.5 rounded-full border-0 p-[3px];
-    background: var(--color-track, var(--color-subtle));
-}
+/* Segmented tabs (analysis views, highlights, indicator order) reuse the
+   shared neutral .seg; keyboard handled by initPanels(). */
 .role-dashboard .seg button {
-    @apply min-h-9 gap-1.5 rounded-full px-3 text-[12.5px];
+    @apply min-h-7 gap-1.5 px-2.5 text-[12.5px];
 }
 .role-dashboard .seg button svg {
     @apply size-3.5;
-}
-.role-dashboard .seg [aria-selected='true'],
-[data-theme='dark'] .role-dashboard .seg [aria-selected='true'] {
-    @apply font-semibold text-white;
-    background: var(--color-primary);
-    box-shadow: 0 1px 2px rgb(0 0 0 / 0.14);
 }
 .role-dashboard .seg button:focus-visible {
     @apply outline-2 outline-offset-1 outline-primary;
 }
 .role-dashboard .dashboard-tab-count {
-    @apply ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-soft px-1.5 text-xs leading-none font-semibold text-link tabular-nums;
+    @apply ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-md bg-track px-1 text-[11px] leading-none font-semibold text-muted tabular-nums;
 }
 .role-dashboard .dashboard-tab-count:empty {
-    display: none;
+    @apply hidden;
 }
 .role-dashboard [aria-selected='true'] > .dashboard-tab-count {
-    @apply bg-white/20 text-white;
+    @apply bg-brand-600 text-white;
 }
 
 /* Layout: explicit role grids with content-sized rows. Grid items stretch to
@@ -169,106 +135,204 @@ body[data-app-shell] .role-dashboard.page-content {
     --dashboard-table-cap: clamp(160px, calc(100dvh - 662px), 360px);
     --dashboard-list: clamp(116px, calc(100dvh - 714px), 300px);
 }
+
 /* KD/HC: 2×2 grid. Distribution + agenda, then the progress table beside
    the highlights. */
 .role-dashboard:not([data-role-dashboard='ku']) .dashboard-layout {
-    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
-    grid-template-areas:
-        'categories agenda'
-        'progress insights';
+    @apply grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)] [grid-template-areas:'categories_agenda'_'progress_insights'];
 }
+
 /* KU: a single row of three panels; the KPI list gets the widest. Five KPI
    rows fit under the list cap. */
 .role-dashboard[data-role-dashboard='ku'] .dashboard-layout {
     --dashboard-list: 272px;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1.2fr);
-    grid-template-areas: 'agenda categories indicators';
+    @apply grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,1.2fr)] [grid-template-areas:'agenda_categories_indicators'];
 }
 .role-dashboard .dashboard-layout > .dashboard-distribution {
-    grid-area: categories;
+    @apply [grid-area:categories];
 }
 .role-dashboard .dashboard-layout > .dashboard-agenda {
-    grid-area: agenda;
+    @apply [grid-area:agenda];
 }
 .role-dashboard .dashboard-layout > .dashboard-insights {
-    grid-area: insights;
+    @apply [grid-area:insights];
 }
 .role-dashboard .dashboard-layout > .dashboard-indicators {
-    grid-area: indicators;
+    @apply [grid-area:indicators];
 }
 .role-dashboard .dashboard-layout > .dashboard-progress {
-    grid-area: progress;
+    @apply [grid-area:progress];
 }
 
-/* Metric cards: four distinct muted pastels in card order (mint, sky,
-   lilac, amber); a warning dot marks non-zero open work. */
+/* Bento metrics: the completion hero spans two rows beside four tiles. Tiles
+   stay neutral; each tone lives on its label marker and icon, and a warning
+   dot marks non-zero open work. */
 .role-dashboard .dashboard-cards {
-    @apply grid gap-3;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    @apply grid grid-cols-[minmax(0,1.25fr)_repeat(2,minmax(0,1fr))] gap-3;
 }
 .role-dashboard .dashboard-cards > .dashboard-empty {
-    grid-column: 1 / -1;
+    @apply col-span-full;
 }
 .role-dashboard .dashboard-card {
-    --card-bg: var(--color-paper);
-    --card-line: var(--color-line);
     --card-ink: var(--color-link);
-    --card-dot: var(--card-ink);
-    @apply grid min-w-0 content-start gap-y-0.5 rounded-2xl border px-4 py-2.5 text-ink transition-[border-color,box-shadow];
-    border-color: var(--card-line);
-    background: var(--card-bg);
+    @apply relative grid min-w-0 content-start gap-y-1 overflow-hidden rounded-card border border-line bg-paper px-4 pt-3.5 pb-3 text-ink no-underline shadow-card transition-[border-color,background-color];
 }
 .role-dashboard .dashboard-card[data-tone='mint'] {
-    --card-bg: var(--card-mint);
-    --card-line: var(--card-mint-line);
     --card-ink: var(--card-mint-ink);
 }
 .role-dashboard .dashboard-card[data-tone='sky'] {
-    --card-bg: var(--card-sky);
-    --card-line: var(--card-sky-line);
     --card-ink: var(--card-sky-ink);
 }
 .role-dashboard .dashboard-card[data-tone='lilac'] {
-    --card-bg: var(--card-lilac);
-    --card-line: var(--card-lilac-line);
     --card-ink: var(--card-lilac-ink);
 }
 .role-dashboard .dashboard-card[data-tone='amber'] {
-    --card-bg: var(--card-amber);
-    --card-line: var(--card-amber-line);
     --card-ink: var(--card-amber-ink);
 }
-.role-dashboard .dashboard-card[data-attention] {
-    --card-dot: var(--color-warning);
+.role-dashboard .dashboard-card-icon {
+    @apply absolute top-3 right-3 size-[18px] text-faint transition-colors;
 }
 .role-dashboard a.dashboard-card:hover {
-    border-color: color-mix(in srgb, var(--card-ink) 45%, var(--card-line));
-    box-shadow: 0 1px 4px color-mix(in srgb, var(--card-ink) 18%, transparent);
+    @apply border-line-strong bg-subtle/50;
+}
+.role-dashboard a.dashboard-card:hover .dashboard-card-icon {
+    @apply text-(--card-ink);
 }
 .role-dashboard a.dashboard-card:focus-visible {
-    outline: 2px solid var(--color-link);
-    outline-offset: 2px;
+    @apply outline-2 outline-offset-2 outline-link;
 }
 .role-dashboard .dashboard-card[data-skeleton] {
-    animation: dashboard-pulse 1.2s ease-in-out infinite;
+    @apply [animation:dashboard-pulse_1.2s_ease-in-out_infinite];
 }
 .role-dashboard .dashboard-card-label {
-    @apply flex min-w-0 items-center gap-2 text-[13px] leading-[18px] font-semibold;
-    color: var(--card-ink);
+    @apply flex min-w-0 items-center gap-2 pr-7 text-[11px] leading-4 font-medium tracking-[0.06em] text-muted uppercase;
 }
 .role-dashboard .dashboard-card-label::before {
-    content: '';
-    @apply size-2 shrink-0 rounded-full;
-    background: var(--card-dot);
+    @apply h-3 w-[3px] shrink-0 rounded-full bg-(--card-ink) content-[''];
 }
 .role-dashboard .dashboard-card-value {
-    @apply mt-1 text-[26px] leading-8 font-semibold tracking-[-0.02em] whitespace-nowrap tabular-nums;
+    @apply mt-1.5 text-[30px] leading-9 font-semibold tracking-[-0.035em] whitespace-nowrap tabular-nums;
 }
 .role-dashboard .dashboard-card-unit {
-    @apply ml-1 text-[13px] font-medium tracking-normal text-muted;
+    @apply ml-1 text-[13px] font-normal tracking-normal text-faint;
 }
 .role-dashboard .dashboard-card-hint {
-    @apply mt-0.5 text-[12.5px] leading-[18px] text-muted;
+    @apply flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-2 text-[12px] leading-[18px] text-muted;
+}
+.role-dashboard .dashboard-card[data-attention] .dashboard-card-label::after {
+    @apply ml-auto size-2 shrink-0 rounded-full bg-warning ring-4 ring-warning-soft content-[''];
+}
+
+/* Completion hero: ring with the Final share, then the status mix as one
+   stacked bar and a four-row legend. */
+.role-dashboard .dashboard-hero {
+    @apply row-span-2 flex flex-col gap-3 pb-3.5;
+}
+.role-dashboard .dashboard-hero .dashboard-card-label::before {
+    @apply bg-brand-500;
+}
+.role-dashboard .dashboard-hero-head {
+    @apply grid gap-1;
+}
+.role-dashboard .dashboard-hero-sub {
+    @apply text-[13px] leading-5 text-muted;
+}
+.role-dashboard .dashboard-hero-body {
+    @apply flex min-w-0 flex-1 items-center gap-5;
+}
+.role-dashboard .dashboard-hero-figure {
+    @apply relative size-[116px] shrink-0;
+}
+.role-dashboard .dashboard-ring {
+    @apply size-full -rotate-90;
+}
+.role-dashboard .dashboard-ring circle {
+    @apply fill-none stroke-[9];
+}
+.role-dashboard .dashboard-ring-track {
+    @apply stroke-track;
+}
+.role-dashboard .dashboard-ring-value {
+    @apply stroke-(--dashboard-final) [stroke-linecap:round] transition-[stroke-dashoffset] duration-500;
+}
+.role-dashboard .dashboard-ring-center {
+    @apply absolute inset-0 grid place-content-center text-center;
+}
+.role-dashboard .dashboard-ring-center strong {
+    @apply text-[24px] leading-7 font-semibold tracking-[-0.035em] tabular-nums;
+}
+.role-dashboard .dashboard-ring-center span {
+    @apply text-[11px] leading-4 tracking-[0.06em] text-faint uppercase;
+}
+.role-dashboard .dashboard-hero-side {
+    @apply grid min-w-0 flex-1 gap-3;
+}
+.role-dashboard .dashboard-hero-stack {
+    @apply flex h-2 gap-0.5 overflow-hidden rounded-full bg-track;
+}
+.role-dashboard .dashboard-hero-stack > span {
+    @apply min-w-1 basis-0 first:rounded-l-full last:rounded-r-full;
+}
+.role-dashboard .dashboard-hero-legend {
+    @apply m-0 grid list-none gap-1.5 p-0;
+}
+.role-dashboard .dashboard-hero-legend li {
+    @apply grid grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-2 text-[13px] leading-5 text-muted;
+}
+.role-dashboard .dashboard-hero-legend i {
+    @apply size-2.5 rounded-[3px];
+}
+.role-dashboard .dashboard-hero-legend strong {
+    @apply font-semibold text-ink tabular-nums;
+}
+.role-dashboard .dashboard-hero-link {
+    @apply w-fit text-[12.5px];
+}
+
+/* Header deadline chip and the rule-based attention banner share one tone
+   scale: calm (green) → warn (amber, < 3 days) → danger (red, < 1 day). */
+.role-dashboard .dashboard-due {
+    @apply inline-flex min-h-9 items-center gap-2 rounded-control border border-brand-100 bg-brand-50 px-3 text-[12.5px] leading-5 text-brand-800;
+}
+.role-dashboard .dashboard-due .icon {
+    @apply size-4 text-brand-600;
+}
+.role-dashboard .dashboard-due strong {
+    @apply font-semibold tabular-nums;
+}
+.role-dashboard .dashboard-due[data-tone='warn'] {
+    @apply border-warning/25 bg-warning-soft text-warning;
+}
+.role-dashboard .dashboard-due[data-tone='danger'] {
+    @apply border-danger/25 bg-danger-soft text-danger;
+}
+.role-dashboard .dashboard-due[data-tone='warn'] .icon,
+.role-dashboard .dashboard-due[data-tone='danger'] .icon {
+    @apply text-current;
+}
+.role-dashboard .dashboard-alert {
+    @apply flex min-w-0 items-center gap-3 rounded-card border border-brand-100 bg-brand-50 py-2.5 pr-2.5 pl-4 text-brand-800;
+}
+.role-dashboard .dashboard-alert > .icon {
+    @apply size-[18px] shrink-0;
+}
+.role-dashboard .dashboard-alert-text {
+    @apply min-w-0 flex-1 text-[13px] leading-5;
+}
+.role-dashboard .dashboard-alert-text strong {
+    @apply font-semibold;
+}
+.role-dashboard .dashboard-alert[data-tone='warn'] {
+    @apply border-warning/25 bg-warning-soft text-warning;
+}
+.role-dashboard .dashboard-alert[data-tone='danger'] {
+    @apply border-danger/25 bg-danger-soft text-danger;
+}
+.role-dashboard .dashboard-alert[data-tone='info'] {
+    @apply border-info/20 bg-info-soft text-info;
+}
+.role-dashboard .dashboard-alert .btn {
+    @apply shrink-0 bg-paper;
 }
 @keyframes dashboard-pulse {
     50% {
@@ -277,22 +341,22 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 @media (prefers-reduced-motion: reduce) {
     .role-dashboard .dashboard-card[data-skeleton] {
-        animation: none;
+        @apply [animation:none];
     }
 }
 
 /* Status colours for the progress-table bars. */
 .role-dashboard span[data-status='final'] {
-    background: var(--dashboard-final);
+    @apply bg-(--dashboard-final);
 }
 .role-dashboard span[data-status='submitted'] {
-    background: var(--dashboard-submitted);
+    @apply bg-(--dashboard-submitted);
 }
 .role-dashboard span[data-status='returned'] {
-    background: var(--dashboard-returned);
+    @apply bg-(--dashboard-returned);
 }
 .role-dashboard span[data-status='not_started'] {
-    background: var(--dashboard-pending);
+    @apply bg-(--dashboard-pending);
 }
 
 /* Distribution of Final results. Tabs switch between the score histogram
@@ -302,27 +366,23 @@ body[data-app-shell] .role-dashboard.page-content {
    on the title row; narrow ones give them a full-width row. */
 .role-dashboard .dashboard-distribution {
     @apply grid content-start gap-x-3;
-    container: dashboard-distribution / inline-size;
-    grid-template-columns: minmax(0, 1fr) auto;
+    @apply @container/dashboard-distribution grid-cols-[minmax(0,1fr)_auto];
 }
 .role-dashboard .dashboard-distribution > * {
-    grid-column: 1 / -1;
+    @apply col-span-full;
 }
 .role-dashboard .dashboard-distribution-tabs {
     @apply flex w-full;
 }
 .role-dashboard .dashboard-distribution-tabs button {
-    flex: 1 1 0;
+    @apply flex-[1_1_0];
 }
 @container dashboard-distribution (min-width: 560px) {
     .role-dashboard .dashboard-distribution > .dashboard-panel-head {
-        grid-column: 1;
-        align-self: center;
+        @apply col-[1] self-center;
     }
     .role-dashboard .dashboard-distribution > .dashboard-distribution-tabs {
-        grid-column: 2;
-        grid-row: 1;
-        width: auto;
+        @apply col-[2] row-[1] w-auto;
     }
 }
 .role-dashboard .dashboard-distribution-view {
@@ -332,45 +392,47 @@ body[data-app-shell] .role-dashboard.page-content {
     --dashboard-histogram: 160px;
 }
 .role-dashboard .dashboard-histogram {
-    height: var(--dashboard-histogram);
+    @apply h-(--dashboard-histogram);
 }
+
 /* Closed, the disclosure's 40px target overlaps the panel padding a little;
    open, its table shows about four ranges and scrolls in its own box. */
 .role-dashboard .dashboard-histogram-data:not([open]) {
-    margin-bottom: -10px;
+    @apply -mb-2.5;
 }
 .role-dashboard .dashboard-histogram-table {
-    width: min(100%, 360px);
-    max-height: 160px;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    @apply w-[min(100%,360px)] max-h-40 overscroll-contain [scrollbar-width:thin];
 }
 .role-dashboard .dashboard-histogram-table > .data-table :is(th, td) {
-    padding: 6px 12px;
+    @apply py-1.5 px-3;
 }
 .role-dashboard .dashboard-histogram-table > .data-table tbody th {
     @apply bg-transparent text-[13px] leading-5 font-normal tracking-normal text-ink normal-case tabular-nums;
 }
-.role-dashboard .dashboard-histogram-table > .data-table :is(th, td):last-child {
-    text-align: right;
+.role-dashboard
+    .dashboard-histogram-table
+    > .data-table
+    :is(th, td):last-child {
+    @apply text-right;
 }
+
 /* Category view: the legend keeps a compact column beside the doughnut so
    counts stay next to their labels on wide panels. */
 .role-dashboard .dashboard-status {
     @apply grid items-center justify-start gap-4;
-    grid-template-columns: var(--dashboard-donut) minmax(0, 340px);
+    @apply grid-cols-[var(--dashboard-donut)_minmax(0,340px)];
 }
 .role-dashboard .dashboard-donut {
     @apply relative;
-    width: var(--dashboard-donut);
-    aspect-ratio: 1;
+    @apply w-(--dashboard-donut) aspect-square;
 }
 .role-dashboard .dashboard-donut > .dashboard-chart {
     @apply absolute inset-0;
 }
+
 /* No Final result: an outline ring only, never a fabricated segment. */
 .role-dashboard .dashboard-donut[data-empty='true']::before {
-    content: '';
+    @apply content-[''];
     @apply absolute inset-1.5 rounded-full border-[18px] border-subtle;
 }
 .role-dashboard .dashboard-donut-center {
@@ -384,16 +446,14 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-stack-legend {
     @apply grid min-w-0 content-start gap-0.5;
-    max-height: calc(var(--dashboard-donut) + 64px);
-    overflow-y: auto;
-    scrollbar-width: thin;
+    @apply max-h-[calc(var(--dashboard-donut)_+_64px)] overflow-y-auto [scrollbar-width:thin];
 }
 .role-dashboard .dashboard-stack-legend:empty {
-    display: none;
+    @apply hidden;
 }
 .role-dashboard .dashboard-stack-item {
-    @apply grid min-h-9 min-w-0 items-center gap-2 rounded-[10px] px-2 py-1 text-ink transition-colors hover:bg-subtle;
-    grid-template-columns: 10px minmax(0, 1fr) auto 44px;
+    @apply grid min-h-9 min-w-0 items-center gap-2 rounded-control px-2 py-1 text-ink transition-colors hover:bg-subtle;
+    @apply grid-cols-[10px_minmax(0,1fr)_auto_44px];
 }
 .role-dashboard .dashboard-stack-item i {
     @apply size-2.5 rounded-[3px];
@@ -412,93 +472,124 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 @container dashboard-distribution (max-width: 280px) {
     .role-dashboard .dashboard-status {
-        grid-template-columns: minmax(0, 1fr);
-        justify-items: center;
+        @apply grid-cols-[minmax(0,1fr)] justify-items-center;
     }
     .role-dashboard .dashboard-stack-legend {
         @apply w-full;
     }
 }
-
 .role-dashboard .dashboard-chart {
     @apply relative min-w-0;
 }
 .role-dashboard canvas {
-    display: block;
-    width: 100% !important;
+    @apply block w-full!;
 }
 
 /* Local table scrolling: real tables with visible sticky headers at every
    width; wide content scrolls inside its box, never the page. Compact rows
    (8px block padding, 12px headers) leave more room for data. */
 .role-dashboard .dashboard-table-scroll {
-    overscroll-behavior-x: contain;
+    @apply overscroll-x-contain;
 }
 .role-dashboard .dashboard-table-scroll > .data-table :is(th, td):not(.empty) {
-    white-space: nowrap;
+    @apply whitespace-nowrap;
 }
-.role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    font-size: 12px;
-    background: color-mix(in srgb, var(--color-subtle) 60%, var(--color-paper));
+.role-dashboard
+    :is(.dashboard-table-scroll, .dashboard-histogram-table)
+    > .data-table
+    thead
+    th {
+    @apply sticky top-0 z-2 text-[12px] bg-[color-mix(in_srgb,var(--color-subtle)_60%,var(--color-paper))];
 }
 .role-dashboard .dashboard-table-scroll > .data-table :is(th, td) {
-    padding-block: 8px;
+    @apply py-2;
 }
+
 /* KD/HC area table: content height up to the layout cap, so a short table
    ends at its last row and a long one (expanded HC units) scrolls under its
    sticky header. */
 .role-dashboard .dashboard-progress-scroll {
-    flex: 0 1 auto;
-    max-height: var(--dashboard-table-cap);
+    @apply flex-[0_1_auto] max-h-(--dashboard-table-cap);
 }
 @media (min-width: 901px) {
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) {
-        min-width: 0;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table) {
+        @apply min-w-0;
     }
 }
 @media (max-width: 900px) {
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) {
-        display: table;
-        min-width: 100%;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table) {
+        @apply table min-w-full;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) thead {
-        position: static;
-        display: table-header-group;
-        width: auto;
-        height: auto;
-        overflow: visible;
-        clip-path: none;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        thead {
+        @apply static table-header-group w-auto h-auto overflow-visible [clip-path:none];
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tbody {
-        display: table-row-group;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        tbody {
+        @apply table-row-group;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tr {
-        display: table-row;
-        padding: 0;
-        border-bottom: 0;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        tr {
+        @apply table-row p-0 border-b-0;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tr[hidden] {
-        display: none;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        tr[hidden] {
+        @apply hidden;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) td {
-        display: table-cell;
-        padding: 8px 12px;
-        border-bottom: 1px solid var(--color-line);
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        td {
+        @apply table-cell py-2 px-3 border-b border-b-line;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) tbody tr:last-child :is(th, td) {
-        border-bottom: 0;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        tbody
+        tr:last-child
+        :is(th, td) {
+        @apply border-b-0;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) th {
-        padding: 8px 12px;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        th {
+        @apply py-2 px-3;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) td[data-label]::before {
-        content: none;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        td[data-label]::before {
+        @apply content-none;
     }
-    body[data-app-shell] .role-dashboard :is(.dashboard-table-scroll, .dashboard-histogram-table) > .data-table:not(.score-table):not(.gp-table) .numeric {
-        text-align: right;
+    body[data-app-shell]
+        .role-dashboard
+        :is(.dashboard-table-scroll, .dashboard-histogram-table)
+        > .data-table:not(.score-table):not(.gp-table)
+        .numeric {
+        @apply text-right;
     }
 }
 
@@ -507,26 +598,25 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply grid min-w-0 gap-2;
 }
 .role-dashboard .dashboard-disclosure summary {
-    @apply inline-flex min-h-10 w-fit cursor-pointer list-none items-center gap-1.5 rounded-[10px] text-[13px] font-semibold text-link;
+    @apply inline-flex min-h-8 w-fit cursor-pointer list-none items-center gap-1.5 rounded-md text-[12.5px] font-medium text-link;
 }
 .role-dashboard .dashboard-disclosure summary:focus-visible {
     @apply outline-2 outline-offset-2 outline-primary;
 }
 .role-dashboard .dashboard-disclosure summary::-webkit-details-marker {
-    display: none;
+    @apply hidden;
 }
 .role-dashboard .dashboard-disclosure summary::before {
-    content: '▸';
-    transition: transform 0.15s;
+    @apply content-['▸'] transition-transform duration-150;
 }
 .role-dashboard .dashboard-disclosure[open] summary::before {
-    transform: rotate(90deg);
+    @apply transform-[rotate(90deg)];
 }
 
 /* Highlights panel: full-width tab track, one visible list at a time. Tabs
    share the row and wrap (never clip) when the column is narrow. */
 .role-dashboard .dashboard-insights > .seg {
-    @apply flex w-full flex-wrap rounded-[18px];
+    @apply flex w-full flex-wrap;
 }
 .role-dashboard .dashboard-insights > .seg button {
     @apply flex-auto px-2.5;
@@ -535,19 +625,23 @@ body[data-app-shell] .role-dashboard.page-content {
 .role-dashboard .dashboard-indicators {
     @apply grid min-w-0 content-start gap-2.5;
 }
-.role-dashboard :is(.dashboard-task-list, .dashboard-indicator-list, .dashboard-activity-list) {
-    max-height: var(--dashboard-list);
-    overflow-y: auto;
-    scrollbar-width: thin;
+.role-dashboard
+    :is(
+        .dashboard-task-list,
+        .dashboard-indicator-list,
+        .dashboard-activity-list
+    ) {
+    @apply max-h-(--dashboard-list) overflow-y-auto [scrollbar-width:thin];
 }
+
 /* KPI inside the KD/HC highlights sits under an extra order-tab row. */
 .role-dashboard .dashboard-insights .dashboard-indicator-list {
-    max-height: max(116px, calc(var(--dashboard-list) - 52px));
+    @apply max-h-[max(116px,calc(var(--dashboard-list)_-_52px))];
 }
 
 /* Indicators */
 .role-dashboard .dashboard-indicators .workspace-tabs {
-    align-self: flex-start;
+    @apply self-start;
 }
 .role-dashboard .dashboard-indicator-list {
     @apply grid content-start;
@@ -555,10 +649,10 @@ body[data-app-shell] .role-dashboard.page-content {
 .role-dashboard .dashboard-indicator {
     --tone: var(--dashboard-final);
     @apply grid items-center gap-3 border-b border-line py-2;
-    grid-template-columns: minmax(0, 1fr) minmax(48px, 22%) 36px;
+    @apply grid-cols-[minmax(0,1fr)_minmax(48px,22%)_36px];
 }
 .role-dashboard .dashboard-indicator:last-child {
-    border-bottom: 0;
+    @apply border-b-0;
 }
 .role-dashboard .dashboard-indicator[data-tone='low'] {
     --tone: var(--dashboard-returned);
@@ -577,7 +671,7 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-indicator-track span {
     @apply block h-full rounded-[inherit];
-    background: var(--tone);
+    @apply bg-(--tone);
 }
 .role-dashboard .dashboard-indicator b {
     @apply text-right text-[13px] font-semibold tabular-nums;
@@ -588,7 +682,7 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply gap-2.5;
 }
 .role-dashboard .dashboard-chip {
-    @apply rounded-full bg-subtle px-2.5 py-0.5 text-xs leading-[18px] font-semibold whitespace-nowrap text-muted;
+    @apply rounded-md bg-subtle px-2 py-px text-[11.5px] leading-[18px] font-medium whitespace-nowrap text-muted;
 }
 .role-dashboard .dashboard-chip[data-status='open'] {
     @apply bg-accent-soft text-link;
@@ -597,10 +691,10 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply bg-warning-soft text-warning;
 }
 .role-dashboard .dashboard-deadline {
-    @apply grid gap-0.5 rounded-xl bg-accent-soft px-3.5 py-3;
+    @apply grid gap-0.5 rounded-control border border-brand-100 bg-brand-50 px-3.5 py-3;
 }
 .role-dashboard .dashboard-deadline-kicker {
-    @apply text-xs leading-4 font-semibold tracking-[0.04em] text-muted uppercase;
+    @apply text-[11px] leading-4 font-medium tracking-[0.06em] text-muted uppercase;
 }
 .role-dashboard .dashboard-deadline strong {
     @apply text-[14px] leading-5 font-semibold text-ink;
@@ -617,7 +711,9 @@ body[data-app-shell] .role-dashboard.page-content {
 .role-dashboard .dashboard-countdown[data-tone='danger'] {
     @apply bg-danger-soft text-danger;
 }
-.role-dashboard .dashboard-deadline > :is(.dashboard-loading, .dashboard-empty) {
+.role-dashboard
+    .dashboard-deadline
+    > :is(.dashboard-loading, .dashboard-empty) {
     @apply w-full bg-transparent p-0 text-left;
 }
 .role-dashboard .dashboard-agenda-foot {
@@ -627,42 +723,39 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply min-w-0 flex-auto;
 }
 .role-dashboard .dashboard-schedule-details[open] {
-    flex-basis: 100%;
+    @apply basis-full;
 }
 .role-dashboard .dashboard-schedule {
     @apply grid pb-1;
-    max-height: 176px;
-    overflow-y: auto;
-    scrollbar-width: thin;
+    @apply max-h-44 overflow-y-auto [scrollbar-width:thin];
 }
 .role-dashboard .dashboard-schedule li {
     @apply relative grid py-1.5 pl-6 text-[12.5px] leading-[18px];
 }
 .role-dashboard .dashboard-schedule li::before {
-    content: '';
+    @apply content-[''];
     @apply absolute top-[10px] left-0.5 z-[1] size-2.5 rounded-full border-2 border-line bg-paper;
 }
 .role-dashboard .dashboard-schedule li:not(:last-child)::after {
-    content: '';
+    @apply content-[''];
     @apply absolute top-5 -bottom-2.5 left-[6px] w-0.5 bg-line;
 }
-.role-dashboard .dashboard-schedule li:is([data-state='past'], [data-state='closed']) {
+.role-dashboard
+    .dashboard-schedule
+    li:is([data-state='past'], [data-state='closed']) {
     @apply text-muted;
 }
 .role-dashboard .dashboard-schedule li[data-state='past']::before {
-    border-color: color-mix(in srgb, var(--dashboard-final) 45%, var(--color-paper));
-    background: color-mix(in srgb, var(--dashboard-final) 45%, var(--color-paper));
+    @apply border-[color-mix(in_srgb,var(--dashboard-final)_45%,var(--color-paper))] bg-[color-mix(in_srgb,var(--dashboard-final)_45%,var(--color-paper))];
 }
 .role-dashboard .dashboard-schedule li[data-state='next'] {
     @apply font-semibold;
 }
 .role-dashboard .dashboard-schedule li[data-state='next']::before {
-    border-color: var(--dashboard-final);
-    background: var(--dashboard-final);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--dashboard-final) 20%, transparent);
+    @apply border-(--dashboard-final) bg-(--dashboard-final) shadow-[0_0_0_3px_color-mix(in_srgb,var(--dashboard-final)_20%,transparent)];
 }
 .role-dashboard .dashboard-schedule li[data-relevant] > span::after {
-    content: 'Batas Anda';
+    @apply content-['Batas_Anda'];
     @apply ml-1.5 rounded-full bg-accent-soft px-1.5 py-px text-xs font-semibold text-link;
 }
 .role-dashboard .dashboard-schedule time {
@@ -671,9 +764,10 @@ body[data-app-shell] .role-dashboard.page-content {
 .role-dashboard .dashboard-panel-link {
     @apply inline-flex min-h-10 items-center text-[13px] font-semibold;
 }
+
 /* KU: the one fill action, right under the submission deadline. */
 .role-dashboard .dashboard-agenda-cta {
-    @apply min-h-10 w-full justify-center gap-2 rounded-[10px];
+    @apply min-h-10 w-full justify-center gap-2 rounded-control;
 }
 
 /* Tasks */
@@ -685,7 +779,7 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-task {
     @apply grid min-h-11 items-center gap-2.5 py-2 text-ink;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    @apply grid-cols-[minmax(0,1fr)_auto_auto];
 }
 .role-dashboard .dashboard-task:focus-visible {
     @apply rounded-lg outline-2 outline-offset-2 outline-primary;
@@ -703,24 +797,29 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply truncate text-xs text-muted;
 }
 .role-dashboard .dashboard-task .assessment-status {
-    font-size: 12px;
+    @apply text-[12px];
 }
 .role-dashboard .dashboard-task-action {
     @apply text-[12.5px] font-semibold text-link;
 }
 .role-dashboard .dashboard-task:hover .dashboard-task-action {
-    text-decoration: underline;
+    @apply underline;
 }
 
 /* Progress table */
-.role-dashboard .dashboard-progress-table :is(th, td):last-child:not(:first-child) {
-    text-align: right;
+.role-dashboard
+    .dashboard-progress-table
+    :is(th, td):last-child:not(:first-child) {
+    @apply text-right;
 }
+
 /* KD/HC area table: long area names wrap, counts are grouped
    (Final/subjek and the unfinished split). */
-.role-dashboard .dashboard-table-scroll > .data-table.dashboard-progress-areas :is(th, td):first-child:not(.empty) {
-    min-width: 180px;
-    white-space: normal;
+.role-dashboard
+    .dashboard-table-scroll
+    > .data-table.dashboard-progress-areas
+    :is(th, td):first-child:not(.empty) {
+    @apply min-w-45 whitespace-normal;
 }
 .role-dashboard .dashboard-progress-areas .dashboard-mini {
     @apply text-[12.5px] leading-[18px];
@@ -736,11 +835,10 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-mini-stack {
     @apply flex h-1.5 flex-1 gap-px overflow-hidden rounded-full bg-subtle;
-    min-width: 64px;
+    @apply min-w-16;
 }
 .role-dashboard .dashboard-mini-stack span {
-    min-width: 2px;
-    flex-basis: 0;
+    @apply min-w-0.5 basis-0;
 }
 .role-dashboard .dashboard-expand {
     @apply ml-2 inline-flex min-h-8 items-center gap-1 rounded-md px-1 align-middle text-xs font-semibold whitespace-nowrap text-link;
@@ -749,17 +847,16 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply outline-2 outline-offset-1 outline-primary;
 }
 .role-dashboard .dashboard-expand::before {
-    content: '▸';
-    transition: transform 0.15s;
+    @apply content-['▸'] transition-transform duration-150;
 }
 .role-dashboard .dashboard-expand[aria-expanded='true']::before {
-    transform: rotate(90deg);
+    @apply transform-[rotate(90deg)];
 }
 .role-dashboard .dashboard-subrow {
-    background: color-mix(in srgb, var(--color-subtle) 70%, transparent);
+    @apply bg-subtle/70;
 }
 .role-dashboard .dashboard-subrow td:first-child {
-    padding-left: 32px;
+    @apply pl-8;
 }
 
 /* Activities */
@@ -768,10 +865,10 @@ body[data-app-shell] .role-dashboard.page-content {
 }
 .role-dashboard .dashboard-activity {
     @apply grid min-w-0 items-baseline gap-x-2 gap-y-0.5 border-b border-line py-2.5;
-    grid-template-columns: auto minmax(0, 1fr);
+    @apply grid-cols-[auto_minmax(0,1fr)];
 }
 .role-dashboard .dashboard-activity:last-child {
-    border-bottom: 0;
+    @apply border-b-0;
 }
 .role-dashboard .dashboard-activity strong {
     @apply text-[13px] font-semibold whitespace-nowrap;
@@ -780,7 +877,7 @@ body[data-app-shell] .role-dashboard.page-content {
     @apply truncate text-[12.5px];
 }
 .role-dashboard .dashboard-activity small {
-    grid-column: 1 / -1;
+    @apply col-span-full;
     @apply text-xs text-muted;
 }
 
@@ -794,48 +891,72 @@ body[data-app-shell] .role-dashboard.page-content {
         --dashboard-list: 320px;
     }
     .role-dashboard:not([data-role-dashboard='ku']) .dashboard-layout {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-areas:
-            'categories agenda'
-            'progress progress'
-            'insights insights';
+        @apply grid-cols-2 [grid-template-areas:'categories_agenda'_'progress_progress'_'insights_insights'];
     }
     .role-dashboard[data-role-dashboard='ku'] .dashboard-layout {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-areas:
-            'agenda categories'
-            'indicators indicators';
+        @apply grid-cols-2 [grid-template-areas:'agenda_categories'_'indicators_indicators'];
     }
 }
 @container dashboard (max-width: 820px) {
     .role-dashboard .dashboard-cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        @apply grid-cols-2;
+    }
+    .role-dashboard .dashboard-hero {
+        @apply col-span-full row-span-1;
+    }
+}
+@container dashboard (max-width: 520px) {
+    .role-dashboard .dashboard-hero-body {
+        @apply gap-4;
+    }
+    .role-dashboard .dashboard-hero-figure {
+        @apply size-24;
+    }
+    .role-dashboard .dashboard-ring-center strong {
+        @apply text-[20px] leading-6;
+    }
+    .role-dashboard .dashboard-card-value {
+        @apply text-[26px] leading-8;
+    }
+    .role-dashboard .dashboard-card-hint {
+        @apply hidden;
     }
 }
 @container dashboard (max-width: 680px) {
     /* One column in reading order (KU: agenda with its fill action first). */
     .role-dashboard[data-role-dashboard] .dashboard-layout {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas: none;
+        @apply grid-cols-[minmax(0,1fr)] [grid-template-areas:none];
     }
     .role-dashboard .dashboard-layout > .dashboard-panel {
-        grid-area: auto;
+        @apply [grid-area:auto];
     }
 }
 @container dashboard (max-width: 340px) {
     .role-dashboard .dashboard-cards {
-        grid-template-columns: minmax(0, 1fr);
+        @apply grid-cols-[minmax(0,1fr)];
+    }
+    .role-dashboard .dashboard-hero-body {
+        @apply flex-col items-stretch;
     }
 }
 @media (max-width: 600px) {
     body[data-app-shell] .role-dashboard.page-content {
-        padding-top: 16px;
+        @apply pt-4;
     }
     .role-dashboard .dashboard-heading .lead {
         @apply text-[20px] leading-7;
     }
     .role-dashboard .dashboard-heading-actions {
+        @apply w-full flex-wrap;
+    }
+    .role-dashboard .dashboard-due {
         @apply w-full;
+    }
+    .role-dashboard .dashboard-alert {
+        @apply flex-wrap;
+    }
+    .role-dashboard .dashboard-alert .btn {
+        @apply ml-7.5;
     }
     .role-dashboard .dashboard-heading-actions .btn {
         @apply min-h-11;
@@ -847,11 +968,7 @@ body[data-app-shell] .role-dashboard.page-content {
         @apply min-w-11 px-0;
     }
     .role-dashboard [data-dashboard-reload] span {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
+        @apply absolute w-px h-px overflow-hidden [clip-path:inset(50%)];
     }
     .role-dashboard .dashboard-panel-head > .link,
     .role-dashboard .dashboard-panel-link,
@@ -865,10 +982,10 @@ body[data-app-shell] .role-dashboard.page-content {
         --dashboard-histogram: 172px;
     }
     .role-dashboard .dashboard-panel {
-        @apply rounded-[14px];
+        @apply rounded-card;
     }
     .role-dashboard .dashboard-card {
-        @apply rounded-[14px] px-3.5 py-3;
+        @apply rounded-card px-3.5 py-3;
     }
     .role-dashboard .dashboard-card-value {
         @apply text-[22px] leading-7;
@@ -878,24 +995,31 @@ body[data-app-shell] .role-dashboard.page-content {
     }
     /* Page scroll only on phones: no nested vertical scroll traps; tables
        keep sideways scrolling inside their box. */
-    .role-dashboard .dashboard-layout :is(.dashboard-task-list, .dashboard-indicator-list, .dashboard-activity-list, .dashboard-schedule, .dashboard-stack-legend, .dashboard-histogram-table) {
-        max-height: none;
-        overflow-y: visible;
+    .role-dashboard
+        .dashboard-layout
+        :is(
+            .dashboard-task-list,
+            .dashboard-indicator-list,
+            .dashboard-activity-list,
+            .dashboard-schedule,
+            .dashboard-stack-legend,
+            .dashboard-histogram-table
+        ) {
+        @apply max-h-none overflow-y-visible;
     }
     .role-dashboard .dashboard-progress-scroll {
-        max-height: none;
+        @apply max-h-none;
     }
     .role-dashboard .dashboard-indicator {
-        grid-template-columns: minmax(0, 1fr) 36px;
-        row-gap: 6px;
+        @apply grid-cols-[minmax(0,1fr)_36px] gap-y-1.5;
     }
     .role-dashboard .dashboard-indicator-text {
-        grid-column: 1 / -1;
+        @apply col-span-full;
     }
     .role-dashboard .dashboard-task {
-        grid-template-columns: minmax(0, 1fr) auto;
+        @apply grid-cols-[minmax(0,1fr)_auto];
     }
     .role-dashboard .dashboard-task-action {
-        display: none;
+        @apply hidden;
     }
 }

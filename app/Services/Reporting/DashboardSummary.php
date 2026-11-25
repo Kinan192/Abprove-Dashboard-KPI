@@ -3,6 +3,7 @@
 namespace App\Services\Reporting;
 
 use App\Queries\ScopedRecords;
+use App\Services\Assessment\DeadlineExtensionService;
 use App\Services\Audit\ActorSnapshot;
 use App\Services\IdentityAccess\AccessContext;
 use Carbon\CarbonImmutable;
@@ -55,7 +56,11 @@ class DashboardSummary
             'histogram' => $this->histogram($ctx, $cycle, $counts['final']),
             'indicators' => $this->indicators($ctx, $cycle),
         ];
+        // Deadline extensions: the actor's own deadline and request (KU/KD), pending requests to decide (Super HC).
+        // Resolved lazily: DeadlineExtensionService itself reads the dashboard status groups.
+        $summary['extension'] = app(DeadlineExtensionService::class)->forActor($ctx, $cycle);
         if ($ctx->role === 'super_hc') {
+            $summary['extensions'] = ['pending' => DB::table('deadline_extensions')->where('cycle_id', $cycle->id)->where('status', 'pending')->count()];
             $summary['progress'] = $this->divisionProgress($groups);
             $summary['tasks'] = $this->divisionTasks($summary['progress']['rows']);
             $summary['activities'] = $this->activities();
@@ -82,7 +87,8 @@ class DashboardSummary
                 ->whereColumn($head ? 'a.subject_user_id' : 'a.employee_id', 'e.id')->where('a.cycle_id', $cycle->id));
     }
 
-    private function statusGroups(AccessContext $ctx, object $cycle, array $kinds): Collection
+    /** Assessment counts per division, unit, kind and status, plus roster members without an assessment (not_started). */
+    public function statusGroups(AccessContext $ctx, object $cycle, array $kinds): Collection
     {
         $rows = $this->scoped($ctx)->where('cycle_id', $cycle->id)
             ->selectRaw('division_id, unit_id, assessment_kind as kind, status, COUNT(*) as total')
