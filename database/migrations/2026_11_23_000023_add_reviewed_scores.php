@@ -17,7 +17,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement('ALTER TABLE assessment_items ADD COLUMN reviewed_score DECIMAL(12,6) NULL AFTER computed_score');
-        DB::statement('ALTER TABLE assessment_items DROP CHECK chk_assessment_items_result_presence');
+        DB::statement('ALTER TABLE assessment_items DROP CONSTRAINT chk_assessment_items_result_presence');
         DB::statement('ALTER TABLE assessment_items MODIFY weighted_result_raw DECIMAL(12,6) GENERATED ALWAYS AS (COALESCE(reviewed_score, computed_score, score) * weight_percent_snapshot / 100) STORED');
         DB::statement('ALTER TABLE assessment_items ADD CONSTRAINT chk_assessment_items_result_presence CHECK (weighted_result_raw IS NOT NULL)');
         DB::statement('ALTER TABLE assessment_items ADD CONSTRAINT chk_assessment_items_reviewed CHECK (reviewed_score IS NULL OR reviewed_score BETWEEN 0 AND 100)');

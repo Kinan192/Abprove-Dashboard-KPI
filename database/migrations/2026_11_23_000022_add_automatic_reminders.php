@@ -41,7 +41,7 @@ return new class extends Migration
         if (DB::table('reminder_emails')->whereNotNull('delivery_key')->exists()) {
             throw new RuntimeException('Log email pengingat otomatis sudah ada dan tidak dihapus otomatis.');
         }
-        DB::statement('ALTER TABLE reminder_emails DROP CHECK chk_reminder_sender');
+        DB::statement('ALTER TABLE reminder_emails DROP CONSTRAINT chk_reminder_sender');
         Schema::table('reminder_emails', function (Blueprint $table) {
             $table->dropUnique('uq_reminder_delivery_key');
             $table->dropColumn('delivery_key');

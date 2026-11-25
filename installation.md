@@ -18,12 +18,13 @@ Contoh perintah memakai PowerShell di Windows. Gunakan `npm.cmd` (bukan `npm`) a
 | PHP CLI | 8.3 atau lebih baru (`composer.json`: `^8.3`) | `php -v` |
 | Composer | 2.x | `composer --version` |
 | Node.js + npm | 22.12 atau lebih baru (disarankan Node 22 LTS) | `node -v`, `npm.cmd -v` |
-| MySQL | 8.4 LTS (target schema di `docs/database/SCHEMA.md`) | `mysql --version` |
+| MySQL **atau** MariaDB | MySQL 8.4 LTS (disarankan) atau MariaDB 10.5+ (diuji di 11.4, umum di Linux) | `mysql --version` / `mariadb --version` |
 
 Catatan versi:
 
 - Node minimal 22.12 karena Vite 8 dan `laravel-vite-plugin` mensyaratkan `^20.19.0 || >=22.12.0`, sedangkan `kysely` (dependensi Better Auth) mensyaratkan `>=22.0.0`.
-- Schema memakai CHECK constraint, foreign key, dan trigger InnoDB. MariaDB dan MySQL 5.7 tidak didukung oleh dokumentasi proyek.
+- Schema memakai CHECK constraint, foreign key, generated column, dan trigger InnoDB. MySQL 8.4 dan MariaDB 11.4 sudah diuji (migrasi, seeder, alur penilaian, perpanjangan, tutup periode). MySQL 5.7 tidak didukung.
+- Di MariaDB isi `DB_CONNECTION=mariadb` (lihat langkah 4). Extension PHP yang dipakai tetap `pdo_mysql`.
 
 Extension PHP yang wajib aktif (periksa dengan `php -m`):
 
@@ -77,7 +78,7 @@ Buka `.env` dan sesuaikan minimal nilai berikut. Isi `DB_USERNAME` dan `DB_PASSW
 ```dotenv
 APP_URL=http://127.0.0.1:8000
 
-DB_CONNECTION=mysql
+DB_CONNECTION=mysql      # MariaDB (mis. Linux): mariadb
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=kpi_kinerja_dev
@@ -204,7 +205,10 @@ Di Linux/macOS, gunakan `curl` biasa.
 Jalankan `npm.cmd run build`. Jika tampilan rusak setelah Vite dev server berhenti tidak normal, hapus file `public/hot` saja, bukan folder lain.
 
 **`could not find driver`**
-Extension `pdo_mysql` belum aktif di `php.ini` milik PHP CLI yang dipakai. Periksa dengan `php --ini` dan `php -m`.
+Extension `pdo_mysql` belum aktif di `php.ini` milik PHP CLI yang dipakai. Periksa dengan `php --ini` dan `php -m`. Di Linux biasanya paketnya `php8.3-mysql` (berlaku juga untuk MariaDB).
+
+**MariaDB: `Schema ini membutuhkan MySQL 8 atau MariaDB` atau error sintaks `DROP CHECK`**
+Kode lama sebelum dukungan MariaDB. Tarik versi terbaru (`git pull`); jika sebelumnya Anda mengubah file migrasi/config secara lokal, kembalikan dulu perubahan itu (`git restore database/migrations config/database.php`) agar tidak bentrok. Lalu pastikan `.env` berisi `DB_CONNECTION=mariadb`.
 
 **`SQLSTATE[HY000] [2002]`**
 MySQL belum berjalan, atau `DB_HOST`/`DB_PORT` salah.

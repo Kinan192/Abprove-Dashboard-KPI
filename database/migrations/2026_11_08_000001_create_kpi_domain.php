@@ -8,8 +8,9 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (DB::getDriverName() !== 'mysql') {
-            throw new RuntimeException('Schema ini membutuhkan MySQL 8.4+, bukan SQLite.');
+        // MySQL 8.0.19+ or MariaDB 10.5+ (DB_CONNECTION=mysql or mariadb); SQLite lacks triggers and CHECKs used here.
+        if (! in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            throw new RuntimeException('Schema ini membutuhkan MySQL 8 atau MariaDB, bukan '.DB::getDriverName().'.');
         }
         if (Schema::hasTable('users') || Schema::hasTable('assessments')) {
             throw new RuntimeException('Tabel domain sudah ada. Gunakan database baru; jangan menjalankan import SQL dan baseline migration pada database yang sama.');

@@ -75,7 +75,7 @@ return new class extends Migration
         DB::statement('ALTER TABLE assessments ADD COLUMN finalized_assignment_id BIGINT UNSIGNED NULL AFTER finalized_by');
         DB::statement('ALTER TABLE assessments ADD COLUMN finalized_by_name_snapshot VARCHAR(160) NULL AFTER finalized_assignment_id');
         DB::statement('ALTER TABLE assessments ADD CONSTRAINT fk_assessment_finalizer_assignment FOREIGN KEY (finalized_assignment_id, finalized_by, division_id) REFERENCES scope_assignments(id, user_id, division_id)');
-        DB::statement('ALTER TABLE assessments DROP CHECK chk_final_metadata');
+        DB::statement('ALTER TABLE assessments DROP CONSTRAINT chk_final_metadata');
         DB::statement("ALTER TABLE assessments ADD CONSTRAINT chk_final_metadata CHECK (status<>'final' OR (finalized_at IS NOT NULL AND finalized_by IS NOT NULL AND (finalized_by=reviewer_user_id OR finalized_assignment_id IS NOT NULL) AND category_code_snapshot IS NOT NULL AND category_label_snapshot IS NOT NULL AND category_lower_snapshot IS NOT NULL AND total_score_raw>=category_lower_snapshot AND (category_upper_snapshot IS NULL OR total_score_raw<category_upper_snapshot)))");
         DB::unprepared('DROP TRIGGER IF EXISTS protect_assessment_item_update');
         DB::unprepared("CREATE TRIGGER protect_assessment_item_update BEFORE UPDATE ON assessment_items FOR EACH ROW

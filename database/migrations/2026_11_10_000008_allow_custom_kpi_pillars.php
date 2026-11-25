@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE kpi_items DROP CHECK chk_kpi_items_pillar, ADD CONSTRAINT chk_kpi_items_pillar CHECK (CHAR_LENGTH(TRIM(pillar)) BETWEEN 1 AND 64)');
+        DB::statement('ALTER TABLE kpi_items DROP CONSTRAINT chk_kpi_items_pillar, ADD CONSTRAINT chk_kpi_items_pillar CHECK (CHAR_LENGTH(TRIM(pillar)) BETWEEN 1 AND 64)');
     }
 
     public function down(): void
@@ -16,6 +16,6 @@ return new class extends Migration
         if (DB::table('kpi_items')->whereNotIn('pillar', $original)->exists()) {
             throw new RuntimeException('Pilar khusus sudah digunakan. Rollback tidak mengubah atau menghapus data tersebut.');
         }
-        DB::statement("ALTER TABLE kpi_items DROP CHECK chk_kpi_items_pillar, ADD CONSTRAINT chk_kpi_items_pillar CHECK (pillar IN ('Technical Care', 'Access', 'Coordination and Continuity', 'Interpersonal Care', 'Efficient'))");
+        DB::statement("ALTER TABLE kpi_items DROP CONSTRAINT chk_kpi_items_pillar, ADD CONSTRAINT chk_kpi_items_pillar CHECK (pillar IN ('Technical Care', 'Access', 'Coordination and Continuity', 'Interpersonal Care', 'Efficient'))");
     }
 };

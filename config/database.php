@@ -65,8 +65,11 @@ return [
             ]) : [],
         ],
 
+        // Same rules as mysql: the app stores DATETIME in UTC, so the session time zone is pinned to UTC
+        // (CURRENT_TIMESTAMP defaults, NOW()) whatever the server's system zone is (Linux MariaDB often uses local time).
         'mariadb' => [
             'driver' => 'mariadb',
+            'timezone' => '+00:00',
             'url' => env('DB_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),

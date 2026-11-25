@@ -62,7 +62,7 @@ return new class extends Migration
             $table->unique(['cycle_id', 'role_key', 'area_id', 'due_at'], 'uq_deadline_notice');
         });
 
-        DB::statement('ALTER TABLE assessment_events DROP CHECK chk_assessment_event_action');
+        DB::statement('ALTER TABLE assessment_events DROP CONSTRAINT chk_assessment_event_action');
         DB::statement("ALTER TABLE assessment_events ADD CONSTRAINT chk_assessment_event_action CHECK (action IN
             ('submitted','head_finalized','resubmitted','withdrawn','adjusted','returned','approved','auto_finalized'))");
     }
@@ -72,7 +72,7 @@ return new class extends Migration
         if (DB::table('assessment_events')->where('action', 'auto_finalized')->exists()) {
             throw new RuntimeException('Riwayat finalisasi otomatis sudah ada dan tidak dihapus otomatis.');
         }
-        DB::statement('ALTER TABLE assessment_events DROP CHECK chk_assessment_event_action');
+        DB::statement('ALTER TABLE assessment_events DROP CONSTRAINT chk_assessment_event_action');
         DB::statement("ALTER TABLE assessment_events ADD CONSTRAINT chk_assessment_event_action CHECK (action IN
             ('submitted','head_finalized','resubmitted','withdrawn','adjusted','returned','approved'))");
         Schema::dropIfExists('deadline_notices');
